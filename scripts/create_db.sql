@@ -30,7 +30,7 @@ CREATE TABLE pocketlinks (
 	pocket_id INTEGER NOT NULL,
     link_id INTEGER NOT NULL,
 	PRIMARY KEY(pocket_id),
-	FOREIGN KEY (link_id) REFERENCES accounts(a_id)
+	FOREIGN KEY (link_id) REFERENCES accounts(a_id) ON DELETE CASCADE
 );
 
 CREATE TABLE transactions (
