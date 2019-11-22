@@ -29,7 +29,9 @@ public class CustomerInterface {
 			"1) to create a customer\n" +
 			"2) to login as existing customer\n" +
 			"3) to update PIN\n" +
-			"4) to delete a customer\n"
+			"4) to delete a customer\n" +
+			"5) to create database tables\n" + 
+			"6) to destroy database tables\n"
 		);
 		if(resp.equals("1")){
 			this.create_cust();
@@ -39,6 +41,10 @@ public class CustomerInterface {
 			this.change_pin();
 		}else if(resp.equals("4")){
 			this.delete_cust();
+		}else if(resp.equals("5")){
+			this.create_tables();
+		}else if(resp.equals("6")){
+			this.destroy_tables();
 		}
 	}
 
@@ -87,6 +93,22 @@ public class CustomerInterface {
 		String id = Utilities.prompt("Enter c_id:");
 		if(Customer.del_cust_by_id(id, this.connection)){
 			System.out.println("Successfully removed customer!");
+		}
+	}
+
+	public void create_tables(){
+		if(DBSystem.execute_queries_from_file("./scripts/create_db.sql", this.connection)){
+			System.out.println("Successfully created tables");
+		}else{
+			System.out.println("Error creating tables");
+		}
+	}
+
+	public void destroy_tables(){
+		if(DBSystem.execute_queries_from_file("./scripts/destroy_db.sql", this.connection)){
+			System.out.println("Successfully destroyed tables");
+		}else{
+			System.out.println("Error destroying tables");
 		}
 	}
 

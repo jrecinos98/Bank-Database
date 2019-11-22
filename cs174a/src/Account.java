@@ -13,6 +13,10 @@ public class Account{
 	public boolean is_open;
 	public String interest_date;
 
+	public static Account create_account(Testable.AccountType accountType, String id, double initialBalance,
+										 String tin, String name, String address){
+		return null;
+	}
 
 	public Account(String a_id, String owner_id, String account_type, String bank_branch,
 					double balance, boolean is_open, String interest_date){

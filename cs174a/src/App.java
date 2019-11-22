@@ -90,30 +90,6 @@ public class App implements Testable
 		return "0 " + id + " " + accountType + " " + initialBalance + " " + tin;
 	}
 
-	public void run_cli(){
-		try{
-			// Translate CLI to GUI
-			Scanner in = new Scanner(System.in);
-			System.out.println("Enter (1) for Bank Teller (2) for customer or (3) for unit tests");
-			String resp = in.nextLine();
-			if(resp.equals("1")){
-				// Run Bank Teller Interface
-				// BankTellerInterface bti = new BankTellerInterface(connection);
-				// bti.run();
-			}else if (resp.equals("2")){
-				// Run Customer Interface
-				CustomerInterface ci = new CustomerInterface(connection);
-				ci.run();
-			}else{
-				System.out.println("Did not recognize input -- should be 1 or 2");
-			}
-		} catch( Exception e ) {
-			System.err.println( e.getMessage() );
-			e.printStackTrace();
-		}
-
-	}
-
 	@Override
 	public String payFriend( String from, String to, double amount ){
 		return "1";
@@ -162,11 +138,36 @@ public class App implements Testable
 	public String close_connection(){
 		try{
 			this.connection.close();
-			System.out.println("Connection closed!");
+			System.err.println("Connection closed!");
 			return "0";
 		}catch(SQLException e){
 			e.printStackTrace();
 			return "1";
 		}
+	}
+
+	public void run_cli(){
+		try{
+			// Translate CLI to GUI
+			Scanner in = new Scanner(System.in);
+			System.out.println("Enter (1) for Bank Teller (2) for customer or (3) for unit tests");
+			String resp = in.nextLine();
+			if(resp.equals("1")){
+				// Run Bank Teller Interface
+				// BankTellerInterface bti = new BankTellerInterface(connection);
+				// bti.run();
+			}else if (resp.equals("2")){
+				// Run Customer Interface
+				CustomerInterface ci = new CustomerInterface(connection);
+				ci.run();
+			}else{
+				System.out.println("Did not recognize input -- should be 1 or 2");
+			}
+		} catch( Exception e ) {
+			System.err.println( e.getMessage() );
+			e.printStackTrace();
+			this.close_connection();
+		}
+
 	}
 }
