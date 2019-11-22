@@ -10,18 +10,29 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
 import oracle.jdbc.pool.OracleDataSource;
 import oracle.jdbc.OracleConnection;
 import java.sql.DatabaseMetaData;
 
 import java.util.Scanner;
+import java.util.ArrayList;
 
-public class CustomerInterface {
-	OracleConnection connection;
+public class CustomerInterface extends JPanel{
+	private OracleConnection connection;
+	private ArrayList<JButton> action_buttons;
 
 	public CustomerInterface(OracleConnection connection){
 		this.connection = connection;
+		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
+		set_up_buttons();
+	
 	}
+	
 
 	public void run(){
 		System.out.println("-- CustomerInterface --");
@@ -127,4 +138,72 @@ public class CustomerInterface {
 	public void purchase(){
 
 	}
+
+	private void set_up_buttons(){
+		create_buttons();
+		for(int i=0; i< action_buttons.size();i++){
+			action_buttons.get(i).addMouseListener(new ButtonListener(i+1));
+			this.add(action_buttons.get(i));
+		}
+	}
+	private void create_buttons(){
+		this.action_buttons= new ArrayList<JButton>(10);
+		this.action_buttons.add(0, new JButton("Create Customer"));
+		this.action_buttons.add(1, new JButton("Log In"));
+		this.action_buttons.add(2, new JButton("Update PIN"));
+		this.action_buttons.add(3, new JButton("Delete Customer"));
+		this.action_buttons.add(4, new JButton("Create Table"));
+		this.action_buttons.add(5, new JButton("Delete Table"));
+		this.action_buttons.add(6, new JButton("Deposit"));
+		this.action_buttons.add(7, new JButton("Top Up"));
+		this.action_buttons.add(8, new JButton("Withdrawal"));
+		this.action_buttons.add(9, new JButton("Purchase"));
+	}
+
+
+	class ButtonListener extends MouseAdapter{
+		private int action;
+		public ButtonListener(int action){
+			super();
+			this.action= action;
+		}
+		public void mouseClicked(MouseEvent e){
+			JFrame new_frame = new JFrame();
+			new_frame.setVisible(true);
+			Utilities.setWindow(new_frame);
+			//If left clicked
+			if(e.getButton() ==  MouseEvent.BUTTON1){
+				switch(this.action){
+					case 1:
+						create_cust();
+						break;
+					case 2:
+						login();
+						break;
+					case 3:
+						change_pin();
+						break;
+					case 4:
+						delete_cust();
+						break;
+					case 5:
+						create_tables();
+						break;
+					case 6:
+						deposit();
+						break;
+					case 7:
+						top_up();
+						break;
+					case 8:
+						withdrawal();
+						break;
+					case 9:
+						purchase();
+						break;
+				}
+			}
+		}
+	}
+
 }
