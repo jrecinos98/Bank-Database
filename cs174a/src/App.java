@@ -78,20 +78,14 @@ public class App implements Testable
 		}
 	}
 
-	/**
-	 * Example of one of the testable functions.
-	 */
 	@Override
 	public String listClosedAccounts()
 	{
 		return "0 it works!";
 	}
 
-	/**
-	 * Another example.
-	 */
 	@Override
-	public String createCheckingSavingsAccount( AccountType accountType, String id, double initialBalance, String tin, String name, String address )
+	public String createCheckingSavingsAccount( AccountType accountType, String id, double initialBalance, String tin, String name, String address)
 	{
 		return "0 " + id + " " + accountType + " " + initialBalance + " " + tin;
 	}
@@ -100,7 +94,7 @@ public class App implements Testable
 		try{
 			// Translate CLI to GUI
 			Scanner in = new Scanner(System.in);
-			System.out.println("Enter (1) for Bank Teller or (2) for customer");
+			System.out.println("Enter (1) for Bank Teller (2) for customer or (3) for unit tests");
 			String resp = in.nextLine();
 			if(resp.equals("1")){
 				// Run Bank Teller Interface

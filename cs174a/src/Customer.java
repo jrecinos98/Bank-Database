@@ -173,6 +173,19 @@ public class Customer {
 		return cust;
 	}
 
+	public static boolean del_cust_by_id(String c_id, OracleConnection connection){
+		String query = String.format("DELETE FROM customers C WHERE C.c_id = %s ", c_id);
+		try( Statement statement = connection.createStatement()){
+			int result = statement.executeUpdate(query);
+			if(result == 1){
+				return true;
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+		}
+		return false;
+	}
+
 
 	/*** MEMBER FUNCTIONS ***/
 

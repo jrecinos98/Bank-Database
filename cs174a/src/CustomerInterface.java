@@ -28,7 +28,8 @@ public class CustomerInterface {
 		String resp = Utilities.prompt(
 			"1) to create a customer\n" +
 			"2) to login as existing customer\n" +
-			"3) update PIN\n"
+			"3) to update PIN\n" +
+			"4) to delete a customer\n"
 		);
 		if(resp.equals("1")){
 			this.create_cust();
@@ -36,6 +37,8 @@ public class CustomerInterface {
 			this.login();
 		}else if(resp.equals("3")){
 			this.change_pin();
+		}else if(resp.equals("4")){
+			this.delete_cust();
 		}
 	}
 
@@ -78,6 +81,13 @@ public class CustomerInterface {
 			}
 		}
 		System.out.println("Failed to set pin");
+	}
+
+	public void delete_cust(){
+		String id = Utilities.prompt("Enter c_id:");
+		if(Customer.del_cust_by_id(id, this.connection)){
+			System.out.println("Successfully removed customer!");
+		}
 	}
 
 	public void deposit(){
