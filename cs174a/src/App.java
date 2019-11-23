@@ -150,7 +150,7 @@ public class App implements Testable
 		try{
 			// Translate CLI to GUI
 			Scanner in = new Scanner(System.in);
-			System.out.println("Enter (1) for Bank Teller (2) for customer or (3) for unit tests");
+			System.out.println("Enter (1) for Bank Teller (2) for customer or (3) for GUI or (4) for unit tests");
 			String resp = in.nextLine();
 			if(resp.equals("1")){
 				// Run Bank Teller Interface
@@ -160,7 +160,11 @@ public class App implements Testable
 				// Run Customer Interface
 				CustomerInterface ci = new CustomerInterface(connection);
 				ci.run();
-			}else{
+			}else if (resp.equals("3")){
+				Interface gui = new Interface(connection);
+				gui.setVisible(true);
+			}
+			else{
 				System.out.println("Did not recognize input -- should be 1 or 2");
 			}
 		} catch( Exception e ) {

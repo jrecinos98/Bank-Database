@@ -1,6 +1,7 @@
 
 build:
-	javac -classpath ./lib/ojdbc8.jar:./src ./src/* -d ./bin
+	find ./src -type f -name "*.java" > sources.txt
+	javac -classpath ./lib/ojdbc8.jar:./src @sources.txt -d ./bin
 
 clean:
 	rm ./bin/cs174a/*
