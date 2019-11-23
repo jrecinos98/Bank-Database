@@ -76,9 +76,40 @@ public class Transaction {
 		return false;
 	}
 
-	public static boolean withdraw(String to_acct, String cust_id, String date, 
+	public static boolean withdraw(String from_acct, String cust_id, String date, 
 						 Transaction.TransactionType type, double amount, OracleConnection connection){
-		return false;
+		// Check customer exists
+		if(Customer.get_cust_by_id(cust_id, connection) == null){
+			System.err.println("Withdraw failed -- customer doesn't exist");
+			return false;
+		}
+
+		// Check customer owns account
+		if(!Transaction.cust_owns_acct(from_acct, cust_id, connection)){
+			System.err.println("Withdraw failed -- customer doesn't own account");
+			return false;
+		}
+
+		// Make sure account is NOT a pocket account
+		Account account = Account.get_account_by_id(from_acct, connection);
+		if(account != null && account.account_type.equals("" + Testable.AccountType.POCKET)){
+			System.err.println("Withdraw failed -- cannot deposit to pocket account");
+			return false;
+		}
+
+		// Transfer money into the account
+		if(!Transaction.transfer_money("", from_acct, amount, connection)){
+			return false;
+		}
+
+		// Create a transaction record
+		Transaction transaction = Transaction.create_transaction("", from_acct, cust_id, date,"" + type, amount, connection);
+		if(transaction == null){
+			System.err.println("Withdraw failed -- could not create transaction");
+			return false;
+		}
+
+		return true;
 	}
 
 	public static boolean deposit(String to_acct, String cust_id, String date, 
@@ -99,7 +130,8 @@ public class Transaction {
 		// Make sure account is NOT a pocket account
 		Account account = Account.get_account_by_id(to_acct, connection);
 		if(account != null && account.account_type.equals("" + Testable.AccountType.POCKET)){
-			
+			System.err.println("Deposit failed -- cannot deposit to pocket account");
+			return false;
 		}
 
 		// Transfer money into the account
@@ -117,6 +149,7 @@ public class Transaction {
 		return true;
 	}
 
+	// Transfer money between account(s) if they exist and are not closed
 	public static boolean transfer_money(String to_acct, String from_acct, double amount, OracleConnection connection){
 		// Make sure at least one of to or from is specified
 		if(to_acct == "" && from_acct == ""){

@@ -32,7 +32,8 @@ public class CustomerInterface {
 			"4) to delete a customer\n" +
 			"5) to create database tables\n" + 
 			"6) to destroy database tables\n" +
-			"7) to deposit money in an account\n"
+			"7) to deposit money in an account\n" +
+			"8) to withdraw money from an account \n"
 		);
 		if(resp.equals("1")){
 			this.create_cust();
@@ -48,6 +49,8 @@ public class CustomerInterface {
 			this.destroy_tables();
 		}else if(resp.equals("7")){
 			this.deposit();
+		}else if(resp.equals("8")){
+			this.withdrawal();
 		}
 	}
 
@@ -135,7 +138,18 @@ public class CustomerInterface {
 	}
 
 	public void withdrawal(){
+		String from_acct = Utilities.prompt("Enter a_id:");
+		String cust_id = Utilities.prompt("Enter c_id:");
+		String date = Bank.get_date();
+		Transaction.TransactionType type = Transaction.TransactionType.WITHDRAWAL;
+		double amount = Double.parseDouble(Utilities.prompt("Enter amount:"));
 
+		boolean success = Transaction.withdraw(from_acct, cust_id, date, type, amount, connection);
+		if(!success){
+			System.err.println("Withdrawal failed");
+		}else{
+			System.out.println("Withdrawal success!");
+		}
 	}
 
 	public void purchase(){
