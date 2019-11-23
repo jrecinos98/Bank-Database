@@ -154,8 +154,8 @@ public class App implements Testable
 			String resp = in.nextLine();
 			if(resp.equals("1")){
 				// Run Bank Teller Interface
-				// BankTellerInterface bti = new BankTellerInterface(connection);
-				// bti.run();
+				BankTellerInterface bti = new BankTellerInterface(connection);
+				bti.run();
 			}else if (resp.equals("2")){
 				// Run Customer Interface
 				CustomerInterface ci = new CustomerInterface(connection);

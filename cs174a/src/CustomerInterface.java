@@ -17,7 +17,7 @@ import java.sql.DatabaseMetaData;
 import java.util.Scanner;
 
 public class CustomerInterface {
-	OracleConnection connection;
+	private OracleConnection connection;
 
 	public CustomerInterface(OracleConnection connection){
 		this.connection = connection;
@@ -31,7 +31,8 @@ public class CustomerInterface {
 			"3) to update PIN\n" +
 			"4) to delete a customer\n" +
 			"5) to create database tables\n" + 
-			"6) to destroy database tables\n"
+			"6) to destroy database tables\n" +
+			"7) to deposit money in an account\n"
 		);
 		if(resp.equals("1")){
 			this.create_cust();
@@ -45,6 +46,8 @@ public class CustomerInterface {
 			this.create_tables();
 		}else if(resp.equals("6")){
 			this.destroy_tables();
+		}else if(resp.equals("7")){
+			this.deposit();
 		}
 	}
 
@@ -113,7 +116,18 @@ public class CustomerInterface {
 	}
 
 	public void deposit(){
+		String to_acct = Utilities.prompt("Enter a_id:");
+		String cust_id = Utilities.prompt("Enter c_id:");
+		String date = Bank.get_date();
+		Transaction.TransactionType type = Transaction.TransactionType.DEPOSIT;
+		double amount = Double.parseDouble(Utilities.prompt("Enter amount:"));
 
+		boolean success = Transaction.deposit(to_acct, cust_id, date, type, amount, connection);
+		if(!success){
+			System.err.println("Deposit failed");
+		}else{
+			System.out.println("Deposit success!");
+		}
 	}
 
 	public void top_up(){
