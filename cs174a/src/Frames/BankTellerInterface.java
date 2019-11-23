@@ -13,6 +13,7 @@ import oracle.jdbc.OracleConnection;
 import java.sql.DatabaseMetaData;
 
 import java.util.Scanner;
+import java.util.ArrayList;
 
 import javax.swing.*;
 
@@ -28,6 +29,7 @@ import java.awt.Toolkit;
 public class BankTellerInterface extends JPanel{
 
 	private OracleConnection connection;
+	private JButton b1;
 
 	public BankTellerInterface(OracleConnection connection){
 		this.connection = connection;		

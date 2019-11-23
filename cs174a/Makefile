@@ -7,4 +7,5 @@ clean:
 	rm ./bin/cs174a/*
 
 run:
+	make build
 	java -classpath ./bin:./lib/* cs174a.Main
