@@ -209,6 +209,25 @@ public class Account{
 		return true;
 	}
 
+	public static boolean accounts_are_linked(String pocket_id, String linked_id, OracleConnection connection){
+		String query = String.format("SELECT * FROM pocketlinks P WHERE P.pocket_id = '%s' AND P.link_id = '%s'",
+										pocket_id, linked_id);
+		try( Statement statement = connection.createStatement() ) {
+			try( ResultSet rs = statement.executeQuery( query )){
+				if(rs.next()){
+					return true;
+				}
+			}catch(SQLException e){
+				e.printStackTrace();
+				return false;
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+			return false;
+		}
+		return false;
+	}
+
 	public static ArrayList<String> get_closed_accounts(OracleConnection connection){
 		ArrayList<String> accounts = new ArrayList<String>();
 		String query = String.format("SELECT a_id FROM accounts A WHERE A.is_open = 0");

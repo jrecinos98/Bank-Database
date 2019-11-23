@@ -33,7 +33,8 @@ public class CustomerInterface {
 			"5) to create database tables\n" + 
 			"6) to destroy database tables\n" +
 			"7) to deposit money in an account\n" +
-			"8) to withdraw money from an account \n"
+			"8) to withdraw money from an account \n" +
+			"9) to top up pocket account\n"
 		);
 		if(resp.equals("1")){
 			this.create_cust();
@@ -51,6 +52,8 @@ public class CustomerInterface {
 			this.deposit();
 		}else if(resp.equals("8")){
 			this.withdrawal();
+		}else if(resp.equals("9")){
+			this.top_up();
 		}
 	}
 
@@ -134,7 +137,19 @@ public class CustomerInterface {
 	}
 
 	public void top_up(){
+		String to_acct = Utilities.prompt("Enter pocket id:");
+		String from_acct = Utilities.prompt("Enter link id:");
+		String cust_id = Utilities.prompt("Enter c_id:");
+		String date = Bank.get_date();
+		Transaction.TransactionType type = Transaction.TransactionType.TOP_UP;
+		double amount = Double.parseDouble(Utilities.prompt("Enter amount:"));
 
+		Transaction transaction = Transaction.top_up(to_acct, from_acct, date, amount, cust_id, connection);
+		if(transaction == null){
+			System.err.println("Top-Up failure");
+		}else{
+			System.out.println("Top-Up success!");
+		}
 	}
 
 	public void withdrawal(){

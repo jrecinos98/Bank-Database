@@ -76,6 +76,31 @@ public class Transaction {
 		return false;
 	}
 
+	public static Transaction top_up(String to_pocket, String from_link, String date,
+								 double amount, String cust_id, OracleConnection connection){
+		// Check that we have a link between the two accounts
+		if(!Account.accounts_are_linked(to_pocket, from_link, connection)){
+			System.err.println("Top up failed -- Accounts are not linked or do not exist");
+			return null;
+		}
+		Account pock_acc = Account.get_account_by_id(to_pocket, connection);
+		if(!pock_acc.owner_id.equals(cust_id)){
+			System.err.println("Top up failed -- Customer does not own this pocket account");
+			return null;
+		}
+		if(!Transaction.transfer_money(to_pocket, from_link, amount, connection)){
+			System.err.println("Top up failed -- Could not transfer money to the pocket account");
+			return null;
+		}
+		Transaction top_up_trans = Transaction.create_transaction(to_pocket, from_link, cust_id,
+									 date, "" + Transaction.TransactionType.TOP_UP, amount, connection);
+		if(top_up_trans == null){
+			System.err.println("Top up failed -- Could not create transaction");
+			return null;
+		}
+		return top_up_trans;
+	}
+
 	public static boolean withdraw(String from_acct, String cust_id, String date, 
 						 Transaction.TransactionType type, double amount, OracleConnection connection){
 		// Check customer exists
@@ -152,7 +177,7 @@ public class Transaction {
 	// Transfer money between account(s) if they exist and are not closed
 	public static boolean transfer_money(String to_acct, String from_acct, double amount, OracleConnection connection){
 		// Make sure at least one of to or from is specified
-		if(to_acct == "" && from_acct == ""){
+		if(to_acct.equals("") && from_acct.equals("")){
 			return false;
 		}
 
@@ -161,20 +186,20 @@ public class Transaction {
 		Account to_acct_temp = Account.get_account_by_id(to_acct, connection);
 
 		// Check required accounts exist
-		if(to_acct != "" && to_acct_temp == null ||
-			from_acct != "" && from_acct_temp == null){
+		if(!to_acct.equals("") && to_acct_temp == null ||
+			!from_acct.equals("") && from_acct_temp == null){
 			System.err.println("One or both accounts supplied do not exist");
 			return false;
 		}
 
 		// Check account is open
-		if(from_acct != "" && from_acct_temp != null && !from_acct_temp.is_open ||
-			to_acct != "" && to_acct_temp != null && !to_acct_temp.is_open){
+		if(!from_acct.equals("") && from_acct_temp != null && !from_acct_temp.is_open ||
+			!to_acct.equals("") && to_acct_temp != null && !to_acct_temp.is_open){
 			System.err.println("A transaction cannot be done on a closed acct -- failed");
 			return false;
 		}
 
-		if(from_acct != ""){
+		if(!from_acct.equals("")){
 			// Check transaction won't result in negative balance
 			if(from_acct_temp.balance - amount < 0){
 				System.err.println("Transaction would result in a negative balance -- failed");
@@ -200,14 +225,16 @@ public class Transaction {
 			}
 
 			// If balance is in 0 < x < 0.01 -- close account
-			if(from_acct_temp.balance - amount <= 0.01 && from_acct_temp.balance >= 0){
+			if(!from_acct_temp.account_type.equals("" + Testable.AccountType.POCKET) &&
+				 from_acct_temp.balance - amount <= 0.01 && 
+				from_acct_temp.balance >= 0){
 				if(!Account.close_account_by_id(from_acct, connection)){
 					return false;
 				}
 			}
 		}
 
-		if(to_acct != ""){
+		if(!to_acct.equals("")){
 			// Add amount to this account
 			String query = String.format("UPDATE accounts SET balance = %s WHERE a_id = '%s'",
 											to_acct_temp.balance + amount, to_acct);
