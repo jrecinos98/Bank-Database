@@ -78,7 +78,7 @@ public class Transaction {
 
 	public static boolean withdraw(String to_acct, String cust_id, String date, 
 						 Transaction.TransactionType type, double amount, OracleConnection connection){
-
+		return false;
 	}
 
 	public static boolean deposit(String to_acct, String cust_id, String date, 

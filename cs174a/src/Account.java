@@ -79,11 +79,14 @@ public class Account{
 		}
 
 		// Create Transaction of initial deposit
-		Transaction transaction = Transaction.create_transaction(
-			id, "", tin, Bank.get_date(), "" + Transaction.TransactionType.DEPOSIT, initialBalance, connection
-		);
-		if(transaction == null){
-			System.out.println("Error creating initial deposit transaction");
+		if(initialBalance != 0){
+			Transaction transaction = Transaction.create_transaction(
+				id, "", tin, Bank.get_date(), "" + Transaction.TransactionType.DEPOSIT, initialBalance, connection
+			);
+
+			if(transaction == null){
+				System.out.println("Error creating initial deposit transaction");
+			}
 		}
 
 		return acct;
@@ -93,7 +96,7 @@ public class Account{
 	public static Account create_pocket_account(String id, String linkedId, double initialTopUp,
 											    String tin, OracleConnection connection){
 		// Check account exists
-		Account linked = Account.get_account_by_id(linkedId);
+		Account linked = Account.get_account_by_id(linkedId, connection);
 		if(linked == null){
 			System.err.println("Need an existing account for a pocket account");
 			return null;
@@ -108,7 +111,7 @@ public class Account{
 			System.err.println("Linked account cannot be another pocket account");
 			return null;
 		}
-		Customer cust = Customer.get_cust_by_id(tin);
+		Customer cust = Customer.get_cust_by_id(tin, connection);
 		// Check customer exists
 		if(cust == null){
 			System.err.println("Need an existing customer for a pocket account");
@@ -125,10 +128,21 @@ public class Account{
 			System.err.println("Customer must own linked account to create a pocket account");
 			return null;
 		}
-		Account pock_account = Account.create_account(Testable.AccountType.POCKET, id, double initialTopUp,
-										 String tin,"", "", connection);
-		
+		// Create pocket account
+		Account pock_account = Account.create_account(Testable.AccountType.POCKET, id, 0.0,
+										 tin,"", "", connection);
 
+		// Transfer initial topup from linked account
+		if(initialTopUp != 0 && !Transaction.transfer_money(id, linkedId, initialTopUp, connection)){
+			System.err.println("Initial topup failed!");
+			return null;
+		}
+		
+		// Create link to a checkings/savings account
+		if(!create_pock_link(id, linkedId, connection)){
+			System.err.println("Pocket linking failed");
+			return null;
+		}
 
 		return pock_account;
 	}
@@ -165,15 +179,34 @@ public class Account{
 				}
 			}catch(SQLException e){
 				e.printStackTrace();
+				return false;
 			}
 		}catch(SQLException e){
 			e.printStackTrace();
+			return false;
 		}
 		return true;
 	}
 
 	public static boolean create_pock_link(String a_id, String link_id, OracleConnection connection){
-		return false;
+		String query = String.format("INSERT INTO pocketlinks (pocket_id, link_id) " +
+	    							 "VALUES ('%s', '%s')"
+	    							 , a_id, link_id);
+		try( Statement statement = connection.createStatement() ) {
+			try{
+				int updates = statement.executeUpdate( query );
+				if(updates == 0){
+					return false;
+				}
+			}catch(SQLException e){
+				e.printStackTrace();
+				return false;
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+			return false;
+		}
+		return true;
 	}
 
 	public static ArrayList<String> get_closed_accounts(OracleConnection connection){

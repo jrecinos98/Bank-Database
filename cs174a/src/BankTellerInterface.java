@@ -32,12 +32,15 @@ public class BankTellerInterface {
 		System.out.println("-- BankTellerInterface --");
 		String resp = Utilities.prompt(
 			"1) to create an account\n" +
-			"2) to see closed accounts\n"
+			"2) to see closed accounts\n" +
+			"3) to create a pocket account\n"
 		);
 		if(resp.equals("1")){
 			this.create_acct();
 		}else if(resp.equals("2")){
 			this.show_closed();
+		}else if(resp.equals("3")){
+			this.create_pocket_acct();
 		}
 	}
 
@@ -75,5 +78,18 @@ public class BankTellerInterface {
 			System.out.println("a_id: " + accounts.get(i));
 		}
 		System.out.println("Successfully got closed accounts!");
+	}
+
+	public void create_pocket_acct(){
+		String id = Utilities.prompt("Enter id:");
+		String linkedId = Utilities.prompt("Enter linkedId:");
+		double initialTopUp = Double.parseDouble(Utilities.prompt("Enter InitialTopup:"));
+		String tin = Utilities.prompt("Enter customer id:");
+		Account acct = Account.create_pocket_account(id, linkedId, initialTopUp, tin, this.connection);
+		if(acct == null){
+			System.err.println("Error: could not create pocket acct");
+		}else{
+			System.out.println("Successfully created pocket acct!");
+		}
 	}
 }
