@@ -163,6 +163,9 @@ public class App implements Testable
 			}else if (resp.equals("3")){
 				Interface gui = new Interface(connection);
 				gui.setVisible(true);
+			}else if(resp.equals("4")){
+				Tester tester = new Tester();
+				tester.run_tests(connection);
 			}
 			else{
 				System.out.println("Did not recognize input -- should be 1 or 2");

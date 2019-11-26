@@ -45,7 +45,7 @@ public class Interface extends JFrame {
        	Utilities.setWindow(this);
 
        	customer= new CustomerInterface(connection);
-       	bankTeller= new BankTellerInterface();
+       	bankTeller= new BankTellerInterface(connection);
 
 	    tabView =new JTabbedPane(JTabbedPane.TOP, JTabbedPane.WRAP_TAB_LAYOUT);  
 	    tabView.setBounds(50,50,200,200);  

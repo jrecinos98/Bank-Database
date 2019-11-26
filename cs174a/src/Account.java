@@ -81,7 +81,7 @@ public class Account{
 		// Create Transaction of initial deposit
 		if(initialBalance != 0){
 			Transaction transaction = Transaction.create_transaction(
-				id, "", tin, Bank.get_date(), "" + Transaction.TransactionType.DEPOSIT, initialBalance, connection
+				id, "", tin, Bank.get_date(connection), "" + Transaction.TransactionType.DEPOSIT, initialBalance, connection
 			);
 
 			if(transaction == null){
@@ -101,6 +101,19 @@ public class Account{
 			System.err.println("Need an existing account for a pocket account");
 			return null;
 		}
+
+		// Check account has at least initialTopUp + $5
+		if(linked.balance < initialTopUp + 5){
+			System.err.println("Not enough money to create pocket account!");
+			return null;
+		}
+
+		// Check initial topup is proper amount
+		if(initialTopUp <= 0.01){
+			System.err.println("Need an initial top up of greater than .01");
+			return null;
+		}
+
 		// Check account is open
 		if(!linked.is_open){
 			System.err.println("Account must be open to allow a pocket account to be created");
@@ -138,6 +151,29 @@ public class Account{
 			return null;
 		}
 		
+		Transaction top_up = Transaction.create_transaction(id, linkedId, tin,
+									 Bank.get_date(connection), "" + Transaction.TransactionType.TOP_UP, initialTopUp,
+									  connection);
+
+		if(top_up == null){
+			System.err.println("Could not perform initial top up");
+			return null;
+		}
+
+		Transaction fee = Transaction.create_transaction("", linkedId, tin,
+									 Bank.get_date(connection), "" + Transaction.TransactionType.FTM_FEE, 5.00,
+									  connection);	
+		if(fee == null){
+			System.err.println("Could not create fee transaction");
+			return null;
+		}
+
+		// Transfer initial topup from linked account
+		if(initialTopUp != 0 && !Transaction.transfer_money("", linkedId, 5, connection)){
+			System.err.println("Fee failed!");
+			return null;
+		}
+
 		// Create link to a checkings/savings account
 		if(!create_pock_link(id, linkedId, connection)){
 			System.err.println("Pocket linking failed");
@@ -293,6 +329,15 @@ public class Account{
 			return false;
 		}
 		return true;
+	}
+
+	// Negative amount means error
+	public static double get_account_balance(String a_id, OracleConnection connection){
+		Account account = Account.get_account_by_id(a_id, connection);
+		if(account == null){
+			return -1;
+		}
+		return account.balance;
 	}
 
 	public Account(String a_id, String owner_id, String account_type, String bank_branch,

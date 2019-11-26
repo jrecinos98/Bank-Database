@@ -35,3 +35,6 @@
 * Check on datatype for transactions/money instead of real
 * On closing a checking/savings account, close all pocket accounts linked to it
 * Add $5 fee to pocket account first transaction of the month
+* Create function called at end of every transaction to close any accounts at 0 or 0.01 and to reverse any transactions that result in negative balance (just to be safe as should be handled in each transaction)
+* Implement is_ftm() function
+* Make sure customer cannot link to a closed account
