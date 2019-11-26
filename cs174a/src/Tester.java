@@ -13,6 +13,13 @@ import java.util.ArrayList;
 
 public class Tester{
 	private OracleConnection connection;
+	private int id = 30;
+
+	public String get_next_id(){
+		String next = "" + id;
+		this.id++;
+		return next;
+	}
 
 	public String result(String method, int status){
 		String output = method;
@@ -170,6 +177,45 @@ public class Tester{
 		return error();
 	}
 
+	public int test_acct_wire(){
+		try{
+			Account to_acct = Account.create_account(Testable.AccountType.SAVINGS, this.get_next_id(), 1500.00,
+										 "567567567", "Steve Irwin", "Australia", this.connection);
+			Account other_acct = Account.create_account(Testable.AccountType.SAVINGS, this.get_next_id(), 1500.00,
+										 "111222456", "Eric Cartman", "South Park", this.connection);
+
+			double balance_to_acct = to_acct.balance;
+			double balance_other_acct = other_acct.balance;
+
+			Transaction transact = Transaction.wire(to_acct.a_id, other_acct.a_id, "111222456",
+			 Bank.get_date(this.connection), Transaction.TransactionType.WIRE, 350, this.connection);
+			if(transact == null){
+				return fail();
+			}
+
+			double new_balance_to_acct = Account.get_account_by_id(to_acct.a_id, this.connection).balance;
+			double new_balance_other_acct = Account.get_account_by_id(other_acct.a_id, this.connection).balance;
+
+			if(new_balance_to_acct != balance_to_acct + 350 || new_balance_other_acct != balance_other_acct - 350 - (350 * .02)){
+				System.out.println("HERE");
+				
+				return fail();
+			}
+
+			transact = Transaction.wire(other_acct.a_id, to_acct.a_id, "111222456",
+			Bank.get_date(this.connection), Transaction.TransactionType.WIRE, 350, this.connection);
+			if(transact != null){
+				return fail();
+			}
+
+
+			return pass();
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return error();
+	}
+
 	public int test_pocket_acct_purchase(){
 		try{
 			Account pocket = Account.get_account_by_id("2", this.connection);
@@ -181,6 +227,7 @@ public class Tester{
 			if(tran != null){
 				return fail();
 			}
+
 
 			pocket = Account.get_account_by_id("2", this.connection);
 			if(pocket.balance != balance){
@@ -194,11 +241,22 @@ public class Tester{
 			if(tran == null || pocket.balance != balance - 25.0){
 				return fail();
 			}
+			pocket = Account.get_account_by_id("2", this.connection);
 
 			// Should fail as not a pocket account
 			tran = Transaction.purchase("1", Bank.get_date(this.connection), 25, 
 										"111222111", this.connection);
 			if(tran != null){
+				return fail();
+			}
+
+			// Test closing account as transfer out remaining 25
+			tran = Transaction.purchase("2", Bank.get_date(this.connection), 25, 
+										"111222111", this.connection);
+
+			pocket = Account.get_account_by_id("2", this.connection);
+
+			if(tran == null || pocket.is_open){
 				return fail();
 			}
 
@@ -213,11 +271,92 @@ public class Tester{
 		
 	}
 
+	public int test_pocket_acct_collect(){
+		try{
+			// Create two accounts for testing
+			Account acct_linked = Account.create_account(Testable.AccountType.SAVINGS, "5", 1000.00,
+										 "408466367", "Boi", "Yes", this.connection);
+			Account pocket = Account.create_pocket_account("6", "5", 150.00,
+												    "408466367", this.connection);
+			double acct_linked_balance = Account.get_account_balance("5", this.connection);
+			double pocket_balance = Account.get_account_balance("6", this.connection);
+
+			Transaction collect_trans = Transaction.collect(acct_linked.a_id, pocket.a_id, "408466367", 
+				Bank.get_date(this.connection), Transaction.TransactionType.COLLECT, 100, this.connection);
+			
+			double new_acct_linked_balance = Account.get_account_balance("5", this.connection);
+			double new_pocket_balance = Account.get_account_balance("6", this.connection);
+
+			if(new_acct_linked_balance != acct_linked_balance + 100 ||
+				new_pocket_balance != pocket_balance - 103){
+				return fail();
+			}
+
+			if(collect_trans == null){
+				return fail();
+			}
+
+			collect_trans = Transaction.collect( pocket.a_id, acct_linked.a_id, "408466367", 
+				Bank.get_date(this.connection), Transaction.TransactionType.COLLECT, 100, this.connection);
+
+			if(collect_trans != null){
+				return fail();
+			}
+
+			return pass();
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return error();
+	}
+
+	public int test_pocket_acct_pay_friend(){
+		try{
+			Account acct_linked = Account.create_account(Testable.AccountType.SAVINGS, "7", 1000.00,
+										 "555777666", "Shrek", "Swamp", this.connection);
+			Account pocket = Account.create_pocket_account("8", "7", 150.00,
+												    "555777666", this.connection);
+
+			Account acct_linked_2 = Account.create_account(Testable.AccountType.SAVINGS, "9", 1000.00,
+										 "141516178", "Shrek", "Swamp", this.connection);
+			Account pocket_2 = Account.create_pocket_account("10", "9", 150.00,
+												    "141516178", this.connection);
+
+			Transaction pay = Transaction.pay_friend(pocket_2.a_id, pocket.a_id, "555777666", Bank.get_date(this.connection), 
+						 Transaction.TransactionType.PAY_FRIEND, 100, connection);
+			
+			if(pay == null){
+				return fail();
+			}
+
+			double new_pocket_balance = Account.get_account_balance("8", this.connection);
+			double new_pocket_2_balance = Account.get_account_balance("10", this.connection);
+
+			if(new_pocket_balance != 50 || new_pocket_2_balance != 250.0){
+				return fail();
+			}
+
+			Transaction pay_2 = Transaction.pay_friend("7", "9", "141516178", Bank.get_date(this.connection), 
+						 Transaction.TransactionType.PAY_FRIEND, 100, connection);
+
+			if(pay_2 != null){
+				System.err.println("HERE2");
+				return fail();
+			}
+
+			return pass();
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return error();
+	}
+
 	public void run_tests(OracleConnection connection){
 		// TODO: CHECK THAT ALL TRANSACTIONS CANNOT BE DONE BY A NON-OWNER
 		// TODO: WRITE TESTS TO CHECK EVERY ACCOUNT GETS CLOSED ON 0 OR .01 BALANCE
-
+		// TODO: TEST CREATING A POCKET ACCOUNT W/ INIT TOPUP THAT WOULD CLOSE LINKED
 		this.setup(connection);
+
 		ArrayList<String> results = new ArrayList<String>();
 		results.add(result("test_create_checking_acct():", this.test_create_checking_acct()));
 		results.add(result("test_create_pocket_acct():", this.test_create_pocket_acct()));
@@ -226,7 +365,9 @@ public class Tester{
 		results.add(result("test_add_cust_to_acct():", this.test_add_cust_to_acct()));
 		results.add(result("test_close_acct():", this.test_close_acct()));
 		results.add(result("test_acct_transfer():", this.test_acct_transfer()));
-
+		results.add(result("test_pocket_acct_collect():", this.test_pocket_acct_collect()));
+		results.add(result("test_pocket_acct_pay_friend():", this.test_pocket_acct_pay_friend()));
+		results.add(result("test_acct_wire():", this.test_acct_wire()));
 
 		System.err.println("\n----- RESULTS -----");
 		for(int i = 0; i < results.size(); i++){

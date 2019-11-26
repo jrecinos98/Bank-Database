@@ -340,6 +340,14 @@ public class Account{
 		return account.balance;
 	}
 
+	public static String get_account_type(String a_id, OracleConnection connection){
+		Account account = Account.get_account_by_id(a_id, connection);
+		if(account == null){
+			return "";
+		}
+		return account.account_type;
+	}
+
 	public Account(String a_id, String owner_id, String account_type, String bank_branch,
 					double balance, boolean is_open, String interest_date){
 		// Leave default
