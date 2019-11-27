@@ -16,6 +16,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
 import java.util.Scanner;
+import java.util.ArrayList;
+
 
 
 public class Transaction {
@@ -30,7 +32,13 @@ public class Transaction {
 		DEPOSIT,
 		WITHDRAWAL,
 		TOP_UP,
-		PAY_FRIEND
+		PURCHASE,
+		PAY_FRIEND,
+		FTM_FEE,
+		PCT_FEE,
+		TRANSFER,
+		COLLECT,
+		WIRE,
 	}
 
 	public static Transaction create_transaction(String to_acct, String from_acct, String cust_id,
@@ -53,6 +61,20 @@ public class Transaction {
 		}catch(SQLException e){
 			e.printStackTrace();
 		}
+		return transaction;
+	}
+
+	public static Transaction create_transaction_and_transfer(String to_acct, String from_acct, String cust_id,
+									 String date, String transaction_type, double amount, OracleConnection connection){
+		// Transfer money into the account
+		if(!Transaction.transfer_money(to_acct, from_acct, amount, connection)){
+			System.err.println("Could not transfer money");
+			return null;
+		}
+
+		// Create a transaction record
+		Transaction transaction = Transaction.create_transaction(to_acct, from_acct, cust_id, date, transaction_type,
+																 amount, connection);
 		return transaction;
 	}
 
@@ -88,6 +110,23 @@ public class Transaction {
 			System.err.println("Top up failed -- Customer does not own this pocket account");
 			return null;
 		}
+
+		// Check that owner account has enough money
+		Account link_acc = Account.get_account_by_id(from_link, connection);
+
+		// Check if it's the first transaction of the month
+		if(Transaction.is_ftm(to_pocket, connection)){
+			if(link_acc == null || link_acc.balance - amount - 5.00 <= 0.01){
+				System.err.println("Top up failed -- not enough money");
+				return null;
+			}
+		}else{
+			if(link_acc == null || link_acc.balance - amount <= 0.01){
+				System.err.println("Top up failed -- not enough money");
+				return null;
+			}
+		}
+
 		if(!Transaction.transfer_money(to_pocket, from_link, amount, connection)){
 			System.err.println("Top up failed -- Could not transfer money to the pocket account");
 			return null;
@@ -98,8 +137,76 @@ public class Transaction {
 			System.err.println("Top up failed -- Could not create transaction");
 			return null;
 		}
+
+		// Charge $5 fee
+		if(Transaction.is_ftm(to_pocket, connection)){
+			Transaction fee = Transaction.create_transaction("", from_link, cust_id,
+									 date, "" + Transaction.TransactionType.FTM_FEE, 5, connection);
+			if(!Transaction.transfer_money("", from_link, 5, connection)){
+				System.err.println("Collect failed -- Could not transfer money from the link account");
+				return null;
+			}
+		}
+
 		return top_up_trans;
 	}
+
+
+
+	public static Transaction purchase(String from_pocket, String date, double amount, 
+										String cust_id, OracleConnection connection){
+		Transaction transact = null;
+		Account pock_acc = Account.get_account_by_id(from_pocket, connection);
+
+		if(pock_acc == null || Transaction.is_ftm(from_pocket, connection)){
+			if(pock_acc.balance - amount - 5 < 0){
+				System.err.println("Purchase failed -- not enough money for pruchase + fee");
+				return null;
+			}
+		}
+
+		// Check customer owns account
+		if(!Transaction.cust_owns_acct(from_pocket, cust_id, connection)){
+			System.err.println("Purchase failed -- customer doesn't own account");
+			return null;
+		}
+
+		if(!pock_acc.owner_id.equals(cust_id)){
+			System.err.println("Purchase failed -- Customer does not own this pocket account");
+			return null;
+		}
+
+		if(!pock_acc.account_type.equals("" + Testable.AccountType.POCKET)){
+			System.err.println("Must be pocket account");
+			return null;
+		}
+
+		if(!Transaction.transfer_money("", from_pocket, amount, connection)){
+			System.err.println("Purchase failed -- Could not transfer money to the pocket account");
+			return null;
+		}
+
+		transact = Transaction.create_transaction("", from_pocket, cust_id,
+									 date, "" + Transaction.TransactionType.PURCHASE, amount, connection);
+
+		// Charge $5 fee
+		if(Transaction.is_ftm(from_pocket, connection)){
+			if(!Transaction.transfer_money("", from_pocket, 5, connection)){
+				System.err.println("Purchase failed -- Could not transfer fee");
+				return null;
+			}
+			Transaction fee = Transaction.create_transaction("", from_pocket, cust_id,
+									 date, "" + Transaction.TransactionType.FTM_FEE, 5, connection);
+			if(fee == null){
+				System.err.println("Could not create fee transaction");
+				return null;
+			}
+		}
+
+		return transact;
+	}
+
+
 
 	public static boolean withdraw(String from_acct, String cust_id, String date, 
 						 Transaction.TransactionType type, double amount, OracleConnection connection){
@@ -174,6 +281,283 @@ public class Transaction {
 		return true;
 	}
 
+
+	public static Transaction transfer(String to_acct, String from_acct, String cust_id, String date, 
+						 Transaction.TransactionType type, double amount, OracleConnection connection){
+		
+		// Check customer is an owner on both accounts
+		ArrayList<String> to_acct_owners = Account.get_account_owners(to_acct, connection);
+		ArrayList<String> from_acct_owners = Account.get_account_owners(from_acct, connection);
+		boolean owns_to_acct = false;
+		boolean owns_from_acct = false;
+		if(to_acct_owners == null || from_acct_owners == null){
+			System.err.println("Transfer failed Could not find account owners, does accnt exist?");
+			return null;
+		}
+		for(int i = 0; i < to_acct_owners.size(); i++){
+			if(to_acct_owners.get(i).equals(cust_id)){
+				owns_to_acct = true;
+				break;
+			}
+		}
+		for(int i = 0; i < from_acct_owners.size(); i++){
+			if(from_acct_owners.get(i).equals(cust_id)){
+				owns_from_acct = true;
+				break;
+			}
+		}
+
+		if(!(owns_to_acct && owns_from_acct)){
+			System.err.println("Transfer failed -- customer does not own both accounts");
+			return null;
+		}
+
+		// Ensure that neither account is a pocket account
+		if(Account.get_account_type(to_acct, connection).equals("" + Testable.AccountType.POCKET) ||
+			Account.get_account_type(from_acct, connection).equals("" + Testable.AccountType.POCKET)){
+			System.err.println("Transfer failed -- cannot transfer on a pocket account");
+			return null;
+		}
+
+		// Check not transferring over 2000
+		if(amount > 2000){
+			System.err.println("Transfer failed -- cannot transfer >2000");
+			return null;
+		}
+
+		// Make sure from account has >= amount
+		if(Account.get_account_balance(from_acct, connection) < amount){
+			System.err.println("Transfer failed -- from account balance insufficient");
+			return null;
+		}
+
+		// Try to transfer money
+		if(!Transaction.transfer_money(to_acct, from_acct, amount, connection)){
+			System.err.println("Transaction failed -- could not transfer money");
+			return null;
+		}
+
+		// Create a transaction
+		Transaction transact = Transaction.create_transaction(to_acct, from_acct, cust_id,
+									 Bank.get_date(connection), "" + Transaction.TransactionType.TRANSFER
+									 , amount, connection);
+
+		if(transact == null){
+			System.err.println("Transfer failed -- could not create transaction");
+			return null;
+		}
+
+		return transact;
+	}
+
+
+	public static Transaction collect(String to_link, String from_pocket, String cust_id, String date, 
+						 Transaction.TransactionType type, double amount, OracleConnection connection){
+		// Make sure to and from are linked and to is not the pocket
+		// Check that we have a link between the two accounts
+		if(!Account.accounts_are_linked(from_pocket, to_link, connection)){
+			System.err.println("Collect failed -- Accounts are not linked or do not exist");
+			return null;
+		}
+		Account pock_acc = Account.get_account_by_id(from_pocket, connection);
+		if(!pock_acc.owner_id.equals(cust_id)){
+			System.err.println("Collect failed -- Customer does not own this pocket account");
+			return null;
+		}
+
+		// Check that pocket account has enough money
+		Account link_acc = Account.get_account_by_id(to_link, connection);
+
+		// Check if it's the first transaction of the month
+		if(Transaction.is_ftm(from_pocket, connection)){
+			if(pock_acc.balance - amount - 5.00 - (0.03 * amount) < 0){
+				System.err.println("Collect failed -- not enough money");
+				return null;
+			}
+		}else{
+			if(pock_acc.balance - amount - (0.03 * amount) < 0){
+				System.err.println("Collect failed -- not enough money");
+				return null;
+			}
+		}
+
+		if(!Transaction.transfer_money(to_link, from_pocket, amount, connection)){
+			System.err.println("Collect failed -- Could not transfer money from the pocket account");
+			return null;
+		}
+		Transaction collect_trans = Transaction.create_transaction(to_link, from_pocket, cust_id,
+									 date, "" + Transaction.TransactionType.COLLECT, amount, connection);
+		if(collect_trans == null){
+			System.err.println("Collect failed -- Could not create transaction");
+			return null;
+		}
+
+		// Charge $5 fee
+		if(Transaction.is_ftm(from_pocket, connection)){
+			if(!Transaction.transfer_money("", from_pocket, 5, connection)){
+				System.err.println("Collect failed -- Could not transfer money from the pocket account");
+				return null;
+			}
+
+			Transaction fee = Transaction.create_transaction("", from_pocket, cust_id,
+									 date, "" + Transaction.TransactionType.FTM_FEE, 5, connection);
+		}
+
+		// Charge 3% fee
+		if(!Transaction.transfer_money("", from_pocket, amount * 0.03, connection)){
+			System.err.println("Collect failed -- Could not transfer money from the pocket account");
+			return null;
+		}
+		Transaction pct_fee = Transaction.create_transaction("", from_pocket, cust_id,
+									 date, "" + Transaction.TransactionType.PCT_FEE, amount * 0.03, connection);
+		if(pct_fee == null){
+			System.err.println("Collect failed -- Could not create fee transaction");
+		}
+		return collect_trans;
+
+
+	}
+
+
+	public static Transaction pay_friend(String to_acct, String from_acct, String cust_id, String date, 
+						 Transaction.TransactionType type, double amount, OracleConnection connection){
+		// Check both accounts are pocket accounts
+		Account to_pock_acct = Account.get_account_by_id(to_acct, connection);
+		Account from_pock_acct = Account.get_account_by_id(from_acct, connection);
+		
+		// Check accounts not null
+		if(to_pock_acct == null || from_pock_acct == null){
+			System.err.println("Pay_Friend failed -- one of the accounts doesn't exist");
+			return null;
+		}
+
+		if(!to_pock_acct.account_type.equals("" + Testable.AccountType.POCKET) ||
+		   !from_pock_acct.account_type.equals("" + Testable.AccountType.POCKET) ){
+			System.err.println("Pay_Friend failed -- not a pocket account");
+			return null;
+		}
+
+		// Check if customer owns the from account
+		if(from_pock_acct.owner_id == cust_id){
+			System.err.println("Pay_Friend failed -- the customer doesn't own the from account");
+			return null;
+		}
+		
+		// Check if it's first transaction of the month for either account
+		if(Transaction.is_ftm(to_acct, connection)){
+			double balance = Account.get_account_balance(to_acct, connection);
+			if(balance < 5){
+				System.err.println("Pay_Friend failed -- to acct can't pay FTM");
+				return null;
+			}
+		}
+
+		if(Transaction.is_ftm(from_acct, connection)){
+			double balance = Account.get_account_balance(from_acct, connection);
+			if(balance < amount + 5){
+				System.err.println("Pay_Friend failed -- from acct can't pay FTM");
+				return null;
+			}
+		}
+
+		// Do transfer between accounts
+		if(!Transaction.transfer_money(to_acct, from_acct, amount, connection)){
+			System.err.println("Pay_Friend failed -- Could not transfer money from the pocket account");
+			return null;
+		}
+
+		// Create transaction
+		Transaction pay_friend = Transaction.create_transaction(to_acct, from_acct, cust_id,
+									 date, "" + Transaction.TransactionType.PAY_FRIEND, amount, connection);
+		if(pay_friend == null){
+			System.err.println("Pay_Friend failed -- could not create transaction");
+			return null;
+		}
+
+		// Do FTM transfer / transaction for to_acct
+		if(Transaction.is_ftm(to_acct, connection)){
+			if(!Transaction.transfer_money("", to_acct, 5, connection)){
+				System.err.println("Pay_Friend failed -- Could not transfer money from the pocket account");
+				return null;
+			}
+			Transaction pay_friend_ftm = Transaction.create_transaction("", to_acct, cust_id,
+									 date, "" + Transaction.TransactionType.FTM_FEE, 5, connection);
+			if(pay_friend_ftm == null){
+				System.err.println("Pay_Friend failed -- Could not transfer money from the pocket account");
+				return null;
+			}
+		}
+
+		// Do FTM transfer / transaction for from_acct
+		if(Transaction.is_ftm(from_acct, connection)){
+			Transaction pay_friend_ftm_2 = Transaction.create_transaction_and_transfer("", from_acct, cust_id,
+										date, "" + Transaction.TransactionType.FTM_FEE, 5, connection);
+			if(pay_friend_ftm_2 == null){
+				System.err.println("Pay_Friend failed -- Could not transfer money from the pocket account");
+				return null;
+			}
+		}
+
+		return pay_friend;
+	}
+
+	public static Transaction wire(String to_acct, String from_acct, String cust_id, String date, 
+						 Transaction.TransactionType type, double amount, OracleConnection connection){
+		// Check customer is an owner on both accounts
+		ArrayList<String> from_acct_owners = Account.get_account_owners(from_acct, connection);
+		Account to_account_obj = Account.get_account_by_id(to_acct, connection);
+		boolean owns_from_acct = false;
+		if(from_acct_owners == null || to_account_obj == null){
+			System.err.println("Wire failed Could not find account owners, does accnt exist?");
+			return null;
+		}
+		for(int i = 0; i < from_acct_owners.size(); i++){
+			if(from_acct_owners.get(i).equals(cust_id)){
+				owns_from_acct = true;
+				break;
+			}
+		}
+
+		if(!(owns_from_acct)){
+			System.err.println("Wire failed -- customer does not own both accounts");
+			return null;
+		}
+
+		// Ensure that neither account is a pocket account
+		if(Account.get_account_type(to_acct, connection).equals("" + Testable.AccountType.POCKET) ||
+			Account.get_account_type(from_acct, connection).equals("" + Testable.AccountType.POCKET)){
+			System.err.println("Wire failed -- cannot transfer on a pocket account");
+			return null;
+		}
+
+		// Make sure from account has >= amount
+		if(Account.get_account_balance(from_acct, connection) < amount + (0.02 * amount)){
+			System.err.println("Wire failed -- from account balance insufficient");
+			return null;
+		}
+
+		// Create a transaction
+		Transaction transact = Transaction.create_transaction_and_transfer(to_acct, from_acct, cust_id,
+									 date, "" + Transaction.TransactionType.WIRE, amount, connection);
+
+		if(transact == null){
+			System.err.println("Wire failed -- could not create transaction");
+			return null;
+		}
+
+		Transaction fee = Transaction.create_transaction_and_transfer("", from_acct, cust_id, date,
+									"" + Transaction.TransactionType.PCT_FEE, amount * 0.02, connection);
+		if(fee == null){
+			System.err.println("Wire failed -- could not create transaction fee");
+		}
+		return transact;
+	}
+
+	// STUBBBBBBBBBBBBBB
+	public static boolean is_ftm(String a_id, OracleConnection connection){
+		return false;
+	}
+
 	// Transfer money between account(s) if they exist and are not closed
 	public static boolean transfer_money(String to_acct, String from_acct, double amount, OracleConnection connection){
 		// Make sure at least one of to or from is specified
@@ -225,8 +609,7 @@ public class Transaction {
 			}
 
 			// If balance is in 0 < x < 0.01 -- close account
-			if(!from_acct_temp.account_type.equals("" + Testable.AccountType.POCKET) &&
-				 from_acct_temp.balance - amount <= 0.01 && 
+			if( from_acct_temp.balance - amount <= 0.01 && 
 				from_acct_temp.balance >= 0){
 				if(!Account.close_account_by_id(from_acct, connection)){
 					return false;

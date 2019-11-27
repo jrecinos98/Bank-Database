@@ -167,9 +167,8 @@ public class CustomerInterface extends JPanel{
 	}
 
 	public void deposit(){
-		/*String to_acct = Utilities.prompt("Enter a_id:");
-		String cust_id = Utilities.prompt("Enter c_id:");*/
-		String date = Bank.get_date();
+
+		String date = Bank.get_date(connection);
 		Transaction.TransactionType type = Transaction.TransactionType.DEPOSIT;
 
 		String id = form.getInput(0);
@@ -194,10 +193,9 @@ public class CustomerInterface extends JPanel{
 	}
 
 	public void top_up(){
-		/*String to_acct = Utilities.prompt("Enter pocket id:");
-		String from_acct = Utilities.prompt("Enter link id:");
-		String cust_id = Utilities.prompt("Enter c_id:");*/
-		String date = Bank.get_date();
+
+		String date = Bank.get_date(connection);
+
 		Transaction.TransactionType type = Transaction.TransactionType.TOP_UP;
 
 		String id = form.getInput(0);
@@ -225,9 +223,10 @@ public class CustomerInterface extends JPanel{
 	}
 
 	public void withdrawal(){
-		/*String from_acct = Utilities.prompt("Enter a_id:");
-		String cust_id = Utilities.prompt("Enter c_id:");*/
-		String date = Bank.get_date();
+
+
+		String date = Bank.get_date(connection);
+
 		Transaction.TransactionType type = Transaction.TransactionType.WITHDRAWAL;
 		String id = form.getInput(0);
 		String pin= form.getInput(1);

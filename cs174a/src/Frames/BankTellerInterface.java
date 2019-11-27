@@ -41,6 +41,7 @@ public class BankTellerInterface extends JPanel{
 
 	public BankTellerInterface(OracleConnection connection){
 		this.connection = connection;	
+
 		ArrayList<String> labels= new ArrayList<String>( Arrays.asList("Test 1", "Test 2"));	
 		JButton b= new JButton("Get Text");
 		b.addMouseListener(new MouseAdapter() { 
@@ -50,6 +51,7 @@ public class BankTellerInterface extends JPanel{
             }
 		});
 		form = new InputForm(labels, b);
+
 		setLayout(new FlowLayout());
 		add(form);
 	}

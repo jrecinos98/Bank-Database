@@ -50,11 +50,13 @@ public class Interface extends JFrame {
             ex.printStackTrace();
         }*/
     	setTitle("Bank");
+
       Utilities.setWindow(this);
       main_frame= this;
        	
       customer= new CustomerInterface(connection);
       bankTeller= new BankTellerInterface(connection);
+
 
       JPanel atm_content = new JPanel(new GridBagLayout());
       //content.setBackground(Color.GRAY);
