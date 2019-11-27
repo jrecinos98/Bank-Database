@@ -27,6 +27,7 @@ public class Transaction {
 	public String date;
 	public String transaction_type;
 	public double amount;
+	public int t_id = -1;
 
 	public enum TransactionType {
 		DEPOSIT,
@@ -39,6 +40,8 @@ public class Transaction {
 		TRANSFER,
 		COLLECT,
 		WIRE,
+		WRITE_CHECK,
+		ACCRUE_INTEREST,
 	}
 
 	public static Transaction create_transaction(String to_acct, String from_acct, String cust_id,
@@ -116,12 +119,12 @@ public class Transaction {
 
 		// Check if it's the first transaction of the month
 		if(Transaction.is_ftm(to_pocket, connection)){
-			if(link_acc == null || link_acc.balance - amount - 5.00 <= 0.01){
+			if(link_acc == null || link_acc.balance - amount - 5.00 < 0){
 				System.err.println("Top up failed -- not enough money");
 				return null;
 			}
 		}else{
-			if(link_acc == null || link_acc.balance - amount <= 0.01){
+			if(link_acc == null || link_acc.balance - amount < 0){
 				System.err.println("Top up failed -- not enough money");
 				return null;
 			}
@@ -177,7 +180,7 @@ public class Transaction {
 		}
 
 		if(!pock_acc.account_type.equals("" + Testable.AccountType.POCKET)){
-			System.err.println("Must be pocket account");
+			System.err.println("Purchase failed -- Must be pocket account");
 			return null;
 		}
 
@@ -504,22 +507,14 @@ public class Transaction {
 	public static Transaction wire(String to_acct, String from_acct, String cust_id, String date, 
 						 Transaction.TransactionType type, double amount, OracleConnection connection){
 		// Check customer is an owner on both accounts
-		ArrayList<String> from_acct_owners = Account.get_account_owners(from_acct, connection);
 		Account to_account_obj = Account.get_account_by_id(to_acct, connection);
-		boolean owns_from_acct = false;
-		if(from_acct_owners == null || to_account_obj == null){
+		if(to_account_obj == null){
 			System.err.println("Wire failed Could not find account owners, does accnt exist?");
 			return null;
 		}
-		for(int i = 0; i < from_acct_owners.size(); i++){
-			if(from_acct_owners.get(i).equals(cust_id)){
-				owns_from_acct = true;
-				break;
-			}
-		}
-
-		if(!(owns_from_acct)){
-			System.err.println("Wire failed -- customer does not own both accounts");
+		
+		if(!(Transaction.cust_owns_acct(from_acct, cust_id, connection))){
+			System.err.println("Wire failed -- customer does not own account");
 			return null;
 		}
 
@@ -553,9 +548,121 @@ public class Transaction {
 		return transact;
 	}
 
-	// STUBBBBBBBBBBBBBB
+	public static Transaction write_check(String from_acct, String cust_id, String date, 
+						 Transaction.TransactionType type, double amount, OracleConnection connection){
+		// Check customer exists
+		if(Customer.get_cust_by_id(cust_id, connection) == null){
+			System.err.println("Write_check failed -- customer doesn't exist");
+			return null;
+		}
+
+		// Check customer owns account
+		if(!Transaction.cust_owns_acct(from_acct, cust_id, connection)){
+			System.err.println("Write_check failed -- customer doesn't own account");
+			return null;
+		}
+
+		// Make sure account is NOT a pocket account
+		Account account = Account.get_account_by_id(from_acct, connection);
+		if(account != null && account.account_type.equals("" + Testable.AccountType.POCKET)){
+			System.err.println("Write_check failed -- cannot withdraw from pocket account");
+			return null;
+		}
+		
+		// Make sure not a savings account
+		if(account != null && account.account_type.equals("" + Testable.AccountType.SAVINGS)){
+			System.err.println("Write_check failed -- cannot withdraw from savings account");
+			return null;
+		}
+
+		// Transfer money into the account
+		if(!Transaction.transfer_money("", from_acct, amount, connection)){
+			return null;
+		}
+
+		// Create a transaction record
+		Transaction transaction = Transaction.create_transaction("", from_acct, cust_id, date,
+								"" + Transaction.TransactionType.WRITE_CHECK, amount, connection);
+		if(transaction == null){
+			System.err.println("Write_check failed -- could not create transaction");
+			return null;
+		}
+
+		return transaction;
+	}
+
+	public static boolean accrue_interest(String a_id, OracleConnection connection){
+		Account account = Account.get_account_by_id(a_id, connection);
+		if(account == null){
+			System.err.println("Accrue_interest failed --Error, could not get account");
+			return false;
+		}
+
+		// Don't accrue interest on a pocket account or a student checking
+		if(account.account_type.equals("" + Testable.AccountType.POCKET) || 
+			account.account_type.equals("" + Testable.AccountType.STUDENT_CHECKING)){
+			return true;
+		}
+
+		// Don't accrue interest on closed accounts
+		if(!account.is_open){
+			return true;
+		}
+
+		double daily_balance = account.balance;
+
+		ArrayList<Transaction> transactions = Transaction.get_acct_transactions_this_month(a_id, connection);
+		if(transactions == null){
+			System.err.println("Accrue_interest failed -- could not get account transactions");
+			return false;
+		}
+
+		double interest_rate;
+		if(account.account_type.equals("" + Testable.AccountType.INTEREST_CHECKING)){
+			interest_rate = Bank.get_interest_rate(Testable.AccountType.INTEREST_CHECKING, connection);
+		}else{
+			interest_rate = Bank.get_interest_rate(Testable.AccountType.SAVINGS, connection);
+		}
+
+		double interest_amount = 0;
+		for(int i = Bank.get_days_in_current_month(connection); i > 0; i--){
+			// Compute weighted avg with the day's daily balance
+			interest_amount += (daily_balance / Bank.get_days_in_current_month(connection));
+
+			// Adjust previous days balance by undoing transactions on current day
+			for(int j = 0; j < transactions.size(); j++){
+
+				// Check if transaction occurred on this day
+				if(Integer.parseInt(transactions.get(j).date.split("-")[2]) == i){
+					if(transactions.get(j).to_acct != null && transactions.get(j).to_acct.equals(a_id)){
+						// Money transferred to the account, reverse to get previous days balance
+						daily_balance -= transactions.get(j).amount;
+					}else if(transactions.get(j).from_acct != null && transactions.get(j).from_acct.equals(a_id)){
+						//Money transferred from the account, reverse to get the previous days balance
+						daily_balance += transactions.get(j).amount;
+					}
+				}
+			}
+		}
+
+		// Multiply by monthly interest rate
+		interest_amount *= ((interest_rate / 12)/100);
+
+		Transaction transaction = Transaction.create_transaction_and_transfer(a_id, "", "", Bank.get_date(connection), 
+			"" + Transaction.TransactionType.ACCRUE_INTEREST, interest_amount, connection);
+
+		if(transaction == null){
+			System.err.println("Accrue_interest failed -- could not create transaction");
+			return false;
+		}
+		return true;
+	}
+
 	public static boolean is_ftm(String a_id, OracleConnection connection){
-		return false;
+		if(Transaction.get_acct_transactions_this_month(a_id, connection) != null){
+			return Transaction.get_acct_transactions_this_month(a_id, connection).size() == 0;
+		}
+		return true;
 	}
 
 	// Transfer money between account(s) if they exist and are not closed
@@ -614,6 +721,9 @@ public class Transaction {
 				if(!Account.close_account_by_id(from_acct, connection)){
 					return false;
 				}
+				if(!Account.close_pocket_accounts_by_owner_id(from_acct, connection)){
+					return false;
+				}
 			}
 		}
 
@@ -640,6 +750,40 @@ public class Transaction {
 		return true;
 	}
 
+	public static ArrayList<Transaction> get_acct_transactions_this_month(String a_id, OracleConnection connection){
+		ArrayList<Transaction> transactions = new ArrayList<Transaction>();
+		String month = Bank.get_month(connection);
+
+		// Find transactions where account sent or received money
+		String query = String.format("SELECT * FROM transactions T WHERE " +
+									"(T.to_acct = '%s' OR T.from_acct = '%s')", a_id, a_id);
+		try( Statement statement = connection.createStatement() ) {
+			try( ResultSet rs = statement.executeQuery( query )){
+				while(rs.next()){
+					String t_date = rs.getString("t_date");
+					if(!t_date.equals("xxxx-xx-xx")){
+						if(t_date.split("-")[1].equals(month)){
+							transactions.add(
+								new Transaction(
+									rs.getInt("t_id"), rs.getString("to_acct"),
+									rs.getString("from_acct"),rs.getString("cust_id"),
+									rs.getString("t_date"), rs.getString("t_type"), rs.getDouble("amount")
+								)
+							);
+						}
+					}
+				}
+			}catch(SQLException e){
+				e.printStackTrace();
+				return null;
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+			return null;
+		}
+		return transactions;
+	}
+
 	public Transaction(String to_acct, String from_acct, String cust_id,
 						String date, String transaction_type, double amount){
 		this.to_acct = to_acct;
@@ -648,6 +792,17 @@ public class Transaction {
 		this.date = date;
 		this.transaction_type = transaction_type;
 		this.amount = amount;
+	}
+
+	public Transaction(int t_id, String to_acct, String from_acct, String cust_id,
+						String date, String transaction_type, double amount){
+		this.to_acct = to_acct;
+		this.from_acct = from_acct;
+		this.cust_id = cust_id;
+		this.date = date;
+		this.transaction_type = transaction_type;
+		this.amount = amount;
+		this.t_id = t_id;
 	}
 
 }

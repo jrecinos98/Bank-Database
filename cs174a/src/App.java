@@ -28,6 +28,7 @@ public class App implements Testable
 	 */
 	App() {
 		// TODO: Any actions you need.
+
 	}
 
 	/**
@@ -76,6 +77,7 @@ public class App implements Testable
 			System.err.println( e.getMessage() );
 			return "1";
 		}
+
 	}
 
 	@Override
@@ -132,6 +134,10 @@ public class App implements Testable
 
 	@Override
 	public String createTables(){
+		// DO TABLE CREATE
+		// Set up dates
+		Bank.bank_set_up(this.connection);
+
 		return "1";
 	}
 

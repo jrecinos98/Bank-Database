@@ -17,7 +17,7 @@
 # To run
 `java -cp ./bin Main`
 
-
+# 
 
 # Questions
 * What if a customer with a given ssn already exists in db?
@@ -26,6 +26,7 @@
 * Can create a customer with a linked account that is closed?
 * Can a pocket account have multiple owners?
 * Can we assume that account creations/customer creations always given unique id?
+* Check if account exists before creation
 
 # To-do
 * Update to store interest date in global (bank) table instead of within each account
@@ -41,3 +42,5 @@
 * Change types to varchar instead of char
 * Test payfriend where it's FTM for both pocket accounts
 * Try every transaction with a nonexistant account
+* Pocket account accrue interest as a transaction as this could attempt to make negative on balance?
+* Constrain interest rate to 0 <= r <= 100

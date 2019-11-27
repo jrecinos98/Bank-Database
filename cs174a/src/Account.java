@@ -331,6 +331,10 @@ public class Account{
 		return true;
 	}
 
+	public static boolean close_pocket_accounts_by_owner_id(String from_acct, OracleConnection connection){
+		return true;
+	}
+
 	// Negative amount means error
 	public static double get_account_balance(String a_id, OracleConnection connection){
 		Account account = Account.get_account_by_id(a_id, connection);

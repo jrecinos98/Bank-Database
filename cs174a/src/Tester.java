@@ -51,6 +51,9 @@ public class Tester{
 		}else{
 			System.out.println("Error creating tables");
 		}
+
+		Bank.bank_set_up(this.connection);
+		Bank.set_date("1997", "1", "2", this.connection);
 	}
 
 	public void teardown(){
@@ -155,6 +158,10 @@ public class Tester{
 			if(transact == null){
 				return fail();
 			}
+			ArrayList<Transaction> transactions = Transaction.get_acct_transactions_this_month(to_acct.a_id, this.connection);
+			if(transactions.size() != 4){
+				return fail();
+			}
 
 			double new_balance_to_acct = Account.get_account_by_id("1", this.connection).balance;
 			double new_balance_other_acct = Account.get_account_by_id("3", this.connection).balance;
@@ -197,8 +204,6 @@ public class Tester{
 			double new_balance_other_acct = Account.get_account_by_id(other_acct.a_id, this.connection).balance;
 
 			if(new_balance_to_acct != balance_to_acct + 350 || new_balance_other_acct != balance_other_acct - 350 - (350 * .02)){
-				System.out.println("HERE");
-				
 				return fail();
 			}
 
@@ -210,6 +215,50 @@ public class Tester{
 
 
 			return pass();
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return error();
+	}
+
+	public int test_acct_accrue_interest(){
+		try{
+			// Start date at Nov 1
+			Bank.set_date("2019", "11", "1", this.connection);
+			Account some_account = Account.create_account(Testable.AccountType.SAVINGS, this.get_next_id(), 1500.00,
+										 "595959595", "Guy", "California", this.connection);
+			Bank.set_date("2019", "11", "5", this.connection);
+			Transaction.withdraw(some_account.a_id, "595959595", Bank.get_date(this.connection), 
+						 Transaction.TransactionType.WITHDRAWAL, 500, this.connection);
+			// Bank.set_date("2019", "11", "12", this.connection);
+			// Transaction.deposit(some_account.a_id, "595959595", Bank.get_date(this.connection), 
+			// 			 Transaction.TransactionType.WITHDRAWAL, 2500, this.connection);
+			// Bank.set_date("2019", "11", "25", this.connection);
+			// Transaction.withdraw(some_account.a_id, "595959595", Bank.get_date(this.connection), 
+			// 			 Transaction.TransactionType.WITHDRAWAL, 1200, this.connection);
+			// Bank.set_date("2019", "11", "30", this.connection);
+			boolean transaction = Transaction.accrue_interest(some_account.a_id, this.connection);
+
+			Account after_interest = Account.get_account_by_id(some_account.a_id, this.connection);
+			
+			if(!transaction){
+				return fail();
+			}
+
+			if(!(Math.abs(after_interest.balance - 1004.2666666666667) < 0.001)){
+				return fail();
+			}
+
+			return pass();
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return error();
+	}
+
+	public int test_acct_write_check(){
+		try{
+			return fail();
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -368,6 +417,9 @@ public class Tester{
 		results.add(result("test_pocket_acct_collect():", this.test_pocket_acct_collect()));
 		results.add(result("test_pocket_acct_pay_friend():", this.test_pocket_acct_pay_friend()));
 		results.add(result("test_acct_wire():", this.test_acct_wire()));
+		results.add(result("test_acct_write_check():", this.test_acct_write_check()));
+		results.add(result("test_acct_accrue_interest():", this.test_acct_accrue_interest()));
+
 
 		System.err.println("\n----- RESULTS -----");
 		for(int i = 0; i < results.size(); i++){
