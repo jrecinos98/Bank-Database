@@ -18,6 +18,7 @@ import java.util.Scanner;
 public class App implements Testable
 {
 	private OracleConnection connection;                   // Example connection object to your DB.
+	private Interface gui;
 	// connection descriptor.
 	final static String DB_URL= "jdbc:oracle:thin:@cs174a.cs.ucsb.edu:1521/orcl";
 	final static String DB_USER = "c##ncduncan";
@@ -63,13 +64,14 @@ public class App implements Testable
 		info.put( OracleConnection.CONNECTION_PROPERTY_PASSWORD, DB_PASSWORD );
 		info.put( OracleConnection.CONNECTION_PROPERTY_DEFAULT_ROW_PREFETCH, "20" );
 
+
 		try
 		{
 			OracleDataSource ods = new OracleDataSource();
 			ods.setURL( DB_URL );
 			ods.setConnectionProperties( info );
 			connection = (OracleConnection) ods.getConnection();
-
+			
 			return "0";
 		}
 		catch( SQLException e )
@@ -93,7 +95,7 @@ public class App implements Testable
 	}
 
 	@Override
-	public String payFriend( String from, String to, double amount ){
+	public String payFriend(String from, String to, double amount ){
 		return "1";
 	}
 
@@ -174,7 +176,7 @@ public class App implements Testable
 				tester.run_tests(connection);
 			}
 			else{
-				System.out.println("Did not recognize input -- should be 1 or 2");
+				System.out.println("Did not recognize input -- should be 1 , 2, or 3");
 			}
 		} catch( Exception e ) {
 			System.err.println( e.getMessage() );

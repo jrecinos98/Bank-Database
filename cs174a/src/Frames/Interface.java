@@ -23,11 +23,14 @@ import javax.swing.JTabbedPane;
 import javax.swing.*;
 
 import java.awt.Component;
+import javax.swing.border.EmptyBorder;
+import java.awt.GridBagLayout;
 import java.awt.event.KeyEvent;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Toolkit;
-
+import java.awt.Color;
+import java.awt.GridLayout;
 
 
 public class Interface extends JFrame {
@@ -37,27 +40,46 @@ public class Interface extends JFrame {
 	private CustomerInterface customer;
 	private BankTellerInterface bankTeller;
 	private OracleConnection connection;
-
+	public static JFrame main_frame;
 
 	
     public Interface(OracleConnection connection) {
+    	/*try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
+            ex.printStackTrace();
+        }*/
     	setTitle("Bank");
-       	Utilities.setWindow(this);
 
-       	customer= new CustomerInterface(connection);
-       	bankTeller= new BankTellerInterface(connection);
+      Utilities.setWindow(this);
+      main_frame= this;
+       	
+      customer= new CustomerInterface(connection);
+      bankTeller= new BankTellerInterface(connection);
 
+
+      JPanel atm_content = new JPanel(new GridBagLayout());
+      //content.setBackground(Color.GRAY);
+      atm_content.setBorder(new EmptyBorder(100,100,100,100));
+      atm_content.add(customer);
+       
+       	
 	    tabView =new JTabbedPane(JTabbedPane.TOP, JTabbedPane.WRAP_TAB_LAYOUT);  
 	    tabView.setBounds(50,50,200,200);  
-	    tabView.add("Customer", customer);  
+	    tabView.add("ATM", atm_content);  
 	    tabView.add("Bank Teller", bankTeller);   
 
 	    //Add tabview to Frame.
 	    add(tabView); 
-	    setDefaultCloseOperation(EXIT_ON_CLOSE);
-
-       
+	    
+	    setLocationRelativeTo(null);
+        setVisible(true);
         
+    }
+    public void update_frame(JPanel new_panel){
+    	/*this.remove(current_panel);
+		this.add(new_panel);
+		this.revalidate();*/
     }
 }
 

@@ -29,6 +29,7 @@ import java.awt.Toolkit;
 public class BankTellerInterface extends JPanel{
 
 	private OracleConnection connection;
+	private JButton b1;
 
 	public BankTellerInterface(OracleConnection connection){
 		this.connection = connection;	
