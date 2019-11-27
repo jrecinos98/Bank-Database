@@ -201,9 +201,8 @@ public class CustomerInterface extends JPanel{
 	}
 
 	public void deposit(){
-		/*String to_acct = Utilities.prompt("Enter a_id:");
-		String cust_id = Utilities.prompt("Enter c_id:");*/
-		String date = Bank.get_date();
+
+		String date = Bank.get_date(connection);
 		Transaction.TransactionType type = Transaction.TransactionType.DEPOSIT;
 		//double amount = Double.parseDouble(Utilities.prompt("Enter amount:"));
 		if(form == null){
@@ -222,10 +221,8 @@ public class CustomerInterface extends JPanel{
 	}
 
 	public void top_up(){
-		/*String to_acct = Utilities.prompt("Enter pocket id:");
-		String from_acct = Utilities.prompt("Enter link id:");
-		String cust_id = Utilities.prompt("Enter c_id:");
-		String date = Bank.get_date();*/
+
+		String date = Bank.get_date(connection);
 		Transaction.TransactionType type = Transaction.TransactionType.TOP_UP;
 		if(form == null){
 			ArrayList<String> labels= new ArrayList<String> (
@@ -249,10 +246,8 @@ public class CustomerInterface extends JPanel{
 	}
 
 	public void withdrawal(){
-		/*String from_acct = Utilities.prompt("Enter a_id:");
-		String cust_id = Utilities.prompt("Enter c_id:");
-		String date = Bank.get_date();
-		*/
+
+		String date = Bank.get_date(connection);
 		Transaction.TransactionType type = Transaction.TransactionType.WITHDRAWAL;
 		if(form == null){
 			ArrayList<String> labels= new ArrayList<String> (

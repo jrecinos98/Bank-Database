@@ -32,7 +32,8 @@ public class BankTellerInterface extends JPanel{
 	private JButton b1;
 
 	public BankTellerInterface(OracleConnection connection){
-		this.connection = connection;		
+		this.connection = connection;	
+		JButton b1;	
 		b1 = new JButton("Hello");
 		b1.setMnemonic(KeyEvent.VK_D);
     	b1.setActionCommand("disable");
