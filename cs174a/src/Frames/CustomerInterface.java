@@ -20,6 +20,8 @@ import javax.swing.text.BadLocationException;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 import oracle.jdbc.pool.OracleDataSource;
 import oracle.jdbc.OracleConnection;
@@ -28,117 +30,79 @@ import java.sql.DatabaseMetaData;
 import java.util.Scanner;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Hashtable;
 
 
 public class CustomerInterface extends JPanel{
-	public final static int LOG_IN= 0;
-	public final static int UPDATE_PIN=2;
-	public final static int DEPOSIT=6;
-	public final static int WITHDRAWAL=8;
+	public final static int LOG_IN= 11;
+	public final static int ACTIONS_PAGE=12;
+
+
+
+	public final static int UPDATE_PIN=1;
+	public final static int DEPOSIT=2;
+	public final static int TOP_UP=3;
+	public final static int WITHDRAWAL=4;
+	public final static int PURCHASE=5;
+	public final static int LOG_OUT= 6;
+	public final static int CREATE_CUSTOMER=7;
+	public final static int DELETE_CUSTOMER=8;
+	public final static int CREATE_TABLES= 9;
+	public final static int DESTROY_TABLES=10;
+
+
 
 	private OracleConnection connection;
 	private String user_id;
 	private String user_pin;
+
 	private ArrayList<JButton> action_buttons;
+	private Hashtable<Integer, JPanel> panels;
 	private InputForm form;
-	private JPanel current_panel;
+	private JPanel current_page;
 	private JFrame parent_frame;
-	private JTextField text_box;
 	
 
 	public CustomerInterface(OracleConnection connection) {
 		super(new GridLayout(3, 1));
 		this.connection = connection;
-		//setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
-		create_login_page();
-		//set_up_buttons();
-		current_panel= this;
+		//Initial Screen
+		create_pages();
+		current_page= panels.get(LOG_IN);
+		this.form= (InputForm) current_page;
+		add(current_page);
 		parent_frame= Interface.main_frame;
-		
-	
-	}
-	
-	private void render_page(ArrayList<String> labels, String b_label, int action){
-		this.removeAll();
-		this.validate();
-		this.repaint();
-		JButton button= new JButton(b_label);
-		button.addMouseListener(new ButtonListener(action));
-		this.form = new InputForm(labels, button);
-		add(form);
-	}
-	private void create_login_page(){
-
-		JButton button= new JButton("Submit PIN");
-        button.addMouseListener(new ButtonListener(LOG_IN));
-        ArrayList<String> labels= new ArrayList<String> (
-        						Arrays.asList("Tax ID:", "PIN"));
-        this.form = new InputForm(labels, button);
-        add(form);
-	}
-	
-	private void render_actions_page(){
-		this.removeAll();
-		this.form= null;
-		set_up_buttons();
-		this.validate();
-		this.repaint();
-	}
-	private void render_pin_reset(){
-		this.removeAll();
-		this.validate();
-		this.repaint();
-
-		JButton button= new JButton("Update PIN");
-		button.addMouseListener(new ButtonListener(UPDATE_PIN));
-	
-		ArrayList<String> labels= new ArrayList<String> (
-        						Arrays.asList("Tax ID:", "Old PIN:","New PIN:"));
-        this.form = new InputForm(labels, button);
-		add(form);
-	}
-	private void render_deposit_page(){
-		this.removeAll();
-		this.validate();
-		this.repaint();
-
-		JButton button= new JButton("Make Deposit");
-		button.addMouseListener(new ButtonListener(DEPOSIT));
-	
-		ArrayList<String> labels= new ArrayList<String> (
-        						Arrays.asList("Account ID:", "Tax ID:","Amount: $"));
-        this.form = new InputForm(labels, button);
-		add(form);
 	}
 
+	/*Creates all the pages that will be used for the customer interface*/
+	private void create_pages(){
+		panels= new Hashtable<Integer, JPanel>();
+		panels.put(LOG_IN, create_login_page());
+		panels.put(ACTIONS_PAGE, create_actions_page());
+		panels.put(UPDATE_PIN, create_page(new ArrayList<String> (Arrays.asList("Tax ID:", "Old PIN:","New PIN:")), "Update PIN", UPDATE_PIN));
+		panels.put(DEPOSIT, create_page(new ArrayList<String> (Arrays.asList("Account ID:", "Tax ID:","Amount: $")), "Make Deposit", DEPOSIT));
+		panels.put(TOP_UP, create_page(new ArrayList<String> (Arrays.asList("Pocket Account ID", " Linked Account ID:","Tax ID:", " Amount: $")), "Transfer to Account", TOP_UP));
+		panels.put(WITHDRAWAL, create_page(new ArrayList<String> (Arrays.asList("Account ID", "Tax ID:","Amount: $")), "Make Withdrawal", WITHDRAWAL ));
+		panels.put(PURCHASE, create_page(new ArrayList<String> (Arrays.asList("Account ID","Amount: $")), "Make Purchase", WITHDRAWAL ));
+	}
+	
 	public void login(){
-
-		//Scanner in = new Scanner(System.in);
-		//System.out.println("Enter tax id:");
-		//String id = in.nextLine();
-		//System.out.println("Enter 4 digit PIN:");
-		//String pin = in.nextLine();
-
 		String id = form.getInput(0);
-		String pin= form.getInput(1);
-		this.user_pin=pin;
-		this.user_id= id;
-		this.render_actions_page();
-
-		//Uncomment after GUI is set up.
-		
-		/*Customer cust = Customer.login(id, pin, this.connection);
+		String pin= form.getInput(1);		
+		System.out.println(id);
+		System.out.println(pin);
+		form.setLabel("Verification Failed.", Color.red);
+		update_page(ACTIONS_PAGE);
+		/*//Customer cust = Customer.login(id, pin, this.connection);
 		if(cust == null){
-			//System.out.println("Verification failed... Are your id/PIN correct?");
-			form.setLabel("Verification Failed.", Color.red);
-
+			System.out.println("Verification failed... Are your id/PIN correct?");
 			
 		}else{
 			this.user_pin=pin;
 			this.user_id= id;
 			System.out.println("User: " + cust.name + " logged in!");
 			//Change Panel to actions_panel
-			this.render_actions_page();
+	
 		}*/
 	}
 
@@ -159,13 +123,15 @@ public class CustomerInterface extends JPanel{
 		/*String id = Utilities.prompt("Enter c_id:");
 		String old = Utilities.prompt("Enter old pin:");
 		String _new = Utilities.prompt("Enter new pin:");*/
-		if(this.form == null){
-			render_pin_reset();
-		}
-		else{
-			render_actions_page();
+		
+
+		String id= form.getInput(0);
+		String old= form.getInput(1);
+		String _new= form.getInput(2);
+		
+		update_page(ACTIONS_PAGE);
 	
-		}
+		
 		/*if(Customer.update_pin(id, old, _new, this.connection)){
 			System.out.println("PIN updated!");
 			Customer cust = Customer.get_cust_by_id(id, this.connection);
@@ -205,14 +171,20 @@ public class CustomerInterface extends JPanel{
 		String cust_id = Utilities.prompt("Enter c_id:");*/
 		String date = Bank.get_date();
 		Transaction.TransactionType type = Transaction.TransactionType.DEPOSIT;
+
+		String id = form.getInput(0);
+		String pin= form.getInput(1);
+		String m= form.getInput(2);		
+		System.out.println(id);
+		System.out.println(pin);
+		System.out.println(m);
+		this.form.setLabel("TEST", Color.red);
 		//double amount = Double.parseDouble(Utilities.prompt("Enter amount:"));
-		if(form == null){
-			render_deposit_page();
-		}
-		else{
-			render_actions_page();
+		
+		
+		update_page(ACTIONS_PAGE);
 	
-		}
+		
 		/*boolean success = Transaction.deposit(to_acct, cust_id, date, type, amount, connection);
 		if(!success){
 			System.err.println("Deposit failed");
@@ -224,19 +196,23 @@ public class CustomerInterface extends JPanel{
 	public void top_up(){
 		/*String to_acct = Utilities.prompt("Enter pocket id:");
 		String from_acct = Utilities.prompt("Enter link id:");
-		String cust_id = Utilities.prompt("Enter c_id:");
-		String date = Bank.get_date();*/
+		String cust_id = Utilities.prompt("Enter c_id:");*/
+		String date = Bank.get_date();
 		Transaction.TransactionType type = Transaction.TransactionType.TOP_UP;
-		if(form == null){
-			ArrayList<String> labels= new ArrayList<String> (
-        						Arrays.asList("Pocket Account ID", " Linked Account ID:","Tax ID: $", " Amount: $"));
-        
-			render_page(labels,"Transfer to Account",WITHDRAWAL);
-		}
-		else{
-			render_actions_page();
-			
-		}
+
+		String id = form.getInput(0);
+		String pin= form.getInput(1);
+		String m= form.getInput(2);		
+		String n= form.getInput(3);		
+		System.out.println(id);
+		System.out.println(pin);
+		System.out.println(m);
+		System.out.println(n);
+		this.form.setLabel("TEST", Color.red);
+		
+		update_page(ACTIONS_PAGE);
+	
+	
 
 		/*double amount = Double.parseDouble(Utilities.prompt("Enter amount:"));
 
@@ -250,20 +226,19 @@ public class CustomerInterface extends JPanel{
 
 	public void withdrawal(){
 		/*String from_acct = Utilities.prompt("Enter a_id:");
-		String cust_id = Utilities.prompt("Enter c_id:");
+		String cust_id = Utilities.prompt("Enter c_id:");*/
 		String date = Bank.get_date();
-		*/
 		Transaction.TransactionType type = Transaction.TransactionType.WITHDRAWAL;
-		if(form == null){
-			ArrayList<String> labels= new ArrayList<String> (
-        						Arrays.asList("Account ID", "Tax ID:","Amount: $"));
-        
-			render_page(labels,"Make Withdrawal",WITHDRAWAL);
-		}
-		else{
-			render_actions_page();
-			this.form=null;
-		}
+		String id = form.getInput(0);
+		String pin= form.getInput(1);
+		String m= form.getInput(2);		
+		System.out.println(id);
+		System.out.println(pin);
+		System.out.println(m);
+		this.form.setLabel("TEST", Color.red);
+		update_page(ACTIONS_PAGE);
+	
+		
 		/*double amount = Double.parseDouble(Utilities.prompt("Enter amount:"));
 
 		boolean success = Transaction.withdraw(from_acct, cust_id, date, type, amount, connection);
@@ -278,29 +253,138 @@ public class CustomerInterface extends JPanel{
 
 	}
 
-	private void set_up_buttons(){
+	/*resets user info and loads sign in page*/
+	private void sign_out(){
+		this.user_id=null;
+	 	this.user_pin=null;
+	 	update_page(LOG_IN);
+	}
+
+	/*Creates the login page*/
+	private JPanel create_login_page(){
+		
+		JButton button= new JButton("Submit PIN");
+        button.addMouseListener(new ButtonListener(LOG_IN));
+        ArrayList<String> labels= new ArrayList<String> (
+        						Arrays.asList("Tax ID:", "PIN"));
+        InputForm form = new InputForm(labels, button);
+        //JPanel hold= new JPanel();
+        //hold.add(form);
+        //add(hold);
+        return form;
+	}
+
+	/*Creates a page with labels and textfields (depends on size of ArrayList)*/
+	private JPanel create_page(ArrayList<String> labels, String b_label, int action){
+		JButton button= new JButton(b_label);
+		button.addMouseListener(new ButtonListener(action));
+		InputForm form = new InputForm(labels, button);
+		JPanel holder= new JPanel();
+		//holder.add(form);
+		return form;
+	}
+	/* Creates the page with user actions*/
+	private JPanel create_actions_page(){
+		JPanel holder= new JPanel();
 		create_buttons();
 		for(int i=0; i< action_buttons.size();i++){
-			action_buttons.get(i).addMouseListener(new ButtonListener(i+1));
-			this.add(action_buttons.get(i));
+			holder.add(action_buttons.get(i));
 		}
+		
+		return holder;
+	}
+	/* Changes from one page to another*/
+	private void update_page(int page){
+		this.remove(current_page);
+		this.revalidate();
+		this.repaint();
+		try{
+			current_page= panels.get(page);
+			if(page != ACTIONS_PAGE){
+				//Clear old values from old form
+				if(this.form != null)
+					this.form.resetFields();
+				//Change form to current page
+				this.form= (InputForm) current_page;
+				this.form.resetFields();
+			}
+			else{
+				this.form= null;
+			}
+		}
+		catch(Exception e){
+			System.err.println(e);
+		}
+		add(current_page);
 	}
 	private void create_buttons(){
 		this.action_buttons= new ArrayList<JButton>(10);
-		this.action_buttons.add(0, new JButton("Create Customer"));
-		this.action_buttons.add(1, new JButton("Update PIN"));
-		this.action_buttons.add(2, new JButton("Delete Customer"));
-		this.action_buttons.add(3, new JButton("Create Table"));
-		this.action_buttons.add(4, new JButton("Delete Table"));
-		this.action_buttons.add(5, new JButton("Deposit"));
-		this.action_buttons.add(6, new JButton("Top Up"));
-		this.action_buttons.add(7, new JButton("Withdrawal"));
-		this.action_buttons.add(8, new JButton("Purchase"));
+		
+		JButton t= new JButton("Update PIN");
+		t.addMouseListener(new MouseAdapter() { 
+			private int action;
+			public void mouseClicked(MouseEvent e) {
+                update_page(UPDATE_PIN);
+            }
+		});
+		this.action_buttons.add(t);
+
+		t= new JButton("Deposit");
+		t.addMouseListener(new MouseAdapter() { 
+			private int action;
+			public void mouseClicked(MouseEvent e) {
+                update_page(DEPOSIT);
+            }
+		});
+		this.action_buttons.add(t);
+
+		t=  new JButton("Top Up");
+		t.addMouseListener(new MouseAdapter() { 
+			private int action;
+			public void mouseClicked(MouseEvent e) {
+                update_page(TOP_UP);
+            }
+		});
+		this.action_buttons.add(t);
+
+		t=new JButton("Withdrawal");
+		t.addMouseListener(new MouseAdapter() { 
+			private int action;
+			public void mouseClicked(MouseEvent e) {
+                update_page(WITHDRAWAL);
+            }
+		});
+		this.action_buttons.add(t) ;
+
+		t= new JButton("Purchase");
+		t.addMouseListener(new MouseAdapter() { 
+			private int action;
+			public void mouseClicked(MouseEvent e) {
+                update_page(PURCHASE);
+            }
+		});
+		this.action_buttons.add( t);
+
+		t= new JButton("Sign Out");
+		t.addMouseListener(new MouseAdapter() { 
+			private int action;
+			public void mouseClicked(MouseEvent e) {
+                sign_out();
+            }
+		});
+		this.action_buttons.add(t);
+
+		/*
+		this.action_buttons.add( new JButton("Create Customer"));
+		this.action_buttons.add( new JButton("Delete Customer"));
+		this.action_buttons.add( new JButton("Create Table"));
+		this.action_buttons.add( new JButton("Delete Table"));*/
 	}
 	class InputForm extends JPanel{
 		private JButton button;
 		private JLabel message;
 		private ArrayList<JTextField> fields;
+
 		public InputForm(ArrayList<String> l, JButton b){
 			super(new GridLayout(3, 1));
 			fields = new ArrayList<JTextField>();
@@ -316,12 +400,12 @@ public class CustomerInterface extends JPanel{
 			add(message);
 			this.button= b;
 			add(button);
+
+			//Odd number of texboxes looks fucky. Gotta do this nasty shit
 			if(l.size()%2 != 0){
 				add(new JLabel());
 				add(new JLabel());
 			}
-
-
 		}
 		public String getInput(int l_num){
 			return fields.get(l_num).getText();
@@ -330,7 +414,14 @@ public class CustomerInterface extends JPanel{
 			this.message.setText(text);
 			this.message.setForeground(c);
 		}
+		public void resetFields(){
+			for (int i =0; i < fields.size(); i++){
+				//System.out.println("Erasing fields");
+				fields.get(i).setText("");
+			}
+		}
 	}
+
 	class ButtonListener extends MouseAdapter{
 		private int action;
 		public ButtonListener(int action){
@@ -338,44 +429,46 @@ public class CustomerInterface extends JPanel{
 			this.action= action;
 		}
 		public void mouseClicked(MouseEvent e){
-			/*JFrame new_frame = new JFrame();
-			new_frame.setVisible(true);
-			Utilities.setWindow(new_frame);*/
-			JPanel new_panel= new JPanel();
-			
 			//If left clicked
 			if(e.getButton() ==  MouseEvent.BUTTON1){
-				switch(this.action){
+			
+				 switch(this.action){
 					case CustomerInterface.LOG_IN:
 						login();
-						break;
-					case 1:
-						create_cust();
 						break;
 					case CustomerInterface.UPDATE_PIN:
 						change_pin();
 						break;
-					case 3:
-						delete_cust();
-						break;
-					case 4:
-						create_tables();
-						break;
-					case 5:
-						destroy_tables();
-						break;
 					case CustomerInterface.DEPOSIT:
 						deposit();
 						break;
-					case 7:
+					case CustomerInterface.TOP_UP:
 						top_up();
 						break;
 					case CustomerInterface.WITHDRAWAL:
 						withdrawal();
 						break;
-					case 9:
+					case CustomerInterface.PURCHASE:
 						purchase();
 						break;
+
+					case CustomerInterface.LOG_OUT:
+						sign_out();
+						break;
+					case CustomerInterface.CREATE_CUSTOMER:
+						create_cust();
+						break;
+					case CustomerInterface.DELETE_CUSTOMER:
+						delete_cust();
+						break;
+					case CustomerInterface.CREATE_TABLES:
+						create_tables();
+						break;
+					case CustomerInterface.DESTROY_TABLES:
+						destroy_tables();
+						break;
+				
+					
 				}
 			}
 		}

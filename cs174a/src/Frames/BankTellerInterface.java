@@ -14,8 +14,15 @@ import java.sql.DatabaseMetaData;
 
 import java.util.Scanner;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import javax.swing.*;
+
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import java.awt.*;
 
 import java.awt.Component;
 import java.awt.event.KeyEvent;
@@ -30,14 +37,64 @@ public class BankTellerInterface extends JPanel{
 
 	private OracleConnection connection;
 	private JButton b1;
+	private InputForm form;
 
 	public BankTellerInterface(OracleConnection connection){
-		this.connection = connection;		
-		b1 = new JButton("Hello");
-		b1.setMnemonic(KeyEvent.VK_D);
-    	b1.setActionCommand("disable");
+		this.connection = connection;	
+		ArrayList<String> labels= new ArrayList<String>( Arrays.asList("Test 1", "Test 2"));	
+		JButton b= new JButton("Get Text");
+		b.addMouseListener(new MouseAdapter() { 
+			public void mouseClicked(MouseEvent e) {
+                System.out.println(form.getInput(0));
+                System.out.println(form.getInput(1));
+            }
+		});
+		form = new InputForm(labels, b);
 		setLayout(new FlowLayout());
-		add(b1);
+		add(form);
+	}
+	class InputForm extends JPanel{
+		private JButton button;
+		private JLabel message;
+		private ArrayList<JTextField> fields;
+
+		public InputForm(ArrayList<String> l, JButton b){
+			super(new GridLayout(3, 1));
+			fields = new ArrayList<JTextField>();
+			for(int i=0; i< l.size();i++){
+				add(new JLabel(l.get(i)));
+				JTextField t;
+				t= new JTextField();
+				t.setHorizontalAlignment(JTextField.CENTER);
+				fields.add(i,t);
+				add(t);
+			}
+			this.message= new JLabel();
+			add(message);
+			this.button= b;
+			add(button);
+
+			//Odd number of texboxes looks fucky. Gotta do this nasty shit
+			if(l.size()%2 != 0){
+				add(new JLabel());
+				add(new JLabel());
+			}
+		}
+		public String getInput(int l_num){
+			System.out.println(message);
+			System.out.println(fields.get(l_num).getText());
+			return fields.get(l_num).getText();
+		}
+		public void setLabel(String text, Color c){
+			this.message.setText(text);
+			this.message.setForeground(c);
+		}
+		public void resetFields(){
+			for (int i =0; i < fields.size(); i++){
+				//System.out.println("Erasing fields");
+				fields.get(i).setText("");
+			}
+		}
 	}
 
 	public void run(){
