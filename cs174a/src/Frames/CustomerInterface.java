@@ -54,7 +54,6 @@ public class CustomerInterface extends JPanel{
 
 	private OracleConnection connection;
 	private String user_id;
-	private String user_pin;
 
 	private ArrayList<JButton> action_buttons;
 	private Hashtable<Integer, JPanel> panels;
@@ -79,31 +78,33 @@ public class CustomerInterface extends JPanel{
 		panels= new Hashtable<Integer, JPanel>();
 		panels.put(LOG_IN, create_login_page());
 		panels.put(ACTIONS_PAGE, create_actions_page());
-		panels.put(UPDATE_PIN, create_page(new ArrayList<String> (Arrays.asList("Tax ID:", "Old PIN:","New PIN:")), "Update PIN", UPDATE_PIN));
-		panels.put(DEPOSIT, create_page(new ArrayList<String> (Arrays.asList("Account ID:", "Tax ID:","Amount: $")), "Make Deposit", DEPOSIT));
-		panels.put(TOP_UP, create_page(new ArrayList<String> (Arrays.asList("Pocket Account ID", " Linked Account ID:","Tax ID:", " Amount: $")), "Transfer to Account", TOP_UP));
+		panels.put(UPDATE_PIN, create_page(new ArrayList<String> (Arrays.asList("Old PIN:","New PIN:")), "Update PIN", UPDATE_PIN));
+		panels.put(DEPOSIT, create_page(new ArrayList<String> (Arrays.asList("Account ID:", "Amount: $")), "Make Deposit", DEPOSIT));
+		panels.put(TOP_UP, create_page(new ArrayList<String> (Arrays.asList("Pocket Account ID:", " Linked Account ID:", " Amount: $")), "Transfer to Account", TOP_UP));
 		panels.put(WITHDRAWAL, create_page(new ArrayList<String> (Arrays.asList("Account ID", "Tax ID:","Amount: $")), "Make Withdrawal", WITHDRAWAL ));
 		panels.put(PURCHASE, create_page(new ArrayList<String> (Arrays.asList("Account ID","Amount: $")), "Make Purchase", WITHDRAWAL ));
 	}
 	
 	public void login(){
 		String id = form.getInput(0);
-		String pin= form.getInput(1);		
-		System.out.println(id);
-		System.out.println(pin);
-		form.setLabel("Verification Failed.", Color.red);
-		update_page(ACTIONS_PAGE);
-		/*//Customer cust = Customer.login(id, pin, this.connection);
+		String pin= form.getInput(1);	
+
+		System.out.println("Customer ID: " + id);
+		System.out.println("Customer PIN: " + pin);
+		Customer cust = Customer.login(id, pin, this.connection);
 		if(cust == null){
+			form.setLabel("Verification Failed.", Color.red);
 			System.out.println("Verification failed... Are your id/PIN correct?");
 			
 		}else{
-			this.user_pin=pin;
 			this.user_id= id;
 			System.out.println("User: " + cust.name + " logged in!");
+			update_page(ACTIONS_PAGE);
 			//Change Panel to actions_panel
 	
-		}*/
+		}
+		//temp
+		update_page(ACTIONS_PAGE);
 	}
 
 
@@ -119,28 +120,51 @@ public class CustomerInterface extends JPanel{
 		}
 	}
 
-	public void change_pin(){
-		/*String id = Utilities.prompt("Enter c_id:");
-		String old = Utilities.prompt("Enter old pin:");
-		String _new = Utilities.prompt("Enter new pin:");*/
-		
+	public void change_pin(){	
 
-		String id= form.getInput(0);
-		String old= form.getInput(1);
-		String _new= form.getInput(2);
+		//String id= form.getInput(0);
+		String old= form.getInput(0);
+		String _new= form.getInput(1);
+
+		System.out.println("Customer ID: " + this.user_id);
 		
+		System.out.println("Old PIN: " + old);
+
+		System.out.println("New PIN: " + _new);
+
+		//Check that pin format is valid 
+		if (!Utilities.valid_pin_format(old)){
+			form.setLabel("Invalid old PIN", Color.red);
+			return;
+		}
+		//Check that pin format is valid 
+		if (!Utilities.valid_pin_format(_new)){
+			form.setLabel("Invalid new PIN", Color.red);
+			return;
+		}
+		if(old.equals(_new)){
+			form.setLabel("New PIN cannot be old PIN", Color.red);
+			return;
+		}
+
+		//temp
 		update_page(ACTIONS_PAGE);
-	
-		
-		/*if(Customer.update_pin(id, old, _new, this.connection)){
+
+		if(Customer.update_pin(this.user_id, old, _new, this.connection)){
 			System.out.println("PIN updated!");
-			Customer cust = Customer.get_cust_by_id(id, this.connection);
+			Customer cust = Customer.get_cust_by_id(this.user_id, this.connection);
 			if(cust != null){
+				//Pop up saying that operation was a success.
 				System.out.println("Successfully set pin to " + cust.encrypted_pin);
+				update_page(ACTIONS_PAGE);
 				return;
 			}
 		}
-		System.out.println("Failed to set pin");*/
+		else{
+			form.setLabel("Operation Failed. Check old pin is correct.", Color.red);
+			System.out.println("Failed to set pin");
+					
+		}
 	}
 
 	public void delete_cust(){
@@ -167,29 +191,36 @@ public class CustomerInterface extends JPanel{
 	}
 
 	public void deposit(){
-
 		String date = Bank.get_date(connection);
 		Transaction.TransactionType type = Transaction.TransactionType.DEPOSIT;
 
-		String id = form.getInput(0);
-		String pin= form.getInput(1);
-		String m= form.getInput(2);		
-		System.out.println(id);
-		System.out.println(pin);
-		System.out.println(m);
-		this.form.setLabel("TEST", Color.red);
-		//double amount = Double.parseDouble(Utilities.prompt("Enter amount:"));
+		String to_acct = form.getInput(0);
+		String amount= form.getInput(1);
+		//If time permits obtain all accounts for the user and have a drop down menu
+		if(to_acct.equals("")){
+			form.setLabel("Enter a valid account", Color.red);
+			return;
+		}
+		if(!Utilities.valid_money_input(amount)){
+			form.setLabel("Enter a valid amount", Color.red);
+			return;
+		}
+		System.out.println("Account: "+ to_acct);
+		System.out.println("Amount: " + amount);
 		
 		
 		update_page(ACTIONS_PAGE);
 	
 		
-		/*boolean success = Transaction.deposit(to_acct, cust_id, date, type, amount, connection);
+		boolean success = Transaction.deposit(to_acct, this.user_id, date, type, Double.parseDouble(amount), connection);
 		if(!success){
+			form.setLabel("Deposit failed", Color.red);
 			System.err.println("Deposit failed");
 		}else{
+			form.setLabel("Deposit successful", Color.green);
 			System.out.println("Deposit success!");
-		}*/
+
+		}
 	}
 
 	public void top_up(){
@@ -198,28 +229,35 @@ public class CustomerInterface extends JPanel{
 
 		Transaction.TransactionType type = Transaction.TransactionType.TOP_UP;
 
-		String id = form.getInput(0);
-		String pin= form.getInput(1);
-		String m= form.getInput(2);		
-		String n= form.getInput(3);		
-		System.out.println(id);
-		System.out.println(pin);
-		System.out.println(m);
-		System.out.println(n);
-		this.form.setLabel("TEST", Color.red);
+		String pocket_id = form.getInput(0);
+		String linked= form.getInput(1);	
+		String amount= form.getInput(2);
+		if(pocket_id.equals("")){
+			form.setLabel("Enter a valid pocket account", Color.red);
+			return;
+		}
+		if(linked.equals("")){
+			form.setLabel("Enter a valid account", Color.red);
+			return;
+		}
+		if(!Utilities.valid_money_input(amount)){
+			form.setLabel("Enter a valid amount", Color.red);
+			return;
+		}
+
+		System.out.println("Pocket Account: "+ pocket_id);
+		System.out.println("PIN: "+pin);
+		System.out.println("Amount: "+amount);
 		
 		update_page(ACTIONS_PAGE);
-	
-	
-
-		/*double amount = Double.parseDouble(Utilities.prompt("Enter amount:"));
-
-		Transaction transaction = Transaction.top_up(to_acct, from_acct, date, amount, cust_id, connection);
+		Transaction transaction = Transaction.top_up(to_acct, from_acct, date,  Double.parseDouble(amount), cust_id, connection);
 		if(transaction == null){
+			form.setLabel("Transaction failed", Color.red);
 			System.err.println("Top-Up failure");
 		}else{
+			form.setLabel("Transaction Successful", Color.green);
 			System.out.println("Top-Up success!");
-		}*/
+		}
 	}
 
 	public void withdrawal(){
@@ -247,7 +285,6 @@ public class CustomerInterface extends JPanel{
 			System.out.println("Withdrawal success!");
 		}*/
 	}
-
 	public void purchase(){
 
 	}
@@ -255,7 +292,6 @@ public class CustomerInterface extends JPanel{
 	/*resets user info and loads sign in page*/
 	private void sign_out(){
 		this.user_id=null;
-	 	this.user_pin=null;
 	 	update_page(LOG_IN);
 	}
 
@@ -413,11 +449,15 @@ public class CustomerInterface extends JPanel{
 			this.message.setText(text);
 			this.message.setForeground(c);
 		}
+		public void resetLabel(){
+			this.message.setText("");
+		}
 		public void resetFields(){
 			for (int i =0; i < fields.size(); i++){
 				//System.out.println("Erasing fields");
 				fields.get(i).setText("");
 			}
+			resetLabel();
 		}
 	}
 
@@ -429,9 +469,12 @@ public class CustomerInterface extends JPanel{
 		}
 		public void mouseClicked(MouseEvent e){
 			//If left clicked
-			if(e.getButton() ==  MouseEvent.BUTTON1){
-			
-				 switch(this.action){
+			if(SwingUtilities.isLeftMouseButton(e)){
+
+				//Reset label/error message upon button click. Not needed but playing it safe
+				form.resetLabel();
+
+				switch(this.action){
 					case CustomerInterface.LOG_IN:
 						login();
 						break;
@@ -465,10 +508,13 @@ public class CustomerInterface extends JPanel{
 						break;
 					case CustomerInterface.DESTROY_TABLES:
 						destroy_tables();
-						break;
-				
-					
+						break;					
 				}
+
+			}
+			else if(SwingUtilities.isRightMouseButton(e)){
+				System.out.println("Mouse Button 2 Pressed");
+				update_page(ACTIONS_PAGE);
 			}
 		}
 	}
