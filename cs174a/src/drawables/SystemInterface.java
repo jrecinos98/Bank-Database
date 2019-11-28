@@ -198,6 +198,20 @@ public class SystemInterface extends JPanel{
 		}
 	}
 	public void set_date(){
+		String d= form.getInput(0);
+		if(!Utilities.valid_date(d)){
+			form.setLabel("Invalid date.Format: MM-DD-YYYY", Color.red);
+			return;
+		}
+		//split at dash
+		String[] date= d.split("-");
+		try{
+			Bank.set_date(date[2],date[1],date[0], this.connection);
+		}catch(Exception e){
+			form.setLabel("An error occured", Color.red);
+			return;
+		}
+		update_page(SystemActions.ACTIONS_PAGE);
 
 	}
 

@@ -34,6 +34,8 @@ import java.util.Hashtable;
 
 
 public class BankTellerInterface extends JPanel{
+	
+	public static String[] ACCT_TYPES= {"Student Checking", "Interest Checking", "Savings", "Pocket"};
 	public enum BankTellerActions{
 		ACTIONS_PAGE,
 		CHECK_TRANSACTION,
@@ -71,6 +73,8 @@ public class BankTellerInterface extends JPanel{
 		//panels.put(CustomerActions.LOG_IN, create_login_page());
 
 		panels.put(BankTellerActions.ACTIONS_PAGE, create_actions_page());
+		panels.put(BankTellerActions.CREATE_ACCOUNT, create_account_page());
+		
 		panels.put(BankTellerActions.CHECK_TRANSACTION, create_page(new ArrayList<String> (Arrays.asList("")), "Create Check", BankTellerActions.CHECK_TRANSACTION));
 		
 		panels.put(BankTellerActions.MONTHLY_STATEMENT, create_page(new ArrayList<String> (Arrays.asList("")), "Generate Statement", BankTellerActions.MONTHLY_STATEMENT));
@@ -78,157 +82,62 @@ public class BankTellerInterface extends JPanel{
 		panels.put(BankTellerActions.DTER, create_page(new ArrayList<String> (Arrays.asList("")), "Generate DTER", BankTellerActions.DTER ));
 		panels.put(BankTellerActions.CUSTOMER_REPORT, create_page(new ArrayList<String> (Arrays.asList("")), "Generate Report", BankTellerActions.CUSTOMER_REPORT ));
 		panels.put(BankTellerActions.ADD_INTEREST, create_page(new ArrayList<String> (Arrays.asList("")), "Add Interest", BankTellerActions.ADD_INTEREST ));
-		panels.put(BankTellerActions.CREATE_ACCOUNT, create_page(new ArrayList<String> (Arrays.asList("")), "Create New Account", BankTellerActions.CREATE_ACCOUNT ));
 		panels.put(BankTellerActions.DELETE_TRANSACTIONS, create_page(new ArrayList<String> (Arrays.asList("")), "Delete All Transactions", BankTellerActions.DELETE_TRANSACTIONS ));
 		panels.put(BankTellerActions.DELETE_CLOSED, create_page(new ArrayList<String> (Arrays.asList("")), "Delete All Closed Accounts", BankTellerActions.DELETE_CLOSED ));
 		
 		
 	}
-	/* Changes from one page to another*/
-	private void update_page(BankTellerActions page){
-		this.remove(current_page);
-		this.revalidate();
-		this.repaint();
-		try{
-			current_page= panels.get(page);
-			//Actions page has no form associated with it
-			if(page != BankTellerActions.ACTIONS_PAGE){
-				//Clear old values from old form
-				if(this.form != null)
-					this.form.resetFields();
-				//Change form to current page
-				this.form= (InputForm) current_page;
-				this.form.resetFields();
-			}
-			else{
-				this.form= null;
-			}
-		}
-		catch(Exception e){
-			System.err.println(e);
-		}
-		add(current_page);
-	}
-	/*Creates a page with labels and textfields (depends on size of ArrayList)*/
-	private JPanel create_page(ArrayList<String> labels, String b_label, BankTellerActions action){
-		JButton button= new JButton(b_label);
-		button.addMouseListener(new ButtonListener(action));
-		InputForm form = new InputForm(labels, button);
-		JPanel holder= new JPanel();
-		//holder.add(form);
-		return form;
-	}
-
-	/* Creates the page with user actions*/
-	private JPanel create_actions_page(){
-		JPanel holder= new JPanel(new GridLayout(2, 1));
-		create_render_buttons();
-		for(int i=0; i< action_buttons.size();i++){
-			holder.add(action_buttons.get(i));
-		}	
-		return holder;
-	}
-	//These buttons are used to render new pages from the ACTIONS_PAGE.
-	//They perform no operations other than rendering a new JPanel.
-	private void create_render_buttons(){
-		this.action_buttons= new ArrayList<JButton>(10);
-
-		JButton t= new JButton("Create Account");
-		t.addMouseListener(new MouseAdapter() { 
-			public void mouseClicked(MouseEvent e) {
-                update_page(BankTellerActions.CREATE_ACCOUNT);
-            }
-		});
-		this.action_buttons.add(t);
-
-		t= new JButton("Write Check");
-		t.addMouseListener(new MouseAdapter() { 
-			public void mouseClicked(MouseEvent e) {
-                update_page(BankTellerActions.CHECK_TRANSACTION);
-            }
-		});		
-		this.action_buttons.add(t);
-
-		t= new JButton("Add Interest");
-		t.addMouseListener(new MouseAdapter() { 
-			public void mouseClicked(MouseEvent e) {
-                update_page(BankTellerActions.ADD_INTEREST);
-            }
-		});
-		this.action_buttons.add( t);
-
-
-		t= new JButton("View Closed Accounts");
-		t.addMouseListener(new MouseAdapter() { 
-			public void mouseClicked(MouseEvent e) {
-                update_page(BankTellerActions.LIST_CLOSED);
-            }
-		});
-		this.action_buttons.add(t);
-	
-		t= new JButton("Generate Customer Report");
-		t.addMouseListener(new MouseAdapter() { 
-			public void mouseClicked(MouseEvent e) {
-                update_page(BankTellerActions.CUSTOMER_REPORT);
-            }
-		});
-		this.action_buttons.add(t);
-
-		t=new JButton("Monthly Statement");
-		t.addMouseListener(new MouseAdapter() { 
-			public void mouseClicked(MouseEvent e) {
-                update_page(BankTellerActions.MONTHLY_STATEMENT);
-            }
-		});
-		this.action_buttons.add(t);
-		
-
-		t= new JButton("Delete Closed Accounts");
-		t.addMouseListener(new MouseAdapter() { 
-			public void mouseClicked(MouseEvent e) {
-                update_page(BankTellerActions.DELETE_CLOSED);
-            }
-		});
-		this.action_buttons.add( t);
-
-		t= new JButton("Delete Transactions");
-		t.addMouseListener(new MouseAdapter() { 
-			public void mouseClicked(MouseEvent e) {
-                update_page(BankTellerActions.DELETE_TRANSACTIONS);
-            }
-		});
-		this.action_buttons.add(t);
-
-		t=  new JButton("Generate DTER");
-		t.addMouseListener(new MouseAdapter() { 
-			public void mouseClicked(MouseEvent e) {
-                update_page(BankTellerActions.DTER);
-            }
-		});
-		this.action_buttons.add(t);
-
-	}
-
 	public void create_acct(){
-		Testable.AccountType type;
-		try{
-			type = Testable.AccountType.values()[Integer.parseInt(Utilities.prompt("Enter account type:"))];
-		}catch(Exception e){
-			System.out.println("Account creation failed... ");
-			e.printStackTrace();
+		//Get JComboBox and find selected Index
+		int a_type= ((JComboBox)form.getCustomComponent()).getSelectedIndex();
+		//If none selected or error
+		if(a_type < 0){
+			//Set to default value (Student Checkings)
+			a_type= 0;
+		}
+
+		Testable.AccountType type = Testable.AccountType.values()[a_type];
+		String a_id= form.getInput(0);
+		String c_id= form.getInput(1);
+		String name= form.getInput(2);
+		String address= form.getInput(3);
+		String initial_balance= form.getInput(4);
+
+		if(a_id.equals("")){
+			form.setLabel("Enter a valid account ID", Color.red);
 			return;
 		}
-		String a_id = Utilities.prompt("Enter a_id:");
-		double initial_balance = Double.parseDouble(Utilities.prompt("Enter initial balance:"));
-		String c_id = Utilities.prompt("Enter c_id:");
-		String name = Utilities.prompt("Enter name:");
-		String address = Utilities.prompt("Enter address:");
-		Account acct = Account.create_account(type, a_id, initial_balance,
+		if(c_id.equals("")){
+			form.setLabel("Enter a valid customer ID", Color.red);
+			return;
+		}
+		if(name.equals("")){
+			form.setLabel("Enter a valid customer name", Color.red);
+			return;
+		}
+		if(address.equals("")){
+			form.setLabel("Enter a valid customer address", Color.red);
+			return;
+		}
+		if(!Utilities.valid_money_input(initial_balance)){
+			form.setLabel("Enter a valid deposit amount", Color.red);
+			return;
+		}
+		if(Double.parseDouble(initial_balance) < 1000){
+			form.setLabel("Initial deposit too low", Color.red);
+			return;
+		}
+		update_page(BankTellerActions.ACTIONS_PAGE);
+		//Will segfault (GUI dev only)
+		Account acct = Account.create_account(type, a_id,Double.parseDouble(initial_balance),
 										 c_id, name,address, this.connection);
 		if(acct == null){
+			form.setLabel("Account creation failed", Color.red);
 			System.out.println("Account creation failed... ");
 		}else{
+			form.setLabel("Account created successfully", Color.green);
 			System.out.println("Account: " + acct.a_id + " created!");
+			update_page(BankTellerActions.ACTIONS_PAGE);
 		}
 	}
 
@@ -275,6 +184,149 @@ public class BankTellerInterface extends JPanel{
 
 	}
 	public void delete_transactions(){
+
+	}
+
+	/* Changes from one page to another*/
+	private void update_page(BankTellerActions page){
+		this.remove(current_page);
+		this.revalidate();
+		this.repaint();
+		try{
+			current_page= panels.get(page);
+			//Actions page has no form associated with it
+			if(page != BankTellerActions.ACTIONS_PAGE){
+				//Clear old values from old form
+				if(this.form != null)
+					this.form.resetFields();
+				//Change form to current page
+				this.form= (InputForm) current_page;
+				this.form.resetFields();
+			}
+			else{
+				this.form= null;
+			}
+		}
+		catch(Exception e){
+			System.err.println(e);
+		}
+		add(current_page);
+	}
+	/*Creates a page with labels and textfields (depends on size of ArrayList)*/
+	private JPanel create_page(ArrayList<String> labels, String b_label, BankTellerActions action){
+		
+		JButton button= new JButton(b_label);
+		button.addMouseListener(new ButtonListener(action));
+		InputForm form = new InputForm(labels, button);
+		JPanel holder= new JPanel();
+		//holder.add(form);
+		return form;
+	}
+	/*Creates a page with labels and textfields (depends on size of ArrayList)*/
+	private JPanel create_custom_page(ArrayList<String> labels, String b_label, JComponent component, String c_label, BankTellerActions action){
+		
+		JButton button= new JButton(b_label);
+		button.addMouseListener(new ButtonListener(action));
+		InputForm form = new InputForm(labels, button,component,c_label);
+		//JPanel holder= new JPanel();
+		//holder.add(form);
+		return form;
+	}
+
+	/* Creates the page with user actions*/
+	private JPanel create_actions_page(){
+		JPanel holder= new JPanel(new GridLayout(2, 1));
+		create_render_buttons();
+		for(int i=0; i< action_buttons.size();i++){
+			holder.add(action_buttons.get(i));
+		}	
+		return holder;
+	}
+	private JPanel create_account_page(){
+		JPanel holder= new JPanel();
+		//holder.add(new JLabel("Account Type"));
+		JComboBox acctList = new JComboBox(BankTellerInterface.ACCT_TYPES);
+		//holder.add(acctList);
+		return create_custom_page(new ArrayList<String> (Arrays.asList("Account ID: ", "Customer ID: ", "Customer Name: ", "Customer Address: ", "Initial Balance: $")), "Create Account", acctList,"AccountType",BankTellerActions.CREATE_ACCOUNT );
+	}
+	//These buttons are used to render new pages from the ACTIONS_PAGE.
+	//They perform no operations other than rendering a new JPanel.
+	private void create_render_buttons(){
+		this.action_buttons= new ArrayList<JButton>(10);
+
+		JButton t= new JButton("Create Account");
+		t.addMouseListener(new MouseAdapter() { 
+			public void mouseClicked(MouseEvent e) {
+                update_page(BankTellerActions.CREATE_ACCOUNT);
+            }
+		});
+		this.action_buttons.add(t);
+
+		t= new JButton("Write Check");
+		t.addMouseListener(new MouseAdapter() { 
+			public void mouseClicked(MouseEvent e) {
+                update_page(BankTellerActions.CHECK_TRANSACTION);
+            }
+		});		
+		this.action_buttons.add(t);
+
+		t= new JButton("Add Interest");
+		t.addMouseListener(new MouseAdapter() { 
+			public void mouseClicked(MouseEvent e) {
+                update_page(BankTellerActions.ADD_INTEREST);
+            }
+		});
+		this.action_buttons.add( t);
+
+
+		t= new JButton("Closed Accounts");
+		t.addMouseListener(new MouseAdapter() { 
+			public void mouseClicked(MouseEvent e) {
+                update_page(BankTellerActions.LIST_CLOSED);
+            }
+		});
+		this.action_buttons.add(t);
+	
+		t= new JButton("Customer Report");
+		t.addMouseListener(new MouseAdapter() { 
+			public void mouseClicked(MouseEvent e) {
+                update_page(BankTellerActions.CUSTOMER_REPORT);
+            }
+		});
+		this.action_buttons.add(t);
+
+		t=new JButton("Monthly Statement");
+		t.addMouseListener(new MouseAdapter() { 
+			public void mouseClicked(MouseEvent e) {
+                update_page(BankTellerActions.MONTHLY_STATEMENT);
+            }
+		});
+		this.action_buttons.add(t);
+		
+
+		t= new JButton("Delete Closed Accounts");
+		t.addMouseListener(new MouseAdapter() { 
+			public void mouseClicked(MouseEvent e) {
+                update_page(BankTellerActions.DELETE_CLOSED);
+            }
+		});
+		this.action_buttons.add( t);
+
+		t= new JButton("Delete Transactions");
+		t.addMouseListener(new MouseAdapter() { 
+			public void mouseClicked(MouseEvent e) {
+                update_page(BankTellerActions.DELETE_TRANSACTIONS);
+            }
+		});
+		this.action_buttons.add(t);
+
+		t=  new JButton("Generate DTER");
+		t.addMouseListener(new MouseAdapter() { 
+			public void mouseClicked(MouseEvent e) {
+                update_page(BankTellerActions.DTER);
+            }
+		});
+		this.action_buttons.add(t);
 
 	}
 	class ButtonListener extends MouseAdapter{

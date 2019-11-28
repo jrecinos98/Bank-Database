@@ -39,7 +39,7 @@ public class Bank{
 	}
 
 	public static String get_date(OracleConnection connection){
-		/*String date = "";
+		String date = "";
 		String query = String.format("SELECT * FROM bank");
 		try( Statement statement = connection.createStatement() ) {
 			try( ResultSet rs = statement.executeQuery( query )){
@@ -57,8 +57,7 @@ public class Bank{
 			e.printStackTrace();
 			return "";
 		}
-		return date;*/
-		return "xxxx-xx-xx";
+		return date;
 	}
 
 	public static boolean set_date(String year, String month, String day, OracleConnection connection){

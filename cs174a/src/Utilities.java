@@ -52,5 +52,35 @@ public class Utilities{
 		}
 		return true;
 	}
+	public static boolean valid_date(String d){
+		String [] date= d.split("-");
+		if(date.length != 3){
+			return false;
+		}
+		int year;
+		int month;
+		int day;
+		try{
+			//Parse Int strips leading 0. Error if it parses double
+			year = Integer.parseInt(date[2]);
+			month = Integer.parseInt(date[1]);
+			day = Integer.parseInt(date[0]);
+		}
+		catch(NumberFormatException e){
+			System.err.println(e);
+			return false;
+		}		
+		//If negative or unreasonably large
+		if (year < 0 || year > 9999){
+			return false;
+		}
+		if(month <=0 || month >12){
+			return false;
+		}
+		if(day <=0 || day > 31){
+			return false;
+		}
+		return true;
+	}
 	
 }
