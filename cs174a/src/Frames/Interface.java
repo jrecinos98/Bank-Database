@@ -37,8 +37,11 @@ public class Interface extends JFrame {
 	private JPanel bankTellerTab;
 	private JTabbedPane tabView;
 	private JTabbedPane tabbedPane;
+
 	private CustomerInterface customer;
 	private BankTellerInterface bankTeller;
+  private SystemInterface system;
+
 	private OracleConnection connection;
 	public static JFrame main_frame;
 
@@ -56,6 +59,7 @@ public class Interface extends JFrame {
        	
       customer= new CustomerInterface(connection);
       bankTeller= new BankTellerInterface(connection);
+      system= new SystemInterface(connection);
 
 
       JPanel atm_content = new JPanel(new GridBagLayout());
@@ -67,7 +71,8 @@ public class Interface extends JFrame {
 	    tabView =new JTabbedPane(JTabbedPane.TOP, JTabbedPane.WRAP_TAB_LAYOUT);  
 	    tabView.setBounds(50,50,200,200);  
 	    tabView.add("ATM", atm_content);  
-	    tabView.add("Bank Teller", bankTeller);   
+	    tabView.add("Bank Teller", bankTeller); 
+      tabView.add("Administrator", system);  
 
 	    //Add tabview to Frame.
 	    add(tabView); 

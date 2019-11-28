@@ -34,21 +34,24 @@ import java.util.Hashtable;
 
 
 public class CustomerInterface extends JPanel{
-	public final static int LOG_IN= 11;
-	public final static int ACTIONS_PAGE=12;
 
+	public enum CustomerActions {
+		LOG_IN,
+		UPDATE_PIN,
+		LOG_OUT,
+		ACTIONS_PAGE,
 
+		DEPOSIT,
+		TOP_UP,
+		WITHDRAWAL,
+		PURCHASE,
 
-	public final static int UPDATE_PIN=1;
-	public final static int DEPOSIT=2;
-	public final static int TOP_UP=3;
-	public final static int WITHDRAWAL=4;
-	public final static int PURCHASE=5;
-	public final static int LOG_OUT= 6;
-	public final static int CREATE_CUSTOMER=7;
-	public final static int DELETE_CUSTOMER=8;
-	public final static int CREATE_TABLES= 9;
-	public final static int DESTROY_TABLES=10;
+		TRANSFER,
+		COLLECT,
+		WIRE,
+		PAY_FRIEND,
+		
+	}
 
 
 
@@ -56,7 +59,7 @@ public class CustomerInterface extends JPanel{
 	private String user_id;
 
 	private ArrayList<JButton> action_buttons;
-	private Hashtable<Integer, JPanel> panels;
+	private Hashtable<CustomerActions, JPanel> panels;
 	private InputForm form;
 	private JPanel current_page;
 	private JFrame parent_frame;
@@ -65,9 +68,9 @@ public class CustomerInterface extends JPanel{
 	public CustomerInterface(OracleConnection connection) {
 		super(new GridLayout(3, 1));
 		this.connection = connection;
-		//Initial Screen
 		create_pages();
-		current_page= panels.get(LOG_IN);
+		//Initial Screen
+		current_page= panels.get(CustomerActions.LOG_IN);
 		this.form= (InputForm) current_page;
 		add(current_page);
 		parent_frame= Interface.main_frame;
@@ -75,14 +78,24 @@ public class CustomerInterface extends JPanel{
 
 	/*Creates all the pages that will be used for the customer interface*/
 	private void create_pages(){
-		panels= new Hashtable<Integer, JPanel>();
-		panels.put(LOG_IN, create_login_page());
-		panels.put(ACTIONS_PAGE, create_actions_page());
-		panels.put(UPDATE_PIN, create_page(new ArrayList<String> (Arrays.asList("Old PIN:","New PIN:")), "Update PIN", UPDATE_PIN));
-		panels.put(DEPOSIT, create_page(new ArrayList<String> (Arrays.asList("Account ID:", "Amount: $")), "Make Deposit", DEPOSIT));
-		panels.put(TOP_UP, create_page(new ArrayList<String> (Arrays.asList("Pocket Account ID:", " Linked Account ID:", " Amount: $")), "Transfer to Account", TOP_UP));
-		panels.put(WITHDRAWAL, create_page(new ArrayList<String> (Arrays.asList("Account ID","Amount: $")), "Make Withdrawal", WITHDRAWAL ));
-		panels.put(PURCHASE, create_page(new ArrayList<String> (Arrays.asList("Account ID","Amount: $")), "Make Purchase", PURCHASE ));
+		panels= new Hashtable<CustomerActions, JPanel>();
+		panels.put(CustomerActions.LOG_IN, create_login_page());
+
+		panels.put(CustomerActions.ACTIONS_PAGE, create_actions_page());
+		panels.put(CustomerActions.UPDATE_PIN, create_page(new ArrayList<String> (Arrays.asList("Old PIN:"," New PIN:")), "Update PIN", CustomerActions.UPDATE_PIN));
+		
+		panels.put(CustomerActions.DEPOSIT, create_page(new ArrayList<String> (Arrays.asList("Account ID: ", " Amount: $")), "Make Deposit", CustomerActions.DEPOSIT));
+		panels.put(CustomerActions.TOP_UP, create_page(new ArrayList<String> (Arrays.asList("Pocket Account ID: ", " Amount: $","Linked Account ID: " )), "Transfer", CustomerActions.TOP_UP));
+		panels.put(CustomerActions.WITHDRAWAL, create_page(new ArrayList<String> (Arrays.asList("Account ID: "," Amount: $")), "Make Withdrawal", CustomerActions.WITHDRAWAL ));
+		panels.put(CustomerActions.PURCHASE, create_page(new ArrayList<String> (Arrays.asList("Account ID: "," Amount: $")), "Make Purchase", CustomerActions.PURCHASE ));
+		panels.put(CustomerActions.TRANSFER, create_page(new ArrayList<String> (Arrays.asList("Sending Account ID: ", " Amount: $","Receiving Account: ")), "Transfer", CustomerActions.TRANSFER ));
+		panels.put(CustomerActions.PAY_FRIEND, create_page(new ArrayList<String> (Arrays.asList("Sending Pocket Account ID: "," Amount: $", "Friend's Pocket Account ID: ")), "Pay Friend", CustomerActions.PAY_FRIEND ));
+
+		//Have Fees
+		panels.put(CustomerActions.COLLECT, create_page(new ArrayList<String> (Arrays.asList("Pocket Account ID: ", " Amount: $","Linked Account ID: ")), "Transfer From Pocket", CustomerActions.COLLECT ));
+		panels.put(CustomerActions.WIRE, create_page(new ArrayList<String> (Arrays.asList("Sending Account ID: ", " Amount: $", "Receiving Account ID: ")), "Wire Money", CustomerActions.WIRE ));
+		
+		
 	}
 	
 	public void login(){
@@ -99,11 +112,11 @@ public class CustomerInterface extends JPanel{
 		}else{
 			this.user_id= id;
 			System.out.println("User: " + cust.name + " logged in!");
-			update_page(ACTIONS_PAGE);
+			update_page(CustomerActions.ACTIONS_PAGE);
 	
 		}
 		//temp
-		update_page(ACTIONS_PAGE);
+		update_page(CustomerActions.ACTIONS_PAGE);
 	}
 
 	public void change_pin(){	
@@ -132,9 +145,8 @@ public class CustomerInterface extends JPanel{
 			form.setLabel("New PIN cannot be old PIN", Color.red);
 			return;
 		}
-
 		//temp
-		update_page(ACTIONS_PAGE);
+		update_page(CustomerActions.ACTIONS_PAGE);
 
 		if(Customer.update_pin(this.user_id, old, _new, this.connection)){
 			System.out.println("PIN updated!");
@@ -143,7 +155,7 @@ public class CustomerInterface extends JPanel{
 				//Pop up saying that operation was a success.
 				form.setLabel("Successfully updated PIN", Color.red);	
 				System.out.println("Successfully set pin to " + cust.encrypted_pin);
-				update_page(ACTIONS_PAGE);
+				update_page(CustomerActions.ACTIONS_PAGE);
 				return;
 			}
 		}
@@ -155,9 +167,7 @@ public class CustomerInterface extends JPanel{
 	}
 
 	public void deposit(){
-		String date = Bank.get_date(connection);
-		Transaction.TransactionType type = Transaction.TransactionType.DEPOSIT;
-
+		
 		String to_acct = form.getInput(0);
 		String amount= form.getInput(1);
 		//If time permits obtain all accounts for the user and have a drop down menu
@@ -173,8 +183,11 @@ public class CustomerInterface extends JPanel{
 		System.out.println("Amount: " + amount);
 		
 		
-		update_page(ACTIONS_PAGE);
-	
+		update_page(CustomerActions.ACTIONS_PAGE);
+
+		//Will work once connection is initialized
+		String date = Bank.get_date(connection);
+		Transaction.TransactionType type = Transaction.TransactionType.DEPOSIT;
 		
 		boolean success = Transaction.deposit(to_acct, this.user_id, date, type, Double.parseDouble(amount), connection);
 		if(!success){
@@ -183,19 +196,16 @@ public class CustomerInterface extends JPanel{
 		}else{
 			form.setLabel("Deposit successful", Color.green);
 			System.out.println("Deposit success!");
+			update_page(CustomerActions.ACTIONS_PAGE);
 
 		}
 	}
 
 	public void top_up(){
 
-		String date = Bank.get_date(connection);
-
-		Transaction.TransactionType type = Transaction.TransactionType.TOP_UP;
-
 		String to_acct = form.getInput(0);
-		String from_acct= form.getInput(1);	
-		String amount= form.getInput(2);
+		String amount= form.getInput(1);
+		String from_acct= form.getInput(2);	
 		if(to_acct.equals("")){
 			form.setLabel("Enter a valid pocket account", Color.red);
 			return;
@@ -213,7 +223,11 @@ public class CustomerInterface extends JPanel{
 		System.out.println("Linked Account: "+ from_acct);
 		System.out.println("Amount: " + amount);
 		
-		update_page(ACTIONS_PAGE);
+		update_page(CustomerActions.ACTIONS_PAGE);
+
+		//WIll segfault until connection inititated (For GUI dev only)
+		String date = Bank.get_date(connection);
+		Transaction.TransactionType type = Transaction.TransactionType.TOP_UP;
 		Transaction transaction = Transaction.top_up(to_acct, from_acct, date,  Double.parseDouble(amount), this.user_id, connection);
 		if(transaction == null){
 			form.setLabel("Transaction failed", Color.red);
@@ -221,14 +235,11 @@ public class CustomerInterface extends JPanel{
 		}else{
 			form.setLabel("Transaction Successful", Color.green);
 			System.out.println("Top-Up success!");
+			update_page(CustomerActions.ACTIONS_PAGE);
 		}
 	}
 
 	public void withdrawal(){
-		String date = Bank.get_date(connection);
-		Transaction.TransactionType type = Transaction.TransactionType.WITHDRAWAL;
-
-
 		String from_acct = form.getInput(0);
 		String amount= form.getInput(1);
 
@@ -244,7 +255,11 @@ public class CustomerInterface extends JPanel{
 		System.out.println("Account: "+ from_acct);
 		System.out.println("Amount: "+amount);
 	
-		update_page(ACTIONS_PAGE);
+		update_page(CustomerActions.ACTIONS_PAGE);
+
+		//Will segfault until connection inititated (For GUI dev only)
+		String date = Bank.get_date(connection);
+		Transaction.TransactionType type = Transaction.TransactionType.WITHDRAWAL;
 
 		boolean success = Transaction.withdraw(from_acct, this.user_id, date, type, Double.parseDouble(amount), connection);
 		if(!success){
@@ -253,69 +268,196 @@ public class CustomerInterface extends JPanel{
 		}else{
 			form.setLabel("Transaction Successful", Color.green);
 			System.out.println("Withdrawal success!");
+			update_page(CustomerActions.ACTIONS_PAGE);
 		}
 	}
 	public void purchase(){
+		String from_acct= form.getInput(0);
+		String amount= form.getInput(1);
+		if(from_acct.equals("")){
+			form.setLabel("Enter a valid account", Color.red);
+			return;
+		}
+		if(!Utilities.valid_money_input(amount)){
+			form.setLabel("Enter a valid amount", Color.red);
+			return;
+		}
+		update_page(CustomerActions.ACTIONS_PAGE);
+
+		//Will segfault until connection inititated (For GUI dev only)
+		String date = Bank.get_date(connection);
+		Transaction.TransactionType type = Transaction.TransactionType.PURCHASE;
+
+		boolean success = Transaction.withdraw(from_acct, this.user_id, date, type, Double.parseDouble(amount), connection);
+		Transaction trans= Transaction.purchase(from_acct, date, Double.parseDouble(amount),this.user_id,connection);
+		if(trans == null){
+			form.setLabel("Purchase Failed", Color.red);
+			System.err.println("Purchase failed");
+		}else{
+			form.setLabel("Purchase Successful", Color.green);
+			System.out.println("Purchase success!");
+			update_page(CustomerActions.ACTIONS_PAGE);
+		}
 		
 
 	}
+	public void transfer(){
+		String from_acct= form.getInput(0);
+		String amount= form.getInput(1);
+		String to_acct= form.getInput(2);
+		if(from_acct.equals("")){
+			form.setLabel("Enter a valid sending account", Color.red);
+			return;
+		}
+		if(to_acct.equals("")){
+			form.setLabel("Enter a valid receiving account", Color.red);
+			return;
+		}
+		if(!Utilities.valid_money_input(amount)){
+			form.setLabel("Enter a valid amount", Color.red);
+			return;
+		}
+		//temp
+		update_page(CustomerActions.ACTIONS_PAGE);
 
-	public void create_cust(){
-		String tin = Utilities.prompt("Enter c_id:");
-		String name = Utilities.prompt("Enter c_name:");
-		String address = Utilities.prompt("Enter address:");
-		Customer cust = Customer.create_customer(tin, name, address, this.connection);
-		if(cust == null){
-			System.out.println("Creation failed... ");
+		//Will segfault until connection inititated (For GUI dev only)
+		String date = Bank.get_date(connection);
+		Transaction.TransactionType type = Transaction.TransactionType.TRANSFER;
+		
+		Transaction trans= Transaction.transfer(to_acct, from_acct, this.user_id, date, 
+						 						type, Double.parseDouble(amount), this.connection);
+		if(trans == null){
+			form.setLabel("Transfer Failed", Color.red);
+			System.err.println("Transfer failed");
 		}else{
-			System.out.println("User: " + cust.name + " created!");
+			form.setLabel("Transfer Successful", Color.green);
+			System.out.println("Transfer success!");
+			update_page(CustomerActions.ACTIONS_PAGE);
 		}
-	}
-	public void delete_cust(){
-		String id = Utilities.prompt("Enter c_id:");
-		if(Customer.del_cust_by_id(id, this.connection)){
-			System.out.println("Successfully removed customer!");
-		}
-	}
 
-	public void create_tables(){
-		if(DBSystem.execute_queries_from_file("./scripts/create_db.sql", this.connection)){
-			System.out.println("Successfully created tables");
+	}
+	public void collect(){
+		String from_pocket= form.getInput(0);
+		String amount= form.getInput(1);
+		String to_link= form.getInput(2);
+		if(from_pocket.equals("")){
+			form.setLabel("Invalid sending pocket account", Color.red);
+			return;
+		}
+		if(to_link.equals("")){
+			form.setLabel("Invalid receiving pocket account", Color.red);
+			return;
+		}
+		if(!Utilities.valid_money_input(amount)){
+			form.setLabel("Enter a valid amount", Color.red);
+			return;
+		}
+		//temp
+		update_page(CustomerActions.ACTIONS_PAGE);
+
+		//Will segfault until connection inititated (For GUI dev only)
+		String date = Bank.get_date(connection);
+		Transaction.TransactionType type = Transaction.TransactionType.PURCHASE;
+		Transaction trans= Transaction.collect(to_link, from_pocket, this.user_id, date, 
+						 						type, Double.parseDouble(amount),this.connection);
+		if(trans == null){
+			form.setLabel("Transfer Failed", Color.red);
+			System.err.println("Transfer failed");
 		}else{
-			System.out.println("Error creating tables");
+			form.setLabel("Transfer Successful", Color.green);
+			System.out.println("Transfer success!");
+			update_page(CustomerActions.ACTIONS_PAGE);
 		}
-	}
 
-	public void destroy_tables(){
-		if(DBSystem.execute_queries_from_file("./scripts/destroy_db.sql", this.connection)){
-			System.out.println("Successfully destroyed tables");
+	}
+	public void wire(){
+		String from_acct= form.getInput(0);
+		String amount= form.getInput(1);
+		String to_acct= form.getInput(2);
+
+		if(from_acct.equals("")){
+			form.setLabel("Enter a valid sending account", Color.red);
+			return;
+		}
+		if(to_acct.equals("")){
+			form.setLabel("Enter a valid receiving account", Color.red);
+			return;
+		}
+		if(!Utilities.valid_money_input(amount)){
+			form.setLabel("Enter a valid amount", Color.red);
+			return;
+		}
+		//temp
+		update_page(CustomerActions.ACTIONS_PAGE);
+
+		//Will segfault until connection inititated (For GUI dev only)
+		String date = Bank.get_date(connection);
+		Transaction.TransactionType type = Transaction.TransactionType.PURCHASE;
+		Transaction trans= Transaction.wire(to_acct, from_acct, this.user_id, date, 
+						 					type, Double.parseDouble(amount), this.connection);
+		if(trans == null){
+			form.setLabel("Wire Transaction Failed", Color.red);
+			System.err.println("Wire failed");
 		}else{
-			System.out.println("Error destroying tables");
+			form.setLabel("Wire Transaction Successful", Color.green);
+			System.out.println("Wire success!");
+			update_page(CustomerActions.ACTIONS_PAGE);
 		}
+
+	}
+	public void pay_friend(){
+		String from_acct= form.getInput(0);
+		String amount= form.getInput(1);
+		String to_acct= form.getInput(2);
+		if(from_acct.equals("")){
+			form.setLabel("Enter a valid sending account", Color.red);
+			return;
+		}
+		if(to_acct.equals("")){
+			form.setLabel("Enter a valid receiving account", Color.red);
+			return;
+		}
+		if(!Utilities.valid_money_input(amount)){
+			form.setLabel("Enter a valid amount", Color.red);
+			return;
+		}
+		//temp
+		update_page(CustomerActions.ACTIONS_PAGE);
+
+
+		//Will segfault until connection inititated (For GUI dev only)
+		String date = Bank.get_date(connection);
+		Transaction.TransactionType type = Transaction.TransactionType.PURCHASE;
+		Transaction trans= Transaction.pay_friend(to_acct,from_acct, this.user_id, date, 
+						 						  type, Double.parseDouble(amount),this.connection);
+		if(trans == null){
+			form.setLabel("Transaction Failed", Color.red);
+			System.err.println("Pay Friend failed");
+		}else{
+			form.setLabel("Transaction Successful", Color.green);
+			System.out.println("Pay Friend success!");
+			update_page(CustomerActions.ACTIONS_PAGE);
+		}
+
+
 	}
 
-	/*resets user info and loads sign in page*/
-	private void sign_out(){
-		this.user_id=null;
-	 	update_page(LOG_IN);
-	}
+	
+
 
 	/*Creates the login page*/
 	private JPanel create_login_page(){
 		
 		JButton button= new JButton("Submit PIN");
-        button.addMouseListener(new ButtonListener(LOG_IN));
+        button.addMouseListener(new ButtonListener(CustomerActions.LOG_IN));
         ArrayList<String> labels= new ArrayList<String> (
         						Arrays.asList("Tax ID:", "PIN"));
         InputForm form = new InputForm(labels, button);
-        //JPanel hold= new JPanel();
-        //hold.add(form);
-        //add(hold);
         return form;
 	}
 
 	/*Creates a page with labels and textfields (depends on size of ArrayList)*/
-	private JPanel create_page(ArrayList<String> labels, String b_label, int action){
+	private JPanel create_page(ArrayList<String> labels, String b_label, CustomerActions action){
 		JButton button= new JButton(b_label);
 		button.addMouseListener(new ButtonListener(action));
 		InputForm form = new InputForm(labels, button);
@@ -325,22 +467,22 @@ public class CustomerInterface extends JPanel{
 	}
 	/* Creates the page with user actions*/
 	private JPanel create_actions_page(){
-		JPanel holder= new JPanel();
-		create_buttons();
+		JPanel holder= new JPanel(new GridLayout(2, 1));
+		create_render_buttons();
 		for(int i=0; i< action_buttons.size();i++){
 			holder.add(action_buttons.get(i));
-		}
-		
+		}	
 		return holder;
 	}
 	/* Changes from one page to another*/
-	private void update_page(int page){
+	private void update_page(CustomerActions page){
 		this.remove(current_page);
 		this.revalidate();
 		this.repaint();
 		try{
 			current_page= panels.get(page);
-			if(page != ACTIONS_PAGE){
+			//Actions page has no form associated with it
+			if(page != CustomerActions.ACTIONS_PAGE){
 				//Clear old values from old form
 				if(this.form != null)
 					this.form.resetFields();
@@ -357,53 +499,96 @@ public class CustomerInterface extends JPanel{
 		}
 		add(current_page);
 	}
-	private void create_buttons(){
+	/*resets user info and loads sign in page*/
+	private void sign_out(){
+		this.user_id=null;
+	 	update_page(CustomerActions.LOG_IN);
+	}
+	//These buttons are used to render new pages from the ACTIONS_PAGE.
+	//They perform no operations other than rendering a new JPanel.
+	private void create_render_buttons(){
 		this.action_buttons= new ArrayList<JButton>(10);
 		
-		JButton t= new JButton("Update PIN");
+		JButton t= new JButton("Deposit");
 		t.addMouseListener(new MouseAdapter() { 
 			private int action;
 			public void mouseClicked(MouseEvent e) {
-                update_page(UPDATE_PIN);
+                update_page(CustomerActions.DEPOSIT);
             }
-		});
-		this.action_buttons.add(t);
-
-		t= new JButton("Deposit");
-		t.addMouseListener(new MouseAdapter() { 
-			private int action;
-			public void mouseClicked(MouseEvent e) {
-                update_page(DEPOSIT);
-            }
-		});
-		this.action_buttons.add(t);
-
-		t=  new JButton("Top Up");
-		t.addMouseListener(new MouseAdapter() { 
-			private int action;
-			public void mouseClicked(MouseEvent e) {
-                update_page(TOP_UP);
-            }
-		});
+		});		
 		this.action_buttons.add(t);
 
 		t=new JButton("Withdrawal");
 		t.addMouseListener(new MouseAdapter() { 
 			private int action;
 			public void mouseClicked(MouseEvent e) {
-                update_page(WITHDRAWAL);
+                update_page(CustomerActions.WITHDRAWAL);
             }
 		});
-		this.action_buttons.add(t) ;
+		this.action_buttons.add(t);
 
 		t= new JButton("Purchase");
 		t.addMouseListener(new MouseAdapter() { 
 			private int action;
 			public void mouseClicked(MouseEvent e) {
-                update_page(PURCHASE);
+                update_page(CustomerActions.PURCHASE);
             }
 		});
 		this.action_buttons.add( t);
+
+		t=  new JButton("Top Up");
+		t.addMouseListener(new MouseAdapter() { 
+			private int action;
+			public void mouseClicked(MouseEvent e) {
+                update_page(CustomerActions.TOP_UP);
+            }
+		});
+		this.action_buttons.add(t);
+
+		t= new JButton("Transfer");
+		t.addMouseListener(new MouseAdapter() { 
+			private int action;
+			public void mouseClicked(MouseEvent e) {
+                update_page(CustomerActions.TRANSFER);
+            }
+		});
+		this.action_buttons.add( t);
+
+		t= new JButton("Collect");
+		t.addMouseListener(new MouseAdapter() { 
+			private int action;
+			public void mouseClicked(MouseEvent e) {
+                update_page(CustomerActions.COLLECT);
+            }
+		});
+		this.action_buttons.add( t);
+
+		t= new JButton("Wire");
+		t.addMouseListener(new MouseAdapter() { 
+			private int action;
+			public void mouseClicked(MouseEvent e) {
+                update_page(CustomerActions.WIRE);
+            }
+		});
+		this.action_buttons.add(t);
+
+		t= new JButton("Pay Friend");
+		t.addMouseListener(new MouseAdapter() { 
+			private int action;
+			public void mouseClicked(MouseEvent e) {
+                update_page(CustomerActions.PAY_FRIEND);
+            }
+		});
+		this.action_buttons.add( t);
+
+		t= new JButton("Update PIN");
+		t.addMouseListener(new MouseAdapter() { 
+			private int action;
+			public void mouseClicked(MouseEvent e) {
+                update_page(CustomerActions.UPDATE_PIN);
+            }
+		});
+		this.action_buttons.add(t);
 
 		t= new JButton("Sign Out");
 		t.addMouseListener(new MouseAdapter() { 
@@ -414,11 +599,6 @@ public class CustomerInterface extends JPanel{
 		});
 		this.action_buttons.add(t);
 
-		/*
-		this.action_buttons.add( new JButton("Create Customer"));
-		this.action_buttons.add( new JButton("Delete Customer"));
-		this.action_buttons.add( new JButton("Create Table"));
-		this.action_buttons.add( new JButton("Delete Table"));*/
 	}
 	class InputForm extends JPanel{
 		private JButton button;
@@ -467,8 +647,8 @@ public class CustomerInterface extends JPanel{
 	}
 
 	class ButtonListener extends MouseAdapter{
-		private int action;
-		public ButtonListener(int action){
+		private CustomerInterface.CustomerActions action;
+		public ButtonListener(CustomerInterface.CustomerActions action){
 			super();
 			this.action= action;
 		}
@@ -480,79 +660,47 @@ public class CustomerInterface extends JPanel{
 				form.resetLabel();
 
 				switch(this.action){
-					case CustomerInterface.LOG_IN:
+					case LOG_IN:
 						login();
 						break;
-					case CustomerInterface.UPDATE_PIN:
+					case UPDATE_PIN:
 						change_pin();
 						break;
-					case CustomerInterface.DEPOSIT:
+					case DEPOSIT:
 						deposit();
 						break;
-					case CustomerInterface.TOP_UP:
+					case TOP_UP:
 						top_up();
 						break;
-					case CustomerInterface.WITHDRAWAL:
+					case WITHDRAWAL:
 						withdrawal();
 						break;
-					case CustomerInterface.PURCHASE:
+					case PURCHASE:
 						purchase();
 						break;
-
-					case CustomerInterface.LOG_OUT:
+					case TRANSFER:
+						transfer();
+						break;	
+					case COLLECT:
+						collect();
+						break;	
+					case WIRE:
+						wire();
+						break;
+					case PAY_FRIEND:
+						pay_friend();
+						break;		
+					case LOG_OUT:
 						sign_out();
-						break;
-					case CustomerInterface.CREATE_CUSTOMER:
-						create_cust();
-						break;
-					case CustomerInterface.DELETE_CUSTOMER:
-						delete_cust();
-						break;
-					case CustomerInterface.CREATE_TABLES:
-						create_tables();
-						break;
-					case CustomerInterface.DESTROY_TABLES:
-						destroy_tables();
-						break;					
+						break;	
+
 				}
 
 			}
 			else if(SwingUtilities.isRightMouseButton(e)){
-				update_page(ACTIONS_PAGE);
+				//Essentially a back key
+				update_page(CustomerActions.ACTIONS_PAGE);
 			}
-		}
-	}
-	public void run(){
-		System.out.println("-- CustomerInterface --");
-		String resp = Utilities.prompt(
-			"1) to create a customer\n" +
-			"2) to login as existing customer\n" +
-			"3) to update PIN\n" +
-			"4) to delete a customer\n" +
-			"5) to create database tables\n" + 
-			"6) to destroy database tables\n" +
-			"7) to deposit money in an account\n" +
-			"8) to withdraw money from an account \n" +
-			"9) to top up pocket account\n"
-		);
-		if(resp.equals("1")){
-			this.create_cust();
-		}else if(resp.equals("2")){
-			this.login();
-		}else if(resp.equals("3")){
-			this.change_pin();
-		}else if(resp.equals("4")){
-			this.delete_cust();
-		}else if(resp.equals("5")){
-			this.create_tables();
-		}else if(resp.equals("6")){
-			this.destroy_tables();
-		}else if(resp.equals("7")){
-			this.deposit();
-		}else if(resp.equals("8")){
-			this.withdrawal();
-		}else if(resp.equals("9")){
-			this.top_up();
 		}
 	}
 

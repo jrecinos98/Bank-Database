@@ -22,7 +22,6 @@ public class Utilities{
   	    frame.setDefaultCloseOperation(frame.EXIT_ON_CLOSE);
 	}
 	public static boolean valid_pin_format(String pin){
-		System.out.println("Utilities::PIN = "+pin);
 		//If less or greater than 4 chars it is invalid
 		if(pin.length()  != 4){
 			System.out.println("Length invalid: "+ pin.length());

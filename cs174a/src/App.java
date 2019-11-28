@@ -58,12 +58,15 @@ public class App implements Testable
 	@Override
 	public String initializeSystem()
 	{
+		this.gui = new Interface(connection);
+		return "0";
 		// Initialize your system.  Probably setting up the DB connection.
-		Properties info = new Properties();
+		/*Properties info = new Properties();
 		info.put( OracleConnection.CONNECTION_PROPERTY_USER_NAME, DB_USER );
 		info.put( OracleConnection.CONNECTION_PROPERTY_PASSWORD, DB_PASSWORD );
 		info.put( OracleConnection.CONNECTION_PROPERTY_DEFAULT_ROW_PREFETCH, "20" );
-
+		this.gui = new Interface(connection);
+		return "0";
 
 		try
 		{
@@ -78,7 +81,7 @@ public class App implements Testable
 		{
 			System.err.println( e.getMessage() );
 			return "1";
-		}
+		}*/
 
 	}
 
@@ -158,20 +161,12 @@ public class App implements Testable
 		try{
 			// Translate CLI to GUI
 			Scanner in = new Scanner(System.in);
-			System.out.println("Enter (1) for Bank Teller (2) for customer or (3) for GUI or (4) for unit tests");
+			System.out.println("Enter (1) for GUI or (2) for unit tests");
 			String resp = in.nextLine();
 			if(resp.equals("1")){
-				// Run Bank Teller Interface
-				BankTellerInterface bti = new BankTellerInterface(connection);
-				bti.run();
-			}else if (resp.equals("2")){
-				// Run Customer Interface
-				CustomerInterface ci = new CustomerInterface(connection);
-				ci.run();
-			}else if (resp.equals("3")){
 				Interface gui = new Interface(connection);
 				gui.setVisible(true);
-			}else if(resp.equals("4")){
+			}else if (resp.equals("2")){
 				Tester tester = new Tester();
 				tester.run_tests(connection);
 			}

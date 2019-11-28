@@ -34,6 +34,17 @@ import java.awt.Toolkit;
 
 
 public class BankTellerInterface extends JPanel{
+	public enum BankTellerActions{
+		CHECK_TRANSACTION,
+		MONTHLY_STATEMENT,
+		LIST_CLOSED,
+		DTER,
+		CUSTOMER_REPORT,
+		ADD_INTEREST,
+		CREATE_ACCOUNT,
+		DELETE_ClOSED_ACCOUNTS,
+		DELETE_TRANSACTIONS
+	}
 
 	private OracleConnection connection;
 	private JButton b1;
@@ -161,6 +172,63 @@ public class BankTellerInterface extends JPanel{
 			System.err.println("Error: could not create pocket acct");
 		}else{
 			System.out.println("Successfully created pocket acct!");
+		}
+	}
+	class ButtonListener extends MouseAdapter{
+		private CustomerInterface.CustomerActions action;
+		public ButtonListener(CustomerInterface.CustomerActions action){
+			super();
+			this.action= action;
+		}
+		public void mouseClicked(MouseEvent e){
+			//If left clicked
+			if(SwingUtilities.isLeftMouseButton(e)){
+
+				//Reset label/error message upon button click. Not needed but playing it safe
+				form.resetLabel();
+
+				switch(this.action){
+					case LOG_IN:
+						login();
+						break;
+					case UPDATE_PIN:
+						change_pin();
+						break;
+					case DEPOSIT:
+						deposit();
+						break;
+					case TOP_UP:
+						top_up();
+						break;
+					case WITHDRAWAL:
+						withdrawal();
+						break;
+					case PURCHASE:
+						purchase();
+						break;
+					case TRANSFER:
+						transfer();
+						break;	
+					case COLLECT:
+						collect();
+						break;	
+					case WIRE:
+						wire();
+						break;
+					case PAY_FRIEND:
+						pay_friend();
+						break;		
+					case LOG_OUT:
+						sign_out();
+						break;	
+
+				}
+
+			}
+			else if(SwingUtilities.isRightMouseButton(e)){
+				//Essentially a back key
+				update_page(CustomerActions.ACTIONS_PAGE);
+			}
 		}
 	}
 }
