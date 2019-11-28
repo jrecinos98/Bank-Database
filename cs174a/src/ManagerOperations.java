@@ -90,12 +90,9 @@ public class ManagerOperations {
 	public boolean create_pocket_account(String id, String linkedId, double initialTopUp,
 											    String tin, OracleConnection connection){
 		// Creates a new pocket account and retuns true if successful
-		Account account = create_pocket_account(id, linkedId, initialTopUp,
+		boolean created = create_pocket_account(id, linkedId, initialTopUp,
 											    tin, connection);
-		if(account != null){
-			return true;
-		}
-		return false;
+		return created;
 	}
 
 	public boolean add_owner_to_account(String new_owner_id, String a_id){
