@@ -34,57 +34,67 @@ import java.awt.GridLayout;
 
 
 public class Interface extends JFrame {
-	private JPanel bankTellerTab;
-	private JTabbedPane tabView;
-	private JTabbedPane tabbedPane;
+  private JPanel bankTellerTab;
+  private JTabbedPane tabView;
+  private JTabbedPane tabbedPane;
 
-	private CustomerInterface customer;
-	private BankTellerInterface bankTeller;
+  private CustomerInterface customer;
+  private BankTellerInterface bankTeller;
   private SystemInterface system;
 
-	private OracleConnection connection;
-	public static JFrame main_frame;
+  private OracleConnection connection;
+  public static JFrame main_frame;
 
-	
+  
     public Interface(OracleConnection connection) {
-    	/*try {
+      /*try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
             ex.printStackTrace();
         }*/
-    	setTitle("Bank");
+      setTitle("Bank");
 
       Utilities.setWindow(this);
       main_frame= this;
-       	
+        
       customer= new CustomerInterface(connection);
       bankTeller= new BankTellerInterface(connection);
       system= new SystemInterface(connection);
 
 
-      JPanel atm_content = new JPanel(new GridBagLayout());
+      JPanel cust_holder = new JPanel(new GridBagLayout());
       //content.setBackground(Color.GRAY);
-      atm_content.setBorder(new EmptyBorder(100,100,100,100));
-      atm_content.add(customer);
-       
-       	
-	    tabView =new JTabbedPane(JTabbedPane.TOP, JTabbedPane.WRAP_TAB_LAYOUT);  
-	    tabView.setBounds(50,50,200,200);  
-	    tabView.add("ATM", atm_content);  
-	    tabView.add("Bank Teller", bankTeller); 
-      tabView.add("Administrator", system);  
+      cust_holder.setBorder(new EmptyBorder(100,100,100,100));
+      cust_holder.add(customer);
 
-	    //Add tabview to Frame.
-	    add(tabView); 
-	    
-	    setLocationRelativeTo(null);
+      JPanel bank_holder = new JPanel(new GridBagLayout());
+      //content.setBackground(Color.GRAY);
+      bank_holder.setBorder(new EmptyBorder(100,100,100,100));
+      bank_holder.add(bankTeller);
+
+      JPanel sys_holder = new JPanel(new GridBagLayout());
+      //content.setBackground(Color.GRAY);
+      sys_holder.setBorder(new EmptyBorder(100,100,100,100));
+      sys_holder.add(system);
+       
+        
+      tabView =new JTabbedPane(JTabbedPane.TOP, JTabbedPane.WRAP_TAB_LAYOUT);  
+      tabView.setBounds(50,50,200,200);  
+      tabView.add("ATM", cust_holder);  
+      tabView.add("Bank Teller", bank_holder); 
+      tabView.add("Administrator", sys_holder);  
+
+      //Add tabview to Frame.
+      add(tabView); 
+      
+      setLocationRelativeTo(null);
         setVisible(true);
         
     }
     public void update_frame(JPanel new_panel){
-    	/*this.remove(current_panel);
-		this.add(new_panel);
-		this.revalidate();*/
+      /*this.remove(current_panel);
+    this.add(new_panel);
+    this.revalidate();*/
     }
 }
 
