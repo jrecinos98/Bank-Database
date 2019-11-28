@@ -35,7 +35,7 @@ public class Main
 				// r = app.createCheckingSavingsAccount( AccountType.INTEREST_CHECKING, "account1", 1234.56, "theTaxID", "Im YoungMing", "Known" );
 				// System.out.println( r );
 				
-				//app.run_cli();
+				app.run_cli();
 			}
 		}catch(Exception e){
 			e.printStackTrace();

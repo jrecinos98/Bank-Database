@@ -81,8 +81,8 @@ public class CustomerInterface extends JPanel{
 		panels.put(UPDATE_PIN, create_page(new ArrayList<String> (Arrays.asList("Old PIN:","New PIN:")), "Update PIN", UPDATE_PIN));
 		panels.put(DEPOSIT, create_page(new ArrayList<String> (Arrays.asList("Account ID:", "Amount: $")), "Make Deposit", DEPOSIT));
 		panels.put(TOP_UP, create_page(new ArrayList<String> (Arrays.asList("Pocket Account ID:", " Linked Account ID:", " Amount: $")), "Transfer to Account", TOP_UP));
-		panels.put(WITHDRAWAL, create_page(new ArrayList<String> (Arrays.asList("Account ID", "Tax ID:","Amount: $")), "Make Withdrawal", WITHDRAWAL ));
-		panels.put(PURCHASE, create_page(new ArrayList<String> (Arrays.asList("Account ID","Amount: $")), "Make Purchase", WITHDRAWAL ));
+		panels.put(WITHDRAWAL, create_page(new ArrayList<String> (Arrays.asList("Account ID","Amount: $")), "Make Withdrawal", WITHDRAWAL ));
+		panels.put(PURCHASE, create_page(new ArrayList<String> (Arrays.asList("Account ID","Amount: $")), "Make Purchase", PURCHASE ));
 	}
 	
 	public void login(){
@@ -100,24 +100,10 @@ public class CustomerInterface extends JPanel{
 			this.user_id= id;
 			System.out.println("User: " + cust.name + " logged in!");
 			update_page(ACTIONS_PAGE);
-			//Change Panel to actions_panel
 	
 		}
 		//temp
 		update_page(ACTIONS_PAGE);
-	}
-
-
-	public void create_cust(){
-		String tin = Utilities.prompt("Enter c_id:");
-		String name = Utilities.prompt("Enter c_name:");
-		String address = Utilities.prompt("Enter address:");
-		Customer cust = Customer.create_customer(tin, name, address, this.connection);
-		if(cust == null){
-			System.out.println("Creation failed... ");
-		}else{
-			System.out.println("User: " + cust.name + " created!");
-		}
 	}
 
 	public void change_pin(){	
@@ -155,6 +141,7 @@ public class CustomerInterface extends JPanel{
 			Customer cust = Customer.get_cust_by_id(this.user_id, this.connection);
 			if(cust != null){
 				//Pop up saying that operation was a success.
+				form.setLabel("Successfully updated PIN", Color.red);	
 				System.out.println("Successfully set pin to " + cust.encrypted_pin);
 				update_page(ACTIONS_PAGE);
 				return;
@@ -164,29 +151,6 @@ public class CustomerInterface extends JPanel{
 			form.setLabel("Operation Failed. Check old pin is correct.", Color.red);
 			System.out.println("Failed to set pin");
 					
-		}
-	}
-
-	public void delete_cust(){
-		String id = Utilities.prompt("Enter c_id:");
-		if(Customer.del_cust_by_id(id, this.connection)){
-			System.out.println("Successfully removed customer!");
-		}
-	}
-
-	public void create_tables(){
-		if(DBSystem.execute_queries_from_file("./scripts/create_db.sql", this.connection)){
-			System.out.println("Successfully created tables");
-		}else{
-			System.out.println("Error creating tables");
-		}
-	}
-
-	public void destroy_tables(){
-		if(DBSystem.execute_queries_from_file("./scripts/destroy_db.sql", this.connection)){
-			System.out.println("Successfully destroyed tables");
-		}else{
-			System.out.println("Error destroying tables");
 		}
 	}
 
@@ -229,14 +193,14 @@ public class CustomerInterface extends JPanel{
 
 		Transaction.TransactionType type = Transaction.TransactionType.TOP_UP;
 
-		String pocket_id = form.getInput(0);
-		String linked= form.getInput(1);	
+		String to_acct = form.getInput(0);
+		String from_acct= form.getInput(1);	
 		String amount= form.getInput(2);
-		if(pocket_id.equals("")){
+		if(to_acct.equals("")){
 			form.setLabel("Enter a valid pocket account", Color.red);
 			return;
 		}
-		if(linked.equals("")){
+		if(from_acct.equals("")){
 			form.setLabel("Enter a valid account", Color.red);
 			return;
 		}
@@ -245,12 +209,12 @@ public class CustomerInterface extends JPanel{
 			return;
 		}
 
-		System.out.println("Pocket Account: "+ pocket_id);
-		System.out.println("PIN: "+pin);
-		System.out.println("Amount: "+amount);
+		System.out.println("Pocket Account: "+ to_acct);
+		System.out.println("Linked Account: "+ from_acct);
+		System.out.println("Amount: " + amount);
 		
 		update_page(ACTIONS_PAGE);
-		Transaction transaction = Transaction.top_up(to_acct, from_acct, date,  Double.parseDouble(amount), cust_id, connection);
+		Transaction transaction = Transaction.top_up(to_acct, from_acct, date,  Double.parseDouble(amount), this.user_id, connection);
 		if(transaction == null){
 			form.setLabel("Transaction failed", Color.red);
 			System.err.println("Top-Up failure");
@@ -261,32 +225,73 @@ public class CustomerInterface extends JPanel{
 	}
 
 	public void withdrawal(){
-
-
 		String date = Bank.get_date(connection);
-
 		Transaction.TransactionType type = Transaction.TransactionType.WITHDRAWAL;
-		String id = form.getInput(0);
-		String pin= form.getInput(1);
-		String m= form.getInput(2);		
-		System.out.println(id);
-		System.out.println(pin);
-		System.out.println(m);
-		this.form.setLabel("TEST", Color.red);
-		update_page(ACTIONS_PAGE);
-	
-		
-		/*double amount = Double.parseDouble(Utilities.prompt("Enter amount:"));
 
-		boolean success = Transaction.withdraw(from_acct, cust_id, date, type, amount, connection);
+
+		String from_acct = form.getInput(0);
+		String amount= form.getInput(1);
+
+		if(from_acct.equals("")){
+			form.setLabel("Enter a valid account", Color.red);
+			return;
+		}
+		if(!Utilities.valid_money_input(amount)){
+			form.setLabel("Enter a valid amount", Color.red);
+			return;
+		}
+
+		System.out.println("Account: "+ from_acct);
+		System.out.println("Amount: "+amount);
+	
+		update_page(ACTIONS_PAGE);
+
+		boolean success = Transaction.withdraw(from_acct, this.user_id, date, type, Double.parseDouble(amount), connection);
 		if(!success){
+			form.setLabel("Transaction Failed", Color.red);
 			System.err.println("Withdrawal failed");
 		}else{
+			form.setLabel("Transaction Successful", Color.green);
 			System.out.println("Withdrawal success!");
-		}*/
+		}
 	}
 	public void purchase(){
+		
 
+	}
+
+	public void create_cust(){
+		String tin = Utilities.prompt("Enter c_id:");
+		String name = Utilities.prompt("Enter c_name:");
+		String address = Utilities.prompt("Enter address:");
+		Customer cust = Customer.create_customer(tin, name, address, this.connection);
+		if(cust == null){
+			System.out.println("Creation failed... ");
+		}else{
+			System.out.println("User: " + cust.name + " created!");
+		}
+	}
+	public void delete_cust(){
+		String id = Utilities.prompt("Enter c_id:");
+		if(Customer.del_cust_by_id(id, this.connection)){
+			System.out.println("Successfully removed customer!");
+		}
+	}
+
+	public void create_tables(){
+		if(DBSystem.execute_queries_from_file("./scripts/create_db.sql", this.connection)){
+			System.out.println("Successfully created tables");
+		}else{
+			System.out.println("Error creating tables");
+		}
+	}
+
+	public void destroy_tables(){
+		if(DBSystem.execute_queries_from_file("./scripts/destroy_db.sql", this.connection)){
+			System.out.println("Successfully destroyed tables");
+		}else{
+			System.out.println("Error destroying tables");
+		}
 	}
 
 	/*resets user info and loads sign in page*/
@@ -513,7 +518,6 @@ public class CustomerInterface extends JPanel{
 
 			}
 			else if(SwingUtilities.isRightMouseButton(e)){
-				System.out.println("Mouse Button 2 Pressed");
 				update_page(ACTIONS_PAGE);
 			}
 		}
