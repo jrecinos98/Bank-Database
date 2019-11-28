@@ -48,19 +48,30 @@ public class Transaction {
 									 String date, String transaction_type, double amount, OracleConnection connection){
 		
 		Transaction transaction = null;
+		int t_id = -1;
 		String query = String.format("INSERT INTO transactions (to_acct, from_acct, cust_id, t_date, t_type, amount) " +
 	    							 "VALUES ('%s', '%s', '%s', '%s', '%s', %f)",
 	    							  to_acct, from_acct, cust_id, date, transaction_type, amount);
-		try( Statement statement = connection.createStatement() ) {
+
+		try( PreparedStatement statement = connection.prepareStatement(query,new String[]{"t_id"}) ) {
 			try{
-				int updates = statement.executeUpdate( query );
+				int updates = statement.executeUpdate();
 				if(updates == 0){
 					return null;
 				}
-				transaction = new Transaction(to_acct, from_acct, cust_id, date, transaction_type, amount);
+				try(ResultSet rs = statement.getGeneratedKeys()){
+					if(rs.next()){
+				    	t_id = Integer.parseInt(rs.getString(1)); 
+				    }	
+				}catch(SQLException e){
+					e.printStackTrace();
+				}
+			    
+				transaction = new Transaction(t_id, to_acct, from_acct, cust_id, date, transaction_type, amount);
 			}catch(SQLException e){
 				e.printStackTrace();
 			}
+
 		}catch(SQLException e){
 			e.printStackTrace();
 		}
