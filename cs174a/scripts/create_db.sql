@@ -59,3 +59,4 @@ CREATE TABLE bank (
 	last_intrst_date VARCHAR(10),
 	PRIMARY KEY(b_id)
 )
+

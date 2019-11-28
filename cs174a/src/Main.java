@@ -40,7 +40,7 @@ public class Main
 		}catch(Exception e){
 			e.printStackTrace();
 		}finally{
-			//app.close_connection();
+			app.close_connection();
 		}
 		
 	}

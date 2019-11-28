@@ -173,6 +173,8 @@ public class App implements Testable
 			else{
 				System.out.println("Did not recognize input -- should be 1 , 2, or 3");
 			}
+			this.close_connection();
+			
 		} catch( Exception e ) {
 			System.err.println( e.getMessage() );
 			e.printStackTrace();

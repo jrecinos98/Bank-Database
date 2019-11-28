@@ -59,6 +59,7 @@ public class Tester{
 	public void teardown(){
 		try{
 			this.connection.close();
+			System.out.println("Closing connection ...");
 			System.out.println("Tests finished running");
 		}catch(Exception e){
 			e.printStackTrace();
