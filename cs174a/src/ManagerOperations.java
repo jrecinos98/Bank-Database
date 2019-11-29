@@ -34,6 +34,7 @@ public class ManagerOperations {
 
 	public boolean generate_monthly_statement(){
 		// Generate monthly statement
+		
 		return false;
 	}
 

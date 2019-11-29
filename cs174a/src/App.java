@@ -21,8 +21,8 @@ public class App implements Testable
 	private Interface gui;
 	// connection descriptor.
 	final static String DB_URL= "jdbc:oracle:thin:@cs174a.cs.ucsb.edu:1521/orcl";
-	final static String DB_USER = "c##jrecinos";
-	final static String DB_PASSWORD = "8907826";
+	final static String DB_USER = "c##ncduncan";
+	final static String DB_PASSWORD = "3937679";
 	/**
 	 * Default constructor.
 	 * DO NOT REMOVE.
@@ -121,26 +121,43 @@ public class App implements Testable
 
 	@Override
 	public String createPocketAccount( String id, String linkedId, double initialTopUp, String tin ){
-		return "1";
+		Account account = Account.create_pocket_account(id, linkedId, initialTopUp,
+											    tin, this.connection);
+		if(account == null){
+			return "1";
+		}else{
+			String resp = String.format("0 %s %s %.2f %s", id, "" + Testable.AccountType.POCKET, initialTopUp, tin);
+			return resp;
+		}
 	}
 
 	@Override
 	public String setDate( int year, int month, int day ){
-		return "1";
+		boolean success = Bank.set_date( "" + year, "" + month, "" + day, this.connection);
+		if(success){
+			return "0 " + year + "-" + Bank.pretty_month("" + month) + "-" + Bank.pretty_day("" + day);
+		}else{
+			return "1";
+		}
 	}
 
 	@Override
 	public String dropTables(){
-		return "1";
+		if(DBSystem.execute_queries_from_file("./scripts/destroy_db.sql", this.connection)){
+			return "0";
+		}else{
+			return "1";
+		}
 	}
 
 	@Override
 	public String createTables(){
-		// DO TABLE CREATE
-		// Set up dates
 		Bank.bank_set_up(this.connection);
-
-		return "1";
+		if(DBSystem.execute_queries_from_file("./scripts/create_db.sql", this.connection)){
+			return "0";
+		}else{
+			return "1";
+		}
 	}
 
 	public String close_connection(){

@@ -200,4 +200,20 @@ public class Bank{
 	public static int get_days_in_current_month(OracleConnection connection){
 		return Bank.get_days_in_month(Bank.get_month(connection));
 	}
+
+	public static String pretty_month(String month){
+		if(month.length() == 1){
+			return "0" + month;
+		}else{
+			return month;
+		}
+	}
+
+	public static String pretty_day(String day){
+		if(day.length() == 1){
+			return "0" + day;
+		}else{
+			return day;
+		}
+	}
 }
