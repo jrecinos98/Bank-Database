@@ -206,11 +206,12 @@ public class SystemInterface extends JPanel{
 		//split at dash
 		String[] date= d.split("-");
 		try{
-			Bank.set_date(date[2],date[1],date[0], this.connection);
+			Bank.set_date(date[2],date[0],date[1], this.connection);
 		}catch(Exception e){
 			form.setLabel("An error occured", Color.red);
 			return;
 		}
+		System.out.println("Date set to: "+ d);
 		update_page(SystemActions.ACTIONS_PAGE);
 
 	}

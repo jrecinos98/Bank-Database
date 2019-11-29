@@ -19,7 +19,7 @@ public class Utilities{
   	    int width = screenSize.width;
   	    frame.setSize(width/2, height/2);
   	    frame.setLocationRelativeTo(null);
-  	    frame.setDefaultCloseOperation(frame.EXIT_ON_CLOSE);
+  	    //frame.setDefaultCloseOperation(frame.EXIT_ON_CLOSE);
 	}
 	public static boolean valid_pin_format(String pin){
 		//If less or greater than 4 chars it is invalid
@@ -53,8 +53,13 @@ public class Utilities{
 		return true;
 	}
 	public static boolean valid_date(String d){
+		if(d.equals("")){
+			System.out.println("Empty date");
+			return false;
+		}
 		String [] date= d.split("-");
 		if(date.length != 3){
+			System.out.println("Date: "+date);
 			return false;
 		}
 		int year;
@@ -63,21 +68,27 @@ public class Utilities{
 		try{
 			//Parse Int strips leading 0. Error if it parses double
 			year = Integer.parseInt(date[2]);
-			month = Integer.parseInt(date[1]);
-			day = Integer.parseInt(date[0]);
+			month = Integer.parseInt(date[0]);
+			day = Integer.parseInt(date[1]);
 		}
 		catch(NumberFormatException e){
 			System.err.println(e);
 			return false;
-		}		
+		}	
+		System.out.println("Year: "+ year);	
+		System.out.println("Month: "+ month);
+		System.out.println("Day: "+ day);
 		//If negative or unreasonably large
 		if (year < 0 || year > 9999){
+			
 			return false;
 		}
 		if(month <=0 || month >12){
+			
 			return false;
 		}
 		if(day <=0 || day > 31){
+			
 			return false;
 		}
 		return true;

@@ -127,8 +127,6 @@ public class BankTellerInterface extends JPanel{
 			form.setLabel("Initial deposit too low", Color.red);
 			return;
 		}
-		update_page(BankTellerActions.ACTIONS_PAGE);
-		//Will segfault (GUI dev only)
 		Account acct = Account.create_account(type, a_id,Double.parseDouble(initial_balance),
 										 c_id, name,address, this.connection);
 		if(acct == null){

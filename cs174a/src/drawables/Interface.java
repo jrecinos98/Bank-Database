@@ -24,6 +24,8 @@ import javax.swing.*;
 
 import java.awt.Component;
 import javax.swing.border.EmptyBorder;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowAdapter;
 import java.awt.GridBagLayout;
 import java.awt.event.KeyEvent;
 import java.awt.Dimension;
@@ -55,6 +57,20 @@ public class Interface extends JFrame {
       setTitle("Bank");
 
       Utilities.setWindow(this);
+      this.addWindowListener(new WindowAdapter(){
+        public void windowClosing(WindowEvent w){
+          int i=JOptionPane.showConfirmDialog(null, "Exit program?");
+              if(i==0){
+                try{
+                  connection.close();
+                  System.err.println("Connection closed!");
+                }catch(SQLException e){
+                  e.printStackTrace();
+                }
+                System.exit(0);
+              }
+        }
+      });
       main_frame= this;
         
       customer= new CustomerInterface(connection);
@@ -88,7 +104,7 @@ public class Interface extends JFrame {
       add(tabView); 
       
       setLocationRelativeTo(null);
-        setVisible(true);
+      setVisible(true);
         
     }
     public void update_frame(JPanel new_panel){

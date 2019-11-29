@@ -21,8 +21,8 @@ public class App implements Testable
 	private Interface gui;
 	// connection descriptor.
 	final static String DB_URL= "jdbc:oracle:thin:@cs174a.cs.ucsb.edu:1521/orcl";
-	final static String DB_USER = "c##ncduncan";
-	final static String DB_PASSWORD = "3937679";
+	final static String DB_USER = "c##jrecinos";
+	final static String DB_PASSWORD = "8907826";
 	/**
 	 * Default constructor.
 	 * DO NOT REMOVE.
@@ -58,15 +58,12 @@ public class App implements Testable
 	@Override
 	public String initializeSystem()
 	{
-		this.gui = new Interface(connection);
-		return "0";
+		
 		// Initialize your system.  Probably setting up the DB connection.
-		/*Properties info = new Properties();
+		Properties info = new Properties();
 		info.put( OracleConnection.CONNECTION_PROPERTY_USER_NAME, DB_USER );
 		info.put( OracleConnection.CONNECTION_PROPERTY_PASSWORD, DB_PASSWORD );
 		info.put( OracleConnection.CONNECTION_PROPERTY_DEFAULT_ROW_PREFETCH, "20" );
-		this.gui = new Interface(connection);
-		return "0";
 
 		try
 		{
@@ -74,14 +71,14 @@ public class App implements Testable
 			ods.setURL( DB_URL );
 			ods.setConnectionProperties( info );
 			connection = (OracleConnection) ods.getConnection();
-			
 			return "0";
 		}
 		catch( SQLException e )
 		{
 			System.err.println( e.getMessage() );
 			return "1";
-		}*/
+		}
+
 
 	}
 
@@ -155,6 +152,9 @@ public class App implements Testable
 			e.printStackTrace();
 			return "1";
 		}
+	}
+	public void run_gui(){
+		this.gui = new Interface(this.connection);
 	}
 
 	public void run_cli(){

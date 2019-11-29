@@ -100,10 +100,19 @@ public class CustomerInterface extends JPanel{
 	
 	public void login(){
 		String id = form.getInput(0);
-		String pin= form.getInput(1);	
+		String pin= form.getInput(1);
 
 		System.out.println("Customer ID: " + id);
 		System.out.println("Customer PIN: " + pin);
+
+		if(id.equals("")){
+			form.setLabel("Incorrect ID/PIN");
+			return;
+		}
+		if(!Utilities.valid_pin_format(pin)){
+			form.setLabel("Invalid PIN format");
+			return;
+		}
 		Customer cust = Customer.login(id, pin, this.connection);
 		if(cust == null){
 			form.setLabel("Verification Failed.", Color.red);
@@ -115,8 +124,6 @@ public class CustomerInterface extends JPanel{
 			update_page(CustomerActions.ACTIONS_PAGE);
 	
 		}
-		//temp
-		update_page(CustomerActions.ACTIONS_PAGE);
 	}
 
 	public void change_pin(){	
@@ -130,7 +137,6 @@ public class CustomerInterface extends JPanel{
 		System.out.println("Old PIN: " + old);
 
 		System.out.println("New PIN: " + _new);
-
 		//Check that pin format is valid 
 		if (!Utilities.valid_pin_format(old)){
 			form.setLabel("Invalid old PIN", Color.red);
@@ -145,8 +151,6 @@ public class CustomerInterface extends JPanel{
 			form.setLabel("New PIN cannot be old PIN", Color.red);
 			return;
 		}
-		//temp
-		update_page(CustomerActions.ACTIONS_PAGE);
 
 		if(Customer.update_pin(this.user_id, old, _new, this.connection)){
 			System.out.println("PIN updated!");
@@ -181,11 +185,7 @@ public class CustomerInterface extends JPanel{
 		}
 		System.out.println("Account: "+ to_acct);
 		System.out.println("Amount: " + amount);
-		
-		
-		update_page(CustomerActions.ACTIONS_PAGE);
 
-		//Will work once connection is initialized
 		String date = Bank.get_date(connection);
 		Transaction.TransactionType type = Transaction.TransactionType.DEPOSIT;
 		
@@ -223,9 +223,6 @@ public class CustomerInterface extends JPanel{
 		System.out.println("Linked Account: "+ from_acct);
 		System.out.println("Amount: " + amount);
 		
-		update_page(CustomerActions.ACTIONS_PAGE);
-
-		//WIll segfault until connection inititated (For GUI dev only)
 		String date = Bank.get_date(connection);
 		Transaction.TransactionType type = Transaction.TransactionType.TOP_UP;
 		Transaction transaction = Transaction.top_up(to_acct, from_acct, date,  Double.parseDouble(amount), this.user_id, connection);
@@ -255,9 +252,6 @@ public class CustomerInterface extends JPanel{
 		System.out.println("Account: "+ from_acct);
 		System.out.println("Amount: "+amount);
 	
-		update_page(CustomerActions.ACTIONS_PAGE);
-
-		//Will segfault until connection inititated (For GUI dev only)
 		String date = Bank.get_date(connection);
 		Transaction.TransactionType type = Transaction.TransactionType.WITHDRAWAL;
 
@@ -282,9 +276,7 @@ public class CustomerInterface extends JPanel{
 			form.setLabel("Enter a valid amount", Color.red);
 			return;
 		}
-		update_page(CustomerActions.ACTIONS_PAGE);
-
-		//Will segfault until connection inititated (For GUI dev only)
+		
 		String date = Bank.get_date(connection);
 		Transaction.TransactionType type = Transaction.TransactionType.PURCHASE;
 
@@ -317,10 +309,7 @@ public class CustomerInterface extends JPanel{
 			form.setLabel("Enter a valid amount", Color.red);
 			return;
 		}
-		//temp
-		update_page(CustomerActions.ACTIONS_PAGE);
-
-		//Will segfault until connection inititated (For GUI dev only)
+		
 		String date = Bank.get_date(connection);
 		Transaction.TransactionType type = Transaction.TransactionType.TRANSFER;
 		
@@ -352,10 +341,7 @@ public class CustomerInterface extends JPanel{
 			form.setLabel("Enter a valid amount", Color.red);
 			return;
 		}
-		//temp
-		update_page(CustomerActions.ACTIONS_PAGE);
-
-		//Will segfault until connection inititated (For GUI dev only)
+		
 		String date = Bank.get_date(connection);
 		Transaction.TransactionType type = Transaction.TransactionType.PURCHASE;
 		Transaction trans= Transaction.collect(to_link, from_pocket, this.user_id, date, 
@@ -387,10 +373,7 @@ public class CustomerInterface extends JPanel{
 			form.setLabel("Enter a valid amount", Color.red);
 			return;
 		}
-		//temp
-		update_page(CustomerActions.ACTIONS_PAGE);
-
-		//Will segfault until connection inititated (For GUI dev only)
+		
 		String date = Bank.get_date(connection);
 		Transaction.TransactionType type = Transaction.TransactionType.PURCHASE;
 		Transaction trans= Transaction.wire(to_acct, from_acct, this.user_id, date, 
@@ -421,11 +404,7 @@ public class CustomerInterface extends JPanel{
 			form.setLabel("Enter a valid amount", Color.red);
 			return;
 		}
-		//temp
-		update_page(CustomerActions.ACTIONS_PAGE);
-
-
-		//Will segfault until connection inititated (For GUI dev only)
+		
 		String date = Bank.get_date(connection);
 		Transaction.TransactionType type = Transaction.TransactionType.PURCHASE;
 		Transaction trans= Transaction.pay_friend(to_acct,from_acct, this.user_id, date, 
