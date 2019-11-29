@@ -105,7 +105,7 @@ public class CustomerInterface extends JPanel{
 		System.out.println("Customer ID: " + id);
 		System.out.println("Customer PIN: " + pin);
 
-		if(id.equals("")){
+		if(!Utilities.valid_id(id)){
 			form.setLabel("Incorrect ID/PIN", Color.red);
 			return;
 		}
@@ -175,7 +175,7 @@ public class CustomerInterface extends JPanel{
 		String to_acct = form.getInput(0);
 		String amount= form.getInput(1);
 		//If time permits obtain all accounts for the user and have a drop down menu
-		if(to_acct.equals("")){
+		if(!Utilities.valid_id(to_acct)){
 			form.setLabel("Enter a valid account", Color.red);
 			return;
 		}
@@ -206,11 +206,11 @@ public class CustomerInterface extends JPanel{
 		String to_acct = form.getInput(0);
 		String amount= form.getInput(1);
 		String from_acct= form.getInput(2);	
-		if(to_acct.equals("")){
+		if(!Utilities.valid_id(to_acct)){
 			form.setLabel("Enter a valid pocket account", Color.red);
 			return;
 		}
-		if(from_acct.equals("")){
+		if(!Utilities.valid_id(from_acct)){
 			form.setLabel("Enter a valid account", Color.red);
 			return;
 		}
@@ -240,7 +240,7 @@ public class CustomerInterface extends JPanel{
 		String from_acct = form.getInput(0);
 		String amount= form.getInput(1);
 
-		if(from_acct.equals("")){
+		if(!Utilities.valid_id(from_acct)){
 			form.setLabel("Enter a valid account", Color.red);
 			return;
 		}
@@ -268,7 +268,7 @@ public class CustomerInterface extends JPanel{
 	public void purchase(){
 		String from_acct= form.getInput(0);
 		String amount= form.getInput(1);
-		if(from_acct.equals("")){
+		if(!Utilities.valid_id(from_acct)){
 			form.setLabel("Enter a valid account", Color.red);
 			return;
 		}
@@ -297,11 +297,11 @@ public class CustomerInterface extends JPanel{
 		String from_acct= form.getInput(0);
 		String amount= form.getInput(1);
 		String to_acct= form.getInput(2);
-		if(from_acct.equals("")){
+		if(!Utilities.valid_id(from_acct)){
 			form.setLabel("Enter a valid sending account", Color.red);
 			return;
 		}
-		if(to_acct.equals("")){
+		if(!Utilities.valid_id(to_acct)){
 			form.setLabel("Enter a valid receiving account", Color.red);
 			return;
 		}
@@ -329,18 +329,19 @@ public class CustomerInterface extends JPanel{
 		String from_pocket= form.getInput(0);
 		String amount= form.getInput(1);
 		String to_link= form.getInput(2);
-		if(from_pocket.equals("")){
+		if(!Utilities.valid_id(from_pocket)){
 			form.setLabel("Invalid sending pocket account", Color.red);
-			return;
-		}
-		if(to_link.equals("")){
-			form.setLabel("Invalid receiving pocket account", Color.red);
 			return;
 		}
 		if(!Utilities.valid_money_input(amount)){
 			form.setLabel("Enter a valid amount", Color.red);
 			return;
 		}
+		if(!Utilities.valid_id(to_link)){
+			form.setLabel("Invalid receiving pocket account", Color.red);
+			return;
+		}
+		
 		
 		String date = Bank.get_date(connection);
 		Transaction.TransactionType type = Transaction.TransactionType.PURCHASE;
@@ -361,11 +362,11 @@ public class CustomerInterface extends JPanel{
 		String amount= form.getInput(1);
 		String to_acct= form.getInput(2);
 
-		if(from_acct.equals("")){
+		if(!Utilities.valid_id(from_acct)){
 			form.setLabel("Enter a valid sending account", Color.red);
 			return;
 		}
-		if(to_acct.equals("")){
+		if(!Utilities.valid_id(to_acct)){
 			form.setLabel("Enter a valid receiving account", Color.red);
 			return;
 		}
@@ -392,16 +393,17 @@ public class CustomerInterface extends JPanel{
 		String from_acct= form.getInput(0);
 		String amount= form.getInput(1);
 		String to_acct= form.getInput(2);
-		if(from_acct.equals("")){
+		if(!Utilities.valid_id(from_acct)){
 			form.setLabel("Enter a valid sending account", Color.red);
 			return;
 		}
-		if(to_acct.equals("")){
-			form.setLabel("Enter a valid receiving account", Color.red);
-			return;
-		}
+		
 		if(!Utilities.valid_money_input(amount)){
 			form.setLabel("Enter a valid amount", Color.red);
+			return;
+		}
+		if(!Utilities.valid_id(to_acct)){
+			form.setLabel("Enter a valid receiving account", Color.red);
 			return;
 		}
 		
