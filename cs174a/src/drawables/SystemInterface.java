@@ -66,11 +66,86 @@ public class SystemInterface extends JPanel{
 
 		panels.put(SystemActions.ACTIONS_PAGE, create_actions_page());
 		
-		panels.put(SystemActions.CREATE_CUSTOMER, create_page(new ArrayList<String> (Arrays.asList("")), "Create Customer", SystemActions.CREATE_CUSTOMER));
-		panels.put(SystemActions.DELETE_CUSTOMER, create_page(new ArrayList<String> (Arrays.asList("")), "Delete Customer", SystemActions.DELETE_CUSTOMER));
-		panels.put(SystemActions.SET_DATE, create_page(new ArrayList<String> (Arrays.asList("")), "Set Date", SystemActions.SET_DATE ));
+		panels.put(SystemActions.CREATE_CUSTOMER, create_page(new ArrayList<String> (Arrays.asList("Customer ID: ", "Customer Name: ", "Customer Address: ")), "Create Customer", SystemActions.CREATE_CUSTOMER));
+		panels.put(SystemActions.DELETE_CUSTOMER, create_page(new ArrayList<String> (Arrays.asList("Customer ID: ")), "Delete Customer", SystemActions.DELETE_CUSTOMER));
+		panels.put(SystemActions.SET_DATE, create_page(new ArrayList<String> (Arrays.asList("Date (MM-DD-YYYY): ")), "Set Date", SystemActions.SET_DATE ));
 		
 		
+	}
+	
+	public void create_cust(){
+		
+		String tin = form.getInput(0);
+		String name = form.getInput(1);
+		String address = form.getInput(2);
+		if(!Utilities.valid_id(tin)){
+			form.setLabel("Invalid ID", Color.red);
+			return;
+		}
+		if(name.equals("")){
+			form.setLabel("Name Required", Color.red);
+			return;
+		}
+		if (address.equals("")){
+			form.setLabel("Address Required", Color.red);
+			return;
+		}
+		Customer cust = Customer.create_customer(tin, name, address, this.connection);
+		if(cust == null){
+			form.setLabel("An error occurred", Color.red);
+			System.out.println("Creation failed... ");
+		}else{
+			form.setLabel("Successfully createed customer", Color.green);
+			System.out.println("User: " + cust.name + " created!");
+		}
+		
+	}
+	public void delete_cust(){
+		
+		String id= form.getInput(0);
+		if(!Utilities.valid_id(id)){
+			form.setLabel("Invalid customer ID", Color.red);
+			return;
+		}
+		if(Customer.del_cust_by_id(id, this.connection)){
+			form.setLabel("Created Customer Successfully", Color.red);
+			System.out.println("Successfully removed customer!");
+		}
+
+	}
+
+	public void create_tables(){
+		if(DBSystem.execute_queries_from_file("./scripts/create_db.sql", this.connection)){
+			System.out.println("Successfully created tables");
+		}else{
+			System.out.println("Error creating tables");
+		}
+	}
+
+	public void destroy_tables(){
+		if(DBSystem.execute_queries_from_file("./scripts/destroy_db.sql", this.connection)){
+			System.out.println("Successfully destroyed tables");
+		}else{
+			System.out.println("Error destroying tables");
+		}
+	}
+	public void set_date(){
+		String d= form.getInput(0);
+		if(!Utilities.valid_date(d)){
+			form.setLabel("Invalid date.Format: MM-DD-YYYY", Color.red);
+			return;
+		}
+		//split at dash
+		String[] date= d.split("-");
+		try{
+			Bank.set_date(date[2],date[0],date[1], this.connection);
+		}catch(Exception e){
+			form.setLabel("An error occured", Color.red);
+			return;
+		}
+		System.out.println("Date set to: "+ d);
+		update_page(SystemActions.ACTIONS_PAGE);
+
 	}
 	/* Changes from one page to another*/
 	private void update_page(SystemActions page){
@@ -164,64 +239,6 @@ public class SystemInterface extends JPanel{
 
 
 	}
-	public void create_cust(){
-		/*
-		String tin = Utilities.prompt("Enter c_id:");
-		String name = Utilities.prompt("Enter c_name:");
-		String address = Utilities.prompt("Enter address:");
-		Customer cust = Customer.create_customer(tin, name, address, this.connection);
-		if(cust == null){
-			System.out.println("Creation failed... ");
-		}else{
-			System.out.println("User: " + cust.name + " created!");
-		}*/
-		form.setLabel("IN PROGRESS", Color.red);
-
-	}
-	public void delete_cust(){
-		/*
-		String id = Utilities.prompt("Enter c_id:");
-		if(Customer.del_cust_by_id(id, this.connection)){
-			System.out.println("Successfully removed customer!");
-		}*/
-		form.setLabel("IN PROGRESS", Color.red);
-
-	}
-
-	public void create_tables(){
-		if(DBSystem.execute_queries_from_file("./scripts/create_db.sql", this.connection)){
-			System.out.println("Successfully created tables");
-		}else{
-			System.out.println("Error creating tables");
-		}
-	}
-
-	public void destroy_tables(){
-		if(DBSystem.execute_queries_from_file("./scripts/destroy_db.sql", this.connection)){
-			System.out.println("Successfully destroyed tables");
-		}else{
-			System.out.println("Error destroying tables");
-		}
-	}
-	public void set_date(){
-		String d= form.getInput(0);
-		if(!Utilities.valid_date(d)){
-			form.setLabel("Invalid date.Format: MM-DD-YYYY", Color.red);
-			return;
-		}
-		//split at dash
-		String[] date= d.split("-");
-		try{
-			Bank.set_date(date[2],date[0],date[1], this.connection);
-		}catch(Exception e){
-			form.setLabel("An error occured", Color.red);
-			return;
-		}
-		System.out.println("Date set to: "+ d);
-		update_page(SystemActions.ACTIONS_PAGE);
-
-	}
-
 	class ButtonListener extends MouseAdapter{
 		private SystemInterface.SystemActions action;
 		public ButtonListener(SystemInterface.SystemActions action){

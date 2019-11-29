@@ -21,6 +21,13 @@ public class Utilities{
   	    frame.setLocationRelativeTo(null);
   	    //frame.setDefaultCloseOperation(frame.EXIT_ON_CLOSE);
 	}
+	public static boolean valid_id(String id){
+		if(id.equals("")){
+			return false;
+		}
+		//Add more restrictions if any.
+		return true;
+	}
 	public static boolean valid_pin_format(String pin){
 		//If less or greater than 4 chars it is invalid
 		if(pin.length()  != 4){
@@ -80,15 +87,12 @@ public class Utilities{
 		System.out.println("Day: "+ day);
 		//If negative or unreasonably large
 		if (year < 0 || year > 9999){
-			
 			return false;
 		}
 		if(month <=0 || month >12){
-			
 			return false;
 		}
 		if(day <=0 || day > 31){
-			
 			return false;
 		}
 		return true;

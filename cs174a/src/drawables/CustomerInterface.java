@@ -430,7 +430,7 @@ public class CustomerInterface extends JPanel{
 		JButton button= new JButton("Submit PIN");
         button.addMouseListener(new ButtonListener(CustomerActions.LOG_IN));
         ArrayList<String> labels= new ArrayList<String> (
-        						Arrays.asList("Tax ID:", "PIN"));
+        						Arrays.asList("Customer ID:", "PIN"));
         InputForm form = new InputForm(labels, button);
         return form;
 	}
