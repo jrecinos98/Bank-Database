@@ -106,11 +106,11 @@ public class CustomerInterface extends JPanel{
 		System.out.println("Customer PIN: " + pin);
 
 		if(id.equals("")){
-			form.setLabel("Incorrect ID/PIN");
+			form.setLabel("Incorrect ID/PIN", Color.red);
 			return;
 		}
 		if(!Utilities.valid_pin_format(pin)){
-			form.setLabel("Invalid PIN format");
+			form.setLabel("Invalid PIN format", Color.red);
 			return;
 		}
 		Customer cust = Customer.login(id, pin, this.connection);

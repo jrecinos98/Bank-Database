@@ -165,6 +165,7 @@ public class SystemInterface extends JPanel{
 
 	}
 	public void create_cust(){
+		/*
 		String tin = Utilities.prompt("Enter c_id:");
 		String name = Utilities.prompt("Enter c_name:");
 		String address = Utilities.prompt("Enter address:");
@@ -173,13 +174,18 @@ public class SystemInterface extends JPanel{
 			System.out.println("Creation failed... ");
 		}else{
 			System.out.println("User: " + cust.name + " created!");
-		}
+		}*/
+		form.setLabel("IN PROGRESS", Color.red);
+
 	}
 	public void delete_cust(){
+		/*
 		String id = Utilities.prompt("Enter c_id:");
 		if(Customer.del_cust_by_id(id, this.connection)){
 			System.out.println("Successfully removed customer!");
-		}
+		}*/
+		form.setLabel("IN PROGRESS", Color.red);
+
 	}
 
 	public void create_tables(){

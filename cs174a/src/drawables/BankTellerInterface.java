@@ -140,6 +140,7 @@ public class BankTellerInterface extends JPanel{
 	}
 
 	public void show_closed(){
+		/*
 		ArrayList<String> accounts = Account.get_closed_accounts(this.connection);
 		if(accounts == null){
 			System.out.println("Finding closed accounts failed...");
@@ -149,10 +150,13 @@ public class BankTellerInterface extends JPanel{
 			System.out.println("a_id: " + accounts.get(i));
 		}
 		System.out.println("Successfully got closed accounts!");
+	*/
+
+		form.setLabel("IN PROGRESS", Color.red);
 	}
 
 	public void create_pocket_acct(){
-		String id = Utilities.prompt("Enter id:");
+		/*String id = Utilities.prompt("Enter id:");
 		String linkedId = Utilities.prompt("Enter linkedId:");
 		double initialTopUp = Double.parseDouble(Utilities.prompt("Enter InitialTopup:"));
 		String tin = Utilities.prompt("Enter customer id:");
@@ -161,27 +165,40 @@ public class BankTellerInterface extends JPanel{
 			System.err.println("Error: could not create pocket acct");
 		}else{
 			System.out.println("Successfully created pocket acct!");
-		}
+		}*/
+
+		form.setLabel("IN PROGRESS", Color.red);
 	}
 	public void check_transaction(){
+		form.setLabel("IN PROGRESS", Color.red);
 
 	}
 	public void monthly_statement(){
-
+		form.setLabel("IN PROGRESS", Color.red);
 	}
 	public void dter(){
+
+		form.setLabel("IN PROGRESS", Color.red);
 
 	}
 	public void cust_report(){
 
+		form.setLabel("IN PROGRESS", Color.red);
+
 	}
 	public void add_interest(){
+
+		form.setLabel("IN PROGRESS", Color.red);
 
 	}
 	public void delete_closed(){
 
+		form.setLabel("IN PROGRESS", Color.red);
+
 	}
 	public void delete_transactions(){
+
+		form.setLabel("IN PROGRESS", Color.red);
 
 	}
 
