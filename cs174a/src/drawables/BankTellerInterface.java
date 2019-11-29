@@ -89,11 +89,17 @@ public class BankTellerInterface extends JPanel{
 	}
 	public void create_acct(){
 		//Get JComboBox and find selected Index
-		int a_type= ((JComboBox)form.getCustomComponent()).getSelectedIndex();
-		//If none selected or error
-		if(a_type < 0){
-			//Set to default value (Student Checkings)
-			a_type= 0;
+		int a_type=0;
+		try{
+			a_type= ((JComboBox)form.getCustomComponent()).getSelectedIndex();
+			//If none selected or error
+			if(a_type < 0){
+				//Set to default value (Student Checkings)
+				a_type= 0;
+			}
+		}
+		catch(Exception e){
+			System.err.println(e);
 		}
 
 		Testable.AccountType type = Testable.AccountType.values()[a_type];
@@ -259,11 +265,10 @@ public class BankTellerInterface extends JPanel{
 	}
 	private JPanel create_account_page(){
 		JPanel holder= new JPanel();
-		//holder.add(new JLabel("Account Type"));
-		JComboBox acctList = new JComboBox(BankTellerInterface.ACCT_TYPES);
-		//holder.add(acctList);
+		JComboBox<String> acctList = new JComboBox<>(BankTellerInterface.ACCT_TYPES);
 		return create_custom_page(new ArrayList<String> (Arrays.asList("Account ID: ", "Customer ID: ", "Customer Name: ", "Customer Address: ", "Initial Balance: $")), "Create Account", acctList,"AccountType",BankTellerActions.CREATE_ACCOUNT );
 	}
+
 	//These buttons are used to render new pages from the ACTIONS_PAGE.
 	//They perform no operations other than rendering a new JPanel.
 	private void create_render_buttons(){
