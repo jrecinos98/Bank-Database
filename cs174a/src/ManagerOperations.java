@@ -46,10 +46,10 @@ public class ManagerOperations {
 	public ArrayList<String> generate_dter(OracleConnection connection){
 		// Execute query and return all customers with sums >= 10000
 		ArrayList<String> customers = new ArrayList<String>();
-		String query = String.format("SELECT C.c_id, SUM(T.amount)" +
-									 "FROM custaccounts C, transactions T" +
-									 "WHERE C.a_id = T.to_acct AND (T.t_type = 'WIRE' OR T.t_type = 'TRANSFER' OR T.t_type = 'DEPOSIT')" +
-									 "GROUP BY C.c_id" +
+		String query = String.format("SELECT C.c_id, SUM(T.amount) " +
+									 "FROM custaccounts C, transactions T " +
+									 "WHERE C.a_id = T.to_acct AND (T.t_type = 'WIRE' OR T.t_type = 'TRANSFER' OR T.t_type = 'DEPOSIT') " +
+									 "GROUP BY C.c_id " +
 									 "HAVING SUM(T.amount) >= 10000");
 		try( Statement statement = connection.createStatement() ) {
 			try( ResultSet rs = statement.executeQuery( query )){
@@ -67,14 +67,20 @@ public class ManagerOperations {
 		return customers;
 	}
 
-	public boolean customer_report(){
-		// TODO
-		return false;
+	public ArrayList<String> customer_report(String c_id, OracleConnection connection){		
+		return Account.get_cust_accounts_and_status(c_id, connection);
 	}
 
-	public boolean add_interest(){
-		// TODO
-		return false;
+	public boolean add_interest(OracleConnection connection){
+		// Get all accounts and then run the accrue interest function on each
+		ArrayList<String> accounts = Account.get_all_accounts(connection);
+		for(int i = 0; i < accounts.size(); i++){
+			boolean success = Transaction.accrue_interest(accounts.get(i), connection);
+			if(!success){
+				return false;
+			}
+		}
+		return true;
 	}
 
 	public boolean create_account(Testable.AccountType accountType, String id, double initialBalance,
@@ -95,13 +101,45 @@ public class ManagerOperations {
 		return created;
 	}
 
-	public boolean add_owner_to_account(String new_owner_id, String a_id){
-		return false;
+	public boolean add_owner_to_account(String new_owner_id, String a_id, OracleConnection connection){
+		// Account.create_acct_ownership
+		return Account.create_acct_ownership(a_id, new_owner_id, connection);
 	}
 
-	public boolean delete_closed_acc_and_cust(){
-		// TODO
-		return false;
+	public boolean delete_closed_acc_and_cust(OracleConnection connection){
+		// Delete any closed accounts
+		String query = String.format( "DELETE FROM accounts WHERE is_open = 0" );
+		try( Statement statement = connection.createStatement() ) {
+			try{
+				int updates = statement.executeUpdate( query );
+			}catch(SQLException e){
+				e.printStackTrace();
+				return false;
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+			return false;
+		}
+
+		// Clean up any customers that need to be deleted
+		query = String.format(
+				"DELETE FROM customers C1 " +
+				"WHERE C1.c_id NOT IN ( " +
+	    			"SELECT C.c_id " +
+    				"FROM custaccounts CA " +
+				")");
+		try( Statement statement = connection.createStatement() ) {
+			try{
+				int updates = statement.executeUpdate( query );
+			}catch(SQLException e){
+				e.printStackTrace();
+				return false;
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+			return false;
+		}
+		return true;
 	}
 
 	public boolean delete_transactions(OracleConnection connection){

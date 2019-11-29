@@ -108,6 +108,11 @@ public class Bank{
 
 	public static boolean set_interest_rate(Testable.AccountType type, double rate, OracleConnection connection){
 		if(type == Testable.AccountType.POCKET || type == Testable.AccountType.STUDENT_CHECKING){
+			System.err.println("Cannot set interest rate on pocket or student account");
+			return false;
+		}
+		if(rate < 0 || rate > 100){
+			System.err.println("Interest rate out of bounds 0 - 100");
 			return false;
 		}
 		String update_type = "";

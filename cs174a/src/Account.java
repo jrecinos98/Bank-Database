@@ -202,6 +202,25 @@ public class Account{
 		return owners;
 	}
 
+	public static ArrayList<String> get_all_accounts(OracleConnection connection){
+		ArrayList<String> accounts = new ArrayList<String>();
+		String query = String.format("SELECT a_id FROM accounts");
+		try( Statement statement = connection.createStatement() ) {
+			try( ResultSet rs = statement.executeQuery( query )){
+				while(rs.next()){
+					accounts.add(rs.getString("a_id"));
+				}
+			}catch(SQLException e){
+				e.printStackTrace();
+				return null;
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+			return null;
+		}
+		return accounts;
+	}
+
 	// Create an instance in custaccounts linking customer + account
 	public static boolean create_acct_ownership(String a_id, String c_id, OracleConnection connection){
 		String query = String.format("INSERT INTO custaccounts (c_id, a_id) " +
@@ -223,6 +242,36 @@ public class Account{
 		}
 		return true;
 	}
+
+	public static ArrayList<String> get_cust_accounts_and_status(String c_id, OracleConnection connection){
+		ArrayList<String> acct_statuses = new ArrayList<String>();
+		String query = String.format("SELECT A.a_id, A.is_open " +
+									 "FROM custaccounts C, Accounts A " +
+									 "WHERE C.a_id = A.a_id AND C.c_id = '%s'", c_id);
+		try( Statement statement = connection.createStatement() ) {
+			try( ResultSet rs = statement.executeQuery( query )){
+				while(rs.next()){
+					String acct_status = "Account id: " + rs.getString("a_id");
+					acct_status += " Status: ";
+					if(rs.getInt("is_open") == 1){
+						acct_status += "open";
+					}else{
+						acct_status += "closed";
+					}
+					acct_statuses.add(acct_status);
+				}
+			}catch(SQLException e){
+				e.printStackTrace();
+				return null;
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+			return null;
+		}
+		return acct_statuses;
+	}
+
+
 
 	public static boolean create_pock_link(String a_id, String link_id, OracleConnection connection){
 		String query = String.format("INSERT INTO pocketlinks (pocket_id, link_id) " +
@@ -320,6 +369,9 @@ public class Account{
 				if(updates == 0){
 					return false;
 				}
+
+				// Close any attached pocket accounts
+				Account.close_pocket_accounts_by_owner_id(a_id, connection);
 			}catch(SQLException e){
 				e.printStackTrace();
 				return false;
@@ -332,6 +384,24 @@ public class Account{
 	}
 
 	public static boolean close_pocket_accounts_by_owner_id(String from_acct, OracleConnection connection){
+		String query = String.format( "UPDATE accounts A " +
+									  "SET A.is_open = 0 " +
+									  "WHERE A.a_id in ( " +
+    								  	"SELECT P.pocket_id " +
+    								  	"FROM pocketlinks P " +
+    								  	"WHERE P.link_id = '%s' " +
+									  ")", from_acct );
+		try( Statement statement = connection.createStatement() ) {
+			try{
+				int updates = statement.executeUpdate( query );
+			}catch(SQLException e){
+				e.printStackTrace();
+				return false;
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+			return false;
+		}
 		return true;
 	}
 

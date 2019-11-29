@@ -27,6 +27,8 @@
 * Can a pocket account have multiple owners?
 * Can we assume that account creations/customer creations always given unique id?
 * Check if account exists before creation
+* Allow pocket and student accounts to change interest?
+* DTER all accounts/transactions?
 
 # To-do
 * Update to store interest date in global (bank) table instead of within each account
@@ -43,4 +45,4 @@
 * Test payfriend where it's FTM for both pocket accounts
 * Try every transaction with a nonexistant account
 * Pocket account accrue interest as a transaction as this could attempt to make negative on balance?
-* Constrain interest rate to 0 <= r <= 100
+* Add Leap year fucntionality

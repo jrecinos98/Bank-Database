@@ -22,6 +22,7 @@ CREATE TABLE pocketlinks (
 	pocket_id VARCHAR(32) NOT NULL,
     link_id VARCHAR(32) NOT NULL,
 	PRIMARY KEY(pocket_id),
+	FOREIGN KEY (pocket_id) REFERENCES accounts(a_id) ON DELETE CASCADE,
 	FOREIGN KEY (link_id) REFERENCES accounts(a_id) ON DELETE CASCADE
 )
 #NEW#
