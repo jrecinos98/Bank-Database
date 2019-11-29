@@ -23,6 +23,8 @@ import java.sql.ResultSet;
 
 
 import java.util.Scanner;
+import java.util.ArrayList;
+
 
 public class Customer {
 	public String c_id;
@@ -97,6 +99,83 @@ public class Customer {
 		return cust;
 	}
 
+
+	public static boolean cust_insurance_limit_reached(String c_id, OracleConnection connection){
+		String query = String.format("SELECT SUM(A.balance) FROM accounts A WHERE A.owner_id = '%s' ", c_id);
+		try( Statement statement = connection.createStatement()){
+			try( ResultSet rs = statement.executeQuery(query)){
+				if(rs.next()){
+					double balance = rs.getDouble(1);
+					if(balance > 100000){
+						return true;
+					}
+				}
+			}catch(SQLException e){
+				e.printStackTrace();
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+		}
+		return false;
+	}
+
+	public static ArrayList<AccountStatement> generate_monthly_statement(String c_id, OracleConnection connection){
+		ArrayList<AccountStatement> statements = new ArrayList<AccountStatement>(); // Return statements
+		ArrayList<String> accounts = Account.get_cust_accounts(c_id, connection);
+
+
+		// Loop over all the accounts they are primary owner of
+		for(int i = 0; i < accounts.size(); i++){
+			ArrayList<String> owners = new ArrayList<String>();
+			ArrayList<Transaction> transactions = new ArrayList<Transaction>();
+			double final_balance;
+			double initial_balance;
+			boolean insurance_limit_reached;
+
+			owners = Account.get_account_owners_name_address(accounts.get(i), connection);
+			transactions = Transaction.get_acct_transactions_this_month(accounts.get(i), connection);
+			final_balance = Account.get_account_balance(accounts.get(i), connection);
+			initial_balance = final_balance;
+			// Unwind transactions to find the initial balance at the start of the month
+			for(int j = 0; j < transactions.size(); j++){
+				if(transactions.get(j).to_acct.equals(accounts.get(i))){
+					// Subtract amount
+					initial_balance -= transactions.get(j).amount;
+				}else if(transactions.get(j).from_acct.equals(accounts.get(i))){
+					// Add amount
+					initial_balance += transactions.get(j).amount;
+				}
+			}
+			// Check if reached insurance limit
+			insurance_limit_reached = Customer.cust_insurance_limit_reached(c_id, connection);
+
+			// Add Account statement to customer's report
+			statements.add(new AccountStatement(accounts.get(i), owners, transactions, final_balance,
+												initial_balance, insurance_limit_reached));
+		}
+
+		return statements;
+	}
+
+	public static ArrayList<String> get_all_customers(OracleConnection connection){
+		ArrayList<String> customers = new ArrayList<String>();
+		String query = String.format("SELECT C.c_id FROM customers C ");
+		try( Statement statement = connection.createStatement()){
+			try( ResultSet rs = statement.executeQuery(query)){
+				while(rs.next()){
+					customers.add(rs.getString("c_id"));
+				}
+			}catch(SQLException e){
+				e.printStackTrace();
+				return null;
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+			return null;
+		}
+		return customers;
+	}
+
 	public static Customer create_customer(String tin, String name, String address, OracleConnection connection){
 		Customer cust = null;
 		String new_encrypted_pin = "0000";
@@ -153,7 +232,7 @@ public class Customer {
 
 	public static Customer get_cust_by_id(String c_id, OracleConnection connection){
 		Customer cust = null;
-		String query = String.format("SELECT * FROM customers C WHERE C.c_id = %s ", c_id);
+		String query = String.format("SELECT * FROM customers C WHERE C.c_id = '%s' ", c_id);
 		try( Statement statement = connection.createStatement()){
 			try( ResultSet rs = statement.executeQuery(query)){
 				if(rs.next()){

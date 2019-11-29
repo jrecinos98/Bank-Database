@@ -21,11 +21,6 @@
 
 # Questions
 * What if a customer with a given ssn already exists in db?
-* Can create customer get called without create account? Need to verify initial acct exists?
-* Adding multiple owners to an account via testable createAccount method?
-* Can create a customer with a linked account that is closed?
-* Can a pocket account have multiple owners?
-* Can we assume that account creations/customer creations always given unique id?
 * Check if account exists before creation
 * Allow pocket and student accounts to change interest?
 * DTER all accounts/transactions?
@@ -46,3 +41,4 @@
 * Try every transaction with a nonexistant account
 * Pocket account accrue interest as a transaction as this could attempt to make negative on balance?
 * Add Leap year fucntionality
+* Add bank branch to account creation

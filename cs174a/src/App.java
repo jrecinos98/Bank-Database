@@ -106,17 +106,43 @@ public class App implements Testable
 
 	@Override
 	public String showBalance( String accountId ){
-		return "1";
+		double balance = Account.get_account_balance(accountId, this.connection);
+		if(balance == -1){
+			return "1";
+		}else{
+			String response = String.format("0 %.2f", balance);
+			return response;
+		}
 	}
 
 	@Override
 	public String deposit( String accountId, double amount ){
-		return "1";
+		double old = Account.get_account_balance(accountId, this.connection);
+		boolean transact = Transaction.deposit_no_owner_check(accountId, Bank.get_date(this.connection), 
+						 Transaction.TransactionType.DEPOSIT, amount, this.connection);
+		double new_b = Account.get_account_balance(accountId, this.connection);
+		if(transact == false || old == -1 || new_b == -1){
+			return "1";
+		}else{
+			String response = String.format("0 %.2f %.2f", old, new_b);
+			return response;
+		}
 	}
 
 	@Override
 	public String createCustomer( String accountId, String tin, String name, String address ){
-		return "1";
+		Account account = Account.get_account_by_id(accountId, this.connection);
+		if(account == null){
+			return "1";
+		}else{
+			Customer cust = Customer.create_customer(tin, name, address,this.connection);
+			if(cust == null){
+				return "1";
+			}else{
+				return "0";
+			}
+		}
+
 	}
 
 	@Override

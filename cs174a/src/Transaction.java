@@ -295,6 +295,43 @@ public class Transaction {
 		return true;
 	}
 
+	public static boolean deposit_no_owner_check(String to_acct, String date, 
+						 Transaction.TransactionType type, double amount, OracleConnection connection){
+		
+		// Check customer exists
+		// if(Customer.get_cust_by_id(cust_id, connection) == null){
+			// System.err.println("Deposit failed -- customer doesn't exist");
+			// return false;
+		// }
+
+		// Check customer owns account
+		// if(!Transaction.cust_owns_acct(to_acct, cust_id, connection)){
+			// System.err.println("Deposit failed -- customer doesn't own account");
+			// return false;
+		// }
+
+		// Make sure account is NOT a pocket account
+		Account account = Account.get_account_by_id(to_acct, connection);
+		if(account != null && account.account_type.equals("" + Testable.AccountType.POCKET)){
+			System.err.println("Deposit failed -- cannot deposit to pocket account");
+			return false;
+		}
+
+		// Transfer money into the account
+		if(!Transaction.transfer_money(to_acct, "", amount, connection)){
+			return false;
+		}
+
+		// Create a transaction record
+		Transaction transaction = Transaction.create_transaction(to_acct, "", "", date,"" + type, amount, connection);
+		if(transaction == null){
+			System.err.println("Deposit failed -- could not create transaction");
+			return false;
+		}
+
+		return true;
+	}
+
 
 	public static Transaction transfer(String to_acct, String from_acct, String cust_id, String date, 
 						 Transaction.TransactionType type, double amount, OracleConnection connection){
