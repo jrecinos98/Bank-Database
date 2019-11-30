@@ -341,6 +341,25 @@ public class Account{
 		return true;
 	}
 
+	public static String get_linked(String pocket_id, OracleConnection connection){
+		String query = String.format("SELECT P.link_id FROM pocketlinks P WHERE P.pocket_id = '%s'",
+										pocket_id);
+		try( Statement statement = connection.createStatement() ) {
+			try( ResultSet rs = statement.executeQuery( query )){
+				if(rs.next()){
+					return rs.getString("link_id");
+				}
+			}catch(SQLException e){
+				e.printStackTrace();
+				return "";
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+			return "";
+		}
+		return "";
+	}	
+
 	public static boolean accounts_are_linked(String pocket_id, String linked_id, OracleConnection connection){
 		String query = String.format("SELECT * FROM pocketlinks P WHERE P.pocket_id = '%s' AND P.link_id = '%s'",
 										pocket_id, linked_id);
