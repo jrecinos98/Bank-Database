@@ -18,10 +18,14 @@ import javax.swing.text.BadLocationException;
 
 
 import java.awt.*;
+import java.awt.event.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
 
 import oracle.jdbc.pool.OracleDataSource;
 import oracle.jdbc.OracleConnection;
@@ -31,26 +35,39 @@ import java.util.Scanner;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
-
+import java.util.List;
+import java.util.*;
 
 public class BankTellerInterface extends JPanel{
 	
 	public static String[] ACCT_TYPES= {"Student Checking", "Interest Checking", "Savings", "Pocket"};
 	public enum BankTellerActions{
-		ACTIONS_PAGE,
-		CHECK_TRANSACTION,
-		MONTHLY_STATEMENT,
-		LIST_CLOSED,
-		DTER,
-		CUSTOMER_REPORT,
-		ADD_INTEREST,
+		
 		CREATE_ACCOUNT,
+		POCKET_ACCOUNT,
+		CHECK_TRANSACTION,
+		
+		CUSTOMER_REPORT,
+		LIST_CLOSED,
+
+		MONTHLY_STATEMENT,
+		DTER,
+
 		DELETE_TRANSACTIONS,
-		DELETE_CLOSED
+		ADD_INTEREST,
+		DELETE_CLOSED,
+
+
+		ACTIONS_PAGE,
+		SEARCH,
+		SEARCH_CLOSED,
+		SEARCH_DTER,
+		SEARCH_REPORT,
+		SEARCH_MONTHLY_STATEMENT
 	}
 
 	private OracleConnection connection;
-	private ArrayList<JButton> action_buttons;
+	private Hashtable<BankTellerActions, JButton> action_buttons;
 	private Hashtable<BankTellerActions, JPanel> panels;
 	private InputForm form;
 	private JPanel current_page;
@@ -58,13 +75,13 @@ public class BankTellerInterface extends JPanel{
 
 
 	public BankTellerInterface(OracleConnection connection){
-		super(new GridLayout(4, 4));
+		//super(new GridLayout(4, 4));
 		this.connection = connection;
 		create_pages();
 		//Initial Screen
 		current_page= panels.get(BankTellerActions.ACTIONS_PAGE);
 		add(current_page);
-		//parent_frame= Interface.main_frame;
+		parent_frame= Interface.main_frame;
 	}
 
 	/*Creates all the pages that will be used for the bankTeller interface*/
@@ -73,17 +90,24 @@ public class BankTellerInterface extends JPanel{
 		//panels.put(CustomerActions.LOG_IN, create_login_page());
 
 		panels.put(BankTellerActions.ACTIONS_PAGE, create_actions_page());
-		panels.put(BankTellerActions.CREATE_ACCOUNT, create_account_page());
 		
-		panels.put(BankTellerActions.CHECK_TRANSACTION, create_page(new ArrayList<String> (Arrays.asList("")), "Create Check", BankTellerActions.CHECK_TRANSACTION));
+		panels.put(BankTellerActions.CREATE_ACCOUNT, create_account_page(true));
+		panels.put(BankTellerActions.POCKET_ACCOUNT, create_account_page(false));
+		panels.put(BankTellerActions.CHECK_TRANSACTION, create_page(new ArrayList<String> (Arrays.asList("Customer ID: ", " Amount: $","Account ID: " )), "Write Check", BankTellerActions.CHECK_TRANSACTION));	
 		
+		//No input needed just display info
+		panels.put(BankTellerActions.LIST_CLOSED, create_closed_page());
+		panels.put(BankTellerActions.DTER, create_dter_page());
+		
+		//Need input but Input form doesn't cut it
 		panels.put(BankTellerActions.MONTHLY_STATEMENT, create_page(new ArrayList<String> (Arrays.asList("")), "Generate Statement", BankTellerActions.MONTHLY_STATEMENT));
-		panels.put(BankTellerActions.LIST_CLOSED, create_page(new ArrayList<String> (Arrays.asList("" )), "List Closed Accounts", BankTellerActions.LIST_CLOSED));
-		panels.put(BankTellerActions.DTER, create_page(new ArrayList<String> (Arrays.asList("")), "Generate DTER", BankTellerActions.DTER ));
-		panels.put(BankTellerActions.CUSTOMER_REPORT, create_page(new ArrayList<String> (Arrays.asList("")), "Generate Report", BankTellerActions.CUSTOMER_REPORT ));
+		panels.put(BankTellerActions.CUSTOMER_REPORT, create_customer_report_page());
+		
+		//Does not need a new page.
 		panels.put(BankTellerActions.ADD_INTEREST, create_page(new ArrayList<String> (Arrays.asList("")), "Add Interest", BankTellerActions.ADD_INTEREST ));
 		panels.put(BankTellerActions.DELETE_TRANSACTIONS, create_page(new ArrayList<String> (Arrays.asList("")), "Delete All Transactions", BankTellerActions.DELETE_TRANSACTIONS ));
 		panels.put(BankTellerActions.DELETE_CLOSED, create_page(new ArrayList<String> (Arrays.asList("")), "Delete All Closed Accounts", BankTellerActions.DELETE_CLOSED ));
+		
 		
 		
 	}
@@ -145,67 +169,192 @@ public class BankTellerInterface extends JPanel{
 		}
 	}
 
-	public void show_closed(){
+
+	public void create_pocket_acct(){
+		//Get JComboBox and find selected Index
+		int a_type=3;
+		try{
+			a_type= ((JComboBox)form.getCustomComponent()).getSelectedIndex();
+			//If none selected or error
+			if(a_type < 0){
+				//Set to default value (Student Checkings)
+				a_type= 3;
+			}
+		}
+		catch(Exception e){
+			System.err.println(e);
+		}
+
+		Testable.AccountType type = Testable.AccountType.values()[a_type];
+		String id= form.getInput(0);
+		String linkedId= form.getInput(1);
+		String tin= form.getInput(2);
+		String initialTopUp= form.getInput(3);
+
+		if(!Utilities.valid_id(id)){
+			form.setLabel("Enter a valid account ID", Color.red);
+			return;
+		}
+		if(!Utilities.valid_id(linkedId)){
+			form.setLabel("Enter a valid linked account ID", Color.red);
+			return;
+		}
+		if(!Utilities.valid_id(tin)){
+			form.setLabel("Enter a valid customer ID", Color.red);
+			return;
+		}
+		if(!Utilities.valid_money_input(initialTopUp)){
+			form.setLabel("Enter a valid amount", Color.red);
+			return;
+		}
 		/*
+		if(Double.parseDouble(initial_balance) < 1000){
+			form.setLabel("Initial deposit too low", Color.red);
+			return;
+		}*/
+
+		//Create the pocket account
+		if(ManagerOperations.create_pocket_account(id, linkedId,Double.parseDouble(initialTopUp), tin, this.connection)){
+			form.setLabel("Account creation failed", Color.red);
+			System.err.println("Error: could not create pocket acct");
+		}else{
+			form.setLabel("Account created successfully", Color.green);
+			System.out.println("Successfully created pocket acct!");
+		}
+	}
+	public void check_transaction(){
+		String cust_id= form.getInput(0);
+		String amount= form.getInput(1);
+		String a_id= form.getInput(2);
+
+		if(!Utilities.valid_id(cust_id)){
+			form.setLabel("Enter a valid customer ID", Color.red);
+			return;
+		}
+		if(!Utilities.valid_id(a_id)){
+			form.setLabel("Enter a valid account ID", Color.red);
+			return;
+		}
+		
+		if(!Utilities.valid_money_input(amount)){
+			form.setLabel("Enter a valid amount", Color.red);
+			return;
+		}
+		String checkID= ManagerOperations.enter_check_transaction(a_id,cust_id, Double.parseDouble(amount), this.connection);
+		if(checkID.equals("-1")){
+			form.setLabel("Check transaction failed", Color.red);
+			System.out.println("Check transaction failed");
+			return;
+		}
+		else{
+			//May have to do something with check num.
+			form.setLabel("Check transaction success", Color.green);
+			System.out.println("Check transaction success");
+			return;
+		}
+
+	}
+	public void show_closed(){
+		ListPage p = (ListPage)panels.get(BankTellerActions.LIST_CLOSED);
+		String[] col = {"Account ID"};
+		ArrayList< ArrayList<String> > a_list= new ArrayList<ArrayList<String>>();
 		ArrayList<String> accounts = Account.get_closed_accounts(this.connection);
-		if(accounts == null){
-			System.out.println("Finding closed accounts failed...");
+		if(accounts == null || accounts.size() == 0){
+			//have a dialog saying that no closed accounts were found
+			JOptionPane.showMessageDialog(parent_frame,"No accounts were found");
+			System.out.println("No accounts found");
 			return;
 		}
 		for(int i = 0; i < accounts.size(); i++){
 			System.out.println("a_id: " + accounts.get(i));
 		}
 		System.out.println("Successfully got closed accounts!");
-	*/
+		a_list.add(accounts);
+		p.createTable(col, a_list);
+		update_page(BankTellerActions.LIST_CLOSED);
 
-		form.setLabel("IN PROGRESS", Color.red);
+
+
+		//form.setLabel("IN PROGRESS", Color.red);
 	}
-
-	public void create_pocket_acct(){
-		/*String id = Utilities.prompt("Enter id:");
-		String linkedId = Utilities.prompt("Enter linkedId:");
-		double initialTopUp = Double.parseDouble(Utilities.prompt("Enter InitialTopup:"));
-		String tin = Utilities.prompt("Enter customer id:");
-		Account acct = Account.create_pocket_account(id, linkedId, initialTopUp, tin, this.connection);
-		if(acct == null){
-			System.err.println("Error: could not create pocket acct");
-		}else{
-			System.out.println("Successfully created pocket acct!");
-		}*/
-
-		form.setLabel("IN PROGRESS", Color.red);
-	}
-	public void check_transaction(){
-		form.setLabel("IN PROGRESS", Color.red);
+	
+	public void dter(){
+		ListPage p = (ListPage)panels.get(BankTellerActions.DTER);
+		String[] col= {"Customer ID"};
+		ArrayList< ArrayList<String> > c_list= new ArrayList<ArrayList<String>>();
+		ArrayList<String> customers = ManagerOperations.generate_dter(this.connection);
+		if(customers == null || customers.size() == 0){
+			//have a dialog saying that no closed accounts were found
+			JOptionPane.showMessageDialog(parent_frame,"No customers were found");
+			System.out.println("No customer found");
+			return;
+		}
+		for(int i = 0; i < customers.size(); i++){
+			System.out.println("c_id: " + customers.get(i));
+		}
+		System.out.println("Successfully got closed accounts!");
+		c_list.add(customers);
+		p.createTable(col, c_list);
+		update_page(BankTellerActions.DTER);
 
 	}
 	public void monthly_statement(){
 		form.setLabel("IN PROGRESS", Color.red);
 	}
-	public void dter(){
-
-		form.setLabel("IN PROGRESS", Color.red);
-
-	}
 	public void cust_report(){
-
+		String cust_id= form.getInput(0);
 		form.setLabel("IN PROGRESS", Color.red);
 
 	}
 	public void add_interest(){
+		int i=JOptionPane.showConfirmDialog(parent_frame, "Sure you want to add interest?");
+        if(i==0){
+        	if(ManagerOperations.add_interest(this.connection)){
+        		//Show dialog confirming
+        		JOptionPane.showMessageDialog(parent_frame,"Interest added successfully");
+			}
+			else{
 
-		form.setLabel("IN PROGRESS", Color.red);
-
+				//Show dialog stating failure
+				JOptionPane.showMessageDialog(parent_frame,"An error occured","Inane warning",JOptionPane.WARNING_MESSAGE);
+				System.out.println("Check transaction success");
+				return;
+			}
+        }
 	}
 	public void delete_closed(){
+		//Show a dalog to make user confirm action (Make them type it)
+		int i=JOptionPane.showConfirmDialog(parent_frame, "Sure you want to delete all closed accounts?");
+        if(i==0){
+        	if(ManagerOperations.delete_closed_acc_and_cust(this.connection)){
+        		//Show dialog confirming
+        		JOptionPane.showMessageDialog(parent_frame,"Closed accounts deleted successfully");
+			}
+			else{
 
-		form.setLabel("IN PROGRESS", Color.red);
-
+				//Show dialog stating failure
+				JOptionPane.showMessageDialog(parent_frame,"An error occured","Inane warning",JOptionPane.WARNING_MESSAGE);
+				System.out.println("Failed to delete closed accounts");
+				return;
+			}
+        }
 	}
 	public void delete_transactions(){
+		//Show a dalog to make user confirm action (Make them type it)
+		int i=JOptionPane.showConfirmDialog(parent_frame, "Sure you want to delete all transactions?");
+        if(i==0){
+        	if(ManagerOperations.delete_transactions(this.connection)){
+        		//Show dialog confirming
+        		JOptionPane.showMessageDialog(parent_frame,"Transactions deleted successfully");
+			}
+			else{
 
-		form.setLabel("IN PROGRESS", Color.red);
-
+				//Show dialog stating failure
+				JOptionPane.showMessageDialog(parent_frame,"An error occured","Inane warning",JOptionPane.WARNING_MESSAGE);
+				System.out.println("Failed to delete transactions");
+				return;
+			}
+        }
 	}
 
 	/* Changes from one page to another*/
@@ -216,7 +365,7 @@ public class BankTellerInterface extends JPanel{
 		try{
 			current_page= panels.get(page);
 			//Actions page has no form associated with it
-			if(page != BankTellerActions.ACTIONS_PAGE){
+			if(isForm(page)){
 				//Clear old values from old form
 				if(this.form != null)
 					this.form.resetFields();
@@ -233,6 +382,11 @@ public class BankTellerInterface extends JPanel{
 		}
 		add(current_page);
 	}
+	private boolean isForm(BankTellerActions page){
+		return (page == BankTellerActions.CREATE_ACCOUNT
+			 || page == BankTellerActions.POCKET_ACCOUNT
+			 || page == BankTellerActions.CHECK_TRANSACTION);
+	}
 	/*Creates a page with labels and textfields (depends on size of ArrayList)*/
 	private JPanel create_page(ArrayList<String> labels, String b_label, BankTellerActions action){
 		
@@ -240,7 +394,7 @@ public class BankTellerInterface extends JPanel{
 		button.addMouseListener(new ButtonListener(action));
 		InputForm form = new InputForm(labels, button);
 		JPanel holder= new JPanel();
-		//holder.add(form);
+		//holder.put(form);
 		return form;
 	}
 	/*Creates a page with labels and textfields (depends on size of ArrayList)*/
@@ -250,7 +404,7 @@ public class BankTellerInterface extends JPanel{
 		button.addMouseListener(new ButtonListener(action));
 		InputForm form = new InputForm(labels, button,component,c_label);
 		//JPanel holder= new JPanel();
-		//holder.add(form);
+		//holder.put(form);
 		return form;
 	}
 
@@ -258,21 +412,62 @@ public class BankTellerInterface extends JPanel{
 	private JPanel create_actions_page(){
 		JPanel holder= new JPanel(new GridLayout(2, 1));
 		create_render_buttons();
-		for(int i=0; i< action_buttons.size();i++){
-			holder.add(action_buttons.get(i));
+		List keys = new ArrayList(action_buttons.keySet());
+		Collections.sort(keys);
+		for(int i=0; i< keys.size();i++){
+			holder.add(action_buttons.get(keys.get(i)));
 		}	
 		return holder;
 	}
-	private JPanel create_account_page(){
-		JPanel holder= new JPanel();
-		JComboBox<String> acctList = new JComboBox<>(BankTellerInterface.ACCT_TYPES);
-		return create_custom_page(new ArrayList<String> (Arrays.asList("Account ID: ", "Customer ID: ", "Customer Name: ", "Customer Address: ", "Initial Balance: $")), "Create Account", acctList,"AccountType",BankTellerActions.CREATE_ACCOUNT );
+	private JPanel create_account_page(boolean regular_acct){
+		ItemChangeListener item = new ItemChangeListener();
+		
+		if(regular_acct){
+			JComboBox<String> acctList = new JComboBox<>(BankTellerInterface.ACCT_TYPES);
+			acctList.addItemListener(item);
+			return create_custom_page(new ArrayList<String> (Arrays.asList("Account ID: ", " Customer ID: ", "Customer Name: ", "Customer Address: ", "Initial Balance: $")), "Create Account", acctList,"Account Type",BankTellerActions.CREATE_ACCOUNT );
+	
+		}
+		else{
+			JComboBox<String> acctList = new JComboBox<>(BankTellerInterface.ACCT_TYPES);
+			acctList.addItemListener(item);
+			return create_custom_page(new ArrayList<String> (Arrays.asList("Account ID: ", " Linked Account ID: ", "Customer ID: ", "Initial Top Up: $")), "Create Pocket Account", acctList,"Account Type",BankTellerActions.POCKET_ACCOUNT );
+		}
+	}
+	private JPanel create_closed_page(){
+		JButton button= new JButton("Search");
+		button.addMouseListener( new ListButtonListener(BankTellerActions.SEARCH_CLOSED));
+		return (new ListPage(button, "Search by Account ID: "));
+	}
+
+	private JPanel create_dter_page(){
+		JButton button= new JButton("Search");
+		button.addMouseListener(new ListButtonListener(BankTellerActions.SEARCH_DTER));
+		return (new ListPage(button, "Search by Customer ID: "));
+		
+	}
+	private JPanel create_customer_report_page(){
+		JButton button= new JButton("Search");
+		button.addMouseListener( new ListButtonListener(BankTellerActions.SEARCH_REPORT));
+		return (new ListPage(button, "Customer ID: "));
+	}
+	/*private JPanel create_monthly_statement(){
+
+	}*/
+
+	private JPanel create_custom_list_page(JButton b, String label, String[] col_names, ArrayList<ArrayList<String>> row_elements){
+		if(col_names.length != row_elements.size()){
+			System.err.println("Missing colums on list");
+			return (new JPanel());
+		}
+		ListPage temp = new ListPage(b,label, col_names, row_elements);
+		return temp;
 	}
 
 	//These buttons are used to render new pages from the ACTIONS_PAGE.
 	//They perform no operations other than rendering a new JPanel.
 	private void create_render_buttons(){
-		this.action_buttons= new ArrayList<JButton>(10);
+		this.action_buttons= new Hashtable< BankTellerActions, JButton>(10);
 
 		JButton t= new JButton("Create Account");
 		t.addMouseListener(new MouseAdapter() { 
@@ -280,7 +475,7 @@ public class BankTellerInterface extends JPanel{
                 update_page(BankTellerActions.CREATE_ACCOUNT);
             }
 		});
-		this.action_buttons.add(t);
+		this.action_buttons.put(BankTellerActions.CREATE_ACCOUNT, t);
 
 		t= new JButton("Write Check");
 		t.addMouseListener(new MouseAdapter() { 
@@ -288,24 +483,24 @@ public class BankTellerInterface extends JPanel{
                 update_page(BankTellerActions.CHECK_TRANSACTION);
             }
 		});		
-		this.action_buttons.add(t);
+		this.action_buttons.put(BankTellerActions.CHECK_TRANSACTION,t);
 
 		t= new JButton("Add Interest");
 		t.addMouseListener(new MouseAdapter() { 
 			public void mouseClicked(MouseEvent e) {
-                update_page(BankTellerActions.ADD_INTEREST);
+                add_interest();
             }
 		});
-		this.action_buttons.add( t);
+		this.action_buttons.put(BankTellerActions.ADD_INTEREST, t);
 
 
 		t= new JButton("Closed Accounts");
 		t.addMouseListener(new MouseAdapter() { 
 			public void mouseClicked(MouseEvent e) {
-                update_page(BankTellerActions.LIST_CLOSED);
+                show_closed();
             }
 		});
-		this.action_buttons.add(t);
+		this.action_buttons.put(BankTellerActions.LIST_CLOSED, t);
 	
 		t= new JButton("Customer Report");
 		t.addMouseListener(new MouseAdapter() { 
@@ -313,7 +508,7 @@ public class BankTellerInterface extends JPanel{
                 update_page(BankTellerActions.CUSTOMER_REPORT);
             }
 		});
-		this.action_buttons.add(t);
+		this.action_buttons.put(BankTellerActions.CUSTOMER_REPORT, t);
 
 		t=new JButton("Monthly Statement");
 		t.addMouseListener(new MouseAdapter() { 
@@ -321,32 +516,33 @@ public class BankTellerInterface extends JPanel{
                 update_page(BankTellerActions.MONTHLY_STATEMENT);
             }
 		});
-		this.action_buttons.add(t);
+		this.action_buttons.put(BankTellerActions.MONTHLY_STATEMENT, t);
 		
 
 		t= new JButton("Delete Closed Accounts");
 		t.addMouseListener(new MouseAdapter() { 
 			public void mouseClicked(MouseEvent e) {
-                update_page(BankTellerActions.DELETE_CLOSED);
+                delete_closed();
             }
 		});
-		this.action_buttons.add( t);
+		this.action_buttons.put(BankTellerActions.DELETE_CLOSED, t);
 
 		t= new JButton("Delete Transactions");
 		t.addMouseListener(new MouseAdapter() { 
 			public void mouseClicked(MouseEvent e) {
-                update_page(BankTellerActions.DELETE_TRANSACTIONS);
+                //update_page(BankTellerActions.DELETE_TRANSACTIONS);
+                delete_transactions();
             }
 		});
-		this.action_buttons.add(t);
+		this.action_buttons.put(BankTellerActions.DELETE_TRANSACTIONS, t);
 
 		t=  new JButton("Generate DTER");
 		t.addMouseListener(new MouseAdapter() { 
 			public void mouseClicked(MouseEvent e) {
-                update_page(BankTellerActions.DTER);
+				dter();
             }
 		});
-		this.action_buttons.add(t);
+		this.action_buttons.put(BankTellerActions.DTER, t);
 
 	}
 	class ButtonListener extends MouseAdapter{
@@ -360,6 +556,7 @@ public class BankTellerInterface extends JPanel{
 			if(SwingUtilities.isLeftMouseButton(e)){
 
 				//Reset label/error message upon button click. Not needed but playing it safe
+				
 				form.resetLabel();
 				switch(this.action){
 					case CHECK_TRANSACTION:
@@ -368,28 +565,24 @@ public class BankTellerInterface extends JPanel{
 					case MONTHLY_STATEMENT:
 						monthly_statement();
 						break;
-					case LIST_CLOSED:
-						show_closed();
-						break;
-					case DTER:
-						dter();
-						break;
 					case CUSTOMER_REPORT:
 						cust_report();
 						break;
-					case ADD_INTEREST:
-						add_interest();
-						break;
 					case CREATE_ACCOUNT:
 						create_acct();
-						break;	
-					case DELETE_CLOSED:
-						delete_closed();
-						break;	
-					case DELETE_TRANSACTIONS:
-						delete_transactions();
+						break;		
+					case POCKET_ACCOUNT:
+						create_pocket_acct();
 						break;
-
+					case SEARCH:
+					 	System.out.println("Searching");
+						try{
+							ListPage page= (ListPage) panels.get(current_page);
+							page.search();
+						}catch(Exception err){
+							System.err.println(err);
+						}
+						break;
 				}
 
 			}
@@ -398,5 +591,59 @@ public class BankTellerInterface extends JPanel{
 				update_page(BankTellerActions.ACTIONS_PAGE);
 			}
 		}
+	}
+	class ListButtonListener extends MouseAdapter{
+		private BankTellerInterface.BankTellerActions action;
+		public ListButtonListener(BankTellerInterface.BankTellerActions action){
+			super();
+			this.action= action;
+		}
+		public void mouseClicked(MouseEvent e){
+			//If left clicked
+			if(SwingUtilities.isLeftMouseButton(e)){
+				switch(this.action){
+					case SEARCH_CLOSED:
+
+						break;
+					case SEARCH_DTER:
+						break;
+					case SEARCH_REPORT:
+						break;
+					case SEARCH_MONTHLY_STATEMENT:
+						break;
+				}
+
+			}
+			else if(SwingUtilities.isRightMouseButton(e)){
+				//Essentially a back key
+				update_page(BankTellerActions.ACTIONS_PAGE);
+			}
+		}
+	}
+	class ItemChangeListener implements ItemListener{
+		private int index=0;
+	    @Override
+	    public void itemStateChanged(ItemEvent event) {
+	       if (event.getStateChange() == ItemEvent.SELECTED) {
+	          Object item = event.getItem();
+	          int i=index;
+	          try{
+	          	i=((JComboBox)form.getCustomComponent()).getSelectedIndex();
+	          }catch(Exception e){
+	          	System.err.println("Could not cast to JComboBox");
+	          }
+	          if(i==3 && index != i){
+	          	update_page(BankTellerActions.POCKET_ACCOUNT);
+	          	((JComboBox)form.getCustomComponent()).setSelectedIndex(3);
+	          }
+	          //Condition wrong
+	          else if (index == 3 && i!= 3){
+	          	update_page(BankTellerActions.CREATE_ACCOUNT);
+	          	((JComboBox)form.getCustomComponent()).setSelectedIndex(i);
+	          }
+	          index=i;
+
+	       }
+	    }       
 	}
 }

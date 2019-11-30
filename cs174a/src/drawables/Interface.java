@@ -76,32 +76,17 @@ public class Interface extends JFrame {
       customer= new CustomerInterface(connection);
       bankTeller= new BankTellerInterface(connection);
       system= new SystemInterface(connection);
-
-
-      JPanel cust_holder = new JPanel(new GridBagLayout());
-      //content.setBackground(Color.GRAY);
-      cust_holder.setBorder(new EmptyBorder(100,100,100,100));
-      cust_holder.add(customer);
-
-      JPanel bank_holder = new JPanel(new GridBagLayout());
-      //content.setBackground(Color.GRAY);
-      bank_holder.setBorder(new EmptyBorder(100,100,100,100));
-      bank_holder.add(bankTeller);
-
-      JPanel sys_holder = new JPanel(new GridBagLayout());
-      //content.setBackground(Color.GRAY);
-      sys_holder.setBorder(new EmptyBorder(100,100,100,100));
-      sys_holder.add(system);
        
         
       tabView =new JTabbedPane(JTabbedPane.TOP, JTabbedPane.WRAP_TAB_LAYOUT);  
       tabView.setBounds(50,50,200,200);  
-      tabView.add("ATM", cust_holder);  
-      tabView.add("Bank Teller", bank_holder); 
-      tabView.add("Administrator", sys_holder);  
+      tabView.add("ATM", customer);  
+      tabView.add("Bank Teller", bankTeller); 
+      tabView.add("Administrator", system);  
 
       //Add tabview to Frame.
       add(tabView); 
+      //pack();
       
       setLocationRelativeTo(null);
       setVisible(true);

@@ -95,7 +95,7 @@ public class SystemInterface extends JPanel{
 			form.setLabel("An error occurred", Color.red);
 			System.out.println("Creation failed... ");
 		}else{
-			form.setLabel("Successfully createed customer", Color.green);
+			form.setLabel("Successfully created customer", Color.green);
 			System.out.println("User: " + cust.name + " created!");
 		}
 		
@@ -108,8 +108,14 @@ public class SystemInterface extends JPanel{
 			return;
 		}
 		if(Customer.del_cust_by_id(id, this.connection)){
-			form.setLabel("Created Customer Successfully", Color.red);
+			form.setLabel("Customer removed Successfully", Color.green);
 			System.out.println("Successfully removed customer!");
+		}
+		else{
+
+			form.setLabel("Failed to remove customer", Color.red);
+			System.out.println("Failed to remove customer!");
+		
 		}
 
 	}
