@@ -15,6 +15,7 @@ public class ListPage extends JPanel{
 	private JList list;
 	private JLabel label;
 	private ArrayList <ArrayList<String>> row_elements;
+	private String previous_search;
 
 	public ListPage(JButton b, String l, String[] col_names, ArrayList <ArrayList<String>> disp_list){
 		//add Layout manager if need
@@ -93,23 +94,26 @@ public class ListPage extends JPanel{
 
 			DefaultTableModel tableModel = new CustomTableModel(col_names, 0);
 		    //Init table with tableModel
+		    if(scroll != null){
+		    	System.out.println("Table Exists");
+		    	remove(scroll);		    
+		    }
 		    table= new JTable(tableModel);
-
 		    //All should be of equal length for algorithm to work
-		    //Outer loop goes for the length of the lists and inner over the len of list of lists
-		    for(int i =0; i < col_names.length; i++){
+		    //Outer loop goes for the length of the last lists and inner over the len of list of lists
+		    for(int i =0; i < disp_list.get(0).size(); i++){
 		    	//Sise of array is the number of col
 		    	Object[] row_data= new Object[col_names.length];
 		    	//Get all the values for a row. When loop over we move to next row
-		    	for (int j=0; j < disp_list.size(); j++){
+		    	for (int j=0; j < col_names.length; j++){
 		    		row_data[j]= disp_list.get(j).get(i);
 		    	}
 		    	tableModel.addRow(row_data);
 		    }
 		    scroll = new JScrollPane();
 		    scroll.setViewportView(table);
-		    JPanel list_holder= new JPanel();
-		    list_holder.add(scroll, BorderLayout.NORTH);
+		    //JPanel list_holder= new JPanel();
+		    //list_holder.add(scroll, BorderLayout.NORTH);
 
 		    //Make the strings in a cells be centered
 		    setCellsAlignment();
@@ -117,7 +121,14 @@ public class ListPage extends JPanel{
 		    //Select how many rows to display at a time
 		    //table.setPreferredScrollableViewportSize(table.getPreferredSize());
 		    //table.setBackground(Color.gray);
-		    this.add(list_holder);
+		    this.add(scroll);
+		    this.revalidate();
+		    this.repaint();
+		    row_elements = new ArrayList<ArrayList<String>>(disp_list.size());
+			//Copy info to make less queries
+			for(ArrayList<String> p : disp_list) {
+				row_elements.add((ArrayList<String>)disp_list.clone());
+			}
 	}
 	private void setCellsAlignment()
     {
@@ -131,16 +142,12 @@ public class ListPage extends JPanel{
             table.getColumnModel().getColumn(columnIndex).setCellRenderer(rightRenderer);
         }
     }
-    //Not all pages will have this functionality
-    public void search(){
-    	String search_item= getInput();
-    	if(row_elements != null || row_elements.size() != 0){
-
-    	}
-    	else{
-    		setLabel("Nothing to search", Color.red);
-    	}
-    	
+   
+    public void setPrevious(String s){
+    	this.previous_search= s;
+    }
+    public String getSearch(){
+    	return previous_search;
     }
     public String getInput(){
 		return input.getText();

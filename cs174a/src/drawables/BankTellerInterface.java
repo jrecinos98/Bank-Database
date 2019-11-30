@@ -100,14 +100,8 @@ public class BankTellerInterface extends JPanel{
 		panels.put(BankTellerActions.DTER, create_dter_page());
 		
 		//Need input but Input form doesn't cut it
-		panels.put(BankTellerActions.MONTHLY_STATEMENT, create_page(new ArrayList<String> (Arrays.asList("")), "Generate Statement", BankTellerActions.MONTHLY_STATEMENT));
+		panels.put(BankTellerActions.MONTHLY_STATEMENT, create_monthly_statement_page());
 		panels.put(BankTellerActions.CUSTOMER_REPORT, create_customer_report_page());
-		
-		//Does not need a new page.
-		panels.put(BankTellerActions.ADD_INTEREST, create_page(new ArrayList<String> (Arrays.asList("")), "Add Interest", BankTellerActions.ADD_INTEREST ));
-		panels.put(BankTellerActions.DELETE_TRANSACTIONS, create_page(new ArrayList<String> (Arrays.asList("")), "Delete All Transactions", BankTellerActions.DELETE_TRANSACTIONS ));
-		panels.put(BankTellerActions.DELETE_CLOSED, create_page(new ArrayList<String> (Arrays.asList("")), "Delete All Closed Accounts", BankTellerActions.DELETE_CLOSED ));
-		
 		
 		
 	}
@@ -298,12 +292,99 @@ public class BankTellerInterface extends JPanel{
 		update_page(BankTellerActions.DTER);
 
 	}
-	public void monthly_statement(){
-		form.setLabel("IN PROGRESS", Color.red);
-	}
 	public void cust_report(){
-		String cust_id= form.getInput(0);
-		form.setLabel("IN PROGRESS", Color.red);
+		ListPage page = (ListPage) current_page;
+		String cust_id= page.getInput();
+		//Needed to prevent making unnecessary queries or multiple tables
+		if(cust_id.equals(page.getSearch())){
+			return;
+		}
+		if (!Utilities.valid_id(cust_id)){
+			page.setLabel("Invalid customer ID", Color.red);
+			return;
+		}
+		//Update search field
+		page.setPrevious(cust_id);
+		String [] col={"Account ID", "Status"};
+		ArrayList<String> acct_status= ManagerOperations.customer_report(cust_id, this.connection);
+		if(acct_status == null || acct_status.size() == 0){
+			JOptionPane.showMessageDialog(parent_frame,"No accounts associated with the given customer ID","Inane warning",JOptionPane.WARNING_MESSAGE);
+			//page.setLabel("No accounts associated with the given customer ID", Color.red);
+			return;
+		}
+		ArrayList<String> acct = new ArrayList<String>();
+		ArrayList<String> status= new ArrayList<String>();
+		for(int i=0; i<acct_status.size();i++){
+
+			String a_s= acct_status.get(i);
+			//split account and status
+			String[] s= a_s.split("/");
+			//split account
+			String acct_str= (s[0].split(":"))[1];
+			//split status
+			String status_str= (s[1].split(":"))[1];
+		
+			acct.add(acct_str);
+			status.add(status_str);
+		}
+		ArrayList<ArrayList<String>> row_elements= new ArrayList<ArrayList<String>>();
+		row_elements.add(acct);
+		row_elements.add(status);
+		
+		page.createTable(col, row_elements);
+		page.revalidate();
+		//form.setLabel("IN PROGRESS", Color.red);
+
+	}
+	public void monthly_statement(){
+		ListPage page = (ListPage) panels.get(BankTellerActions.MONTHLY_STATEMENT);
+		String cust_id= page.getInput();
+		String [] col={"Primary Owner", "Account", "Owners","Transactions", "Initial Balance", "Final Balance", "Insurance status"};
+		ArrayList<CustomerMonthlyStatement> statement= ManagerOperations.generate_monthly_statement(this.connection);
+		if(statement == null || statement.size() == 0){
+			JOptionPane.showMessageDialog(parent_frame,"Error: No reports","Inane warning",JOptionPane.WARNING_MESSAGE);
+			//page.setLabel("No accounts associated with the given customer ID", Color.red);
+			return;
+		}
+		//Multiple entries in table for a customer if they are the primary owner for multiple accounts
+		ArrayList<String> customers = new ArrayList<String>(); 
+		ArrayList<String> accounts= new ArrayList<String>();
+
+		ArrayList<String> owners= new ArrayList<String>();
+		ArrayList<String> trans= new ArrayList<String>();
+		//Single strings
+		ArrayList<String> final_balance= new ArrayList<String>();
+		ArrayList<String> initial_balance= new ArrayList<String>();
+		ArrayList<String> insurance_limit= new ArrayList<String>();
+
+		ArrayList<ArrayList<String>> row_elements= new ArrayList<ArrayList<String>>();
+		System.out.println("Creating rows");
+		for(int i=0; i < statement.size(); i++){
+			CustomerMonthlyStatement monthly_statement= statement.get(i);
+			String c_id = monthly_statement.c_id;
+			for(int j=0; j < monthly_statement.statements.size(); j++){
+				customers.add(monthly_statement.c_id);
+				AccountStatement a_statement= monthly_statement.statements.get(i);
+				accounts.add(a_statement.a_id);
+				owners.add(Utilities.format_owners(a_statement.owners));
+				trans.add(Utilities.format_transactions(a_statement.transactions));
+				initial_balance.add(Double.toString(a_statement.initial_balance));
+				final_balance.add(Double.toString(a_statement.final_balance));
+				//Reverse so it makes more sense in table
+				insurance_limit.add(Boolean.toString(!a_statement.insurance_limit_reached));
+			}
+
+		}
+		row_elements.add(customers);
+		row_elements.add(accounts);
+		row_elements.add(owners);
+		row_elements.add(trans);
+		row_elements.add(initial_balance);
+		row_elements.add(final_balance);
+		row_elements.add(insurance_limit);
+		System.out.println("Creating table");
+		page.createTable(col, row_elements);
+		update_page(BankTellerActions.MONTHLY_STATEMENT);
 
 	}
 	public void add_interest(){
@@ -333,7 +414,7 @@ public class BankTellerInterface extends JPanel{
 			else{
 
 				//Show dialog stating failure
-				JOptionPane.showMessageDialog(parent_frame,"An error occured","Inane warning",JOptionPane.WARNING_MESSAGE);
+				JOptionPane.showMessageDialog(parent_frame,"No closed accounts or an error occured","Inane warning",JOptionPane.WARNING_MESSAGE);
 				System.out.println("Failed to delete closed accounts");
 				return;
 			}
@@ -350,7 +431,7 @@ public class BankTellerInterface extends JPanel{
 			else{
 
 				//Show dialog stating failure
-				JOptionPane.showMessageDialog(parent_frame,"An error occured","Inane warning",JOptionPane.WARNING_MESSAGE);
+				JOptionPane.showMessageDialog(parent_frame,"An error occurred","Inane warning",JOptionPane.WARNING_MESSAGE);
 				System.out.println("Failed to delete transactions");
 				return;
 			}
@@ -451,9 +532,11 @@ public class BankTellerInterface extends JPanel{
 		button.addMouseListener( new ListButtonListener(BankTellerActions.SEARCH_REPORT));
 		return (new ListPage(button, "Customer ID: "));
 	}
-	/*private JPanel create_monthly_statement(){
-
-	}*/
+	private JPanel create_monthly_statement_page(){
+		JButton button= new JButton("Search");
+		button.addMouseListener( new ListButtonListener(BankTellerActions.SEARCH_MONTHLY_STATEMENT));
+		return (new ListPage(button, "Customer ID: "));
+	}
 
 	private JPanel create_custom_list_page(JButton b, String label, String[] col_names, ArrayList<ArrayList<String>> row_elements){
 		if(col_names.length != row_elements.size()){
@@ -513,7 +596,7 @@ public class BankTellerInterface extends JPanel{
 		t=new JButton("Monthly Statement");
 		t.addMouseListener(new MouseAdapter() { 
 			public void mouseClicked(MouseEvent e) {
-                update_page(BankTellerActions.MONTHLY_STATEMENT);
+                monthly_statement();
             }
 		});
 		this.action_buttons.put(BankTellerActions.MONTHLY_STATEMENT, t);
@@ -565,9 +648,6 @@ public class BankTellerInterface extends JPanel{
 					case MONTHLY_STATEMENT:
 						monthly_statement();
 						break;
-					case CUSTOMER_REPORT:
-						cust_report();
-						break;
 					case CREATE_ACCOUNT:
 						create_acct();
 						break;		
@@ -578,7 +658,7 @@ public class BankTellerInterface extends JPanel{
 					 	System.out.println("Searching");
 						try{
 							ListPage page= (ListPage) panels.get(current_page);
-							page.search();
+							//page.search();
 						}catch(Exception err){
 							System.err.println(err);
 						}
@@ -603,11 +683,13 @@ public class BankTellerInterface extends JPanel{
 			if(SwingUtilities.isLeftMouseButton(e)){
 				switch(this.action){
 					case SEARCH_CLOSED:
-
+						//Table already created
 						break;
 					case SEARCH_DTER:
+						//Table already created
 						break;
 					case SEARCH_REPORT:
+						cust_report();
 						break;
 					case SEARCH_MONTHLY_STATEMENT:
 						break;

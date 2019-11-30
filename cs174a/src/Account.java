@@ -298,7 +298,7 @@ public class Account{
 		try( Statement statement = connection.createStatement() ) {
 			try( ResultSet rs = statement.executeQuery( query )){
 				while(rs.next()){
-					String acct_status = "Account id: " + rs.getString("a_id");
+					String acct_status = "Account id: " + rs.getString("a_id") +" /";
 					acct_status += " Status: ";
 					if(rs.getInt("is_open") == 1){
 						acct_status += "open";

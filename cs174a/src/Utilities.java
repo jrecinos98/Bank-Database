@@ -5,6 +5,7 @@ import javax.swing.JFrame;
 
 import java.awt.Dimension;
 import java.awt.Toolkit;
+import java.util.ArrayList;
 
 public class Utilities{
 	public static String prompt(String p){
@@ -96,6 +97,39 @@ public class Utilities{
 			return false;
 		}
 		return true;
+	}
+	public static String format_owners(ArrayList<String> o){
+		String owners="";
+		for (int i=0; i< o.size(); i++){
+			owners+=o.get(i)+"\n";
+		}
+		return owners;
+	}
+	public static String format_transactions(ArrayList<Transaction> transactions){
+		String transaction="";
+		for(int i=0; i < transactions.size(); i++){
+			Transaction trans = transactions.get(i);
+			transaction+= Integer.toString(i+1)+". ";
+			transaction+= trans.transaction_type + " Transaction: ";
+			//From account empty means deposit
+			if(trans.from_acct.equals("") || trans.from_acct == null){
+				transaction+= "$"+ Double.toString(trans.amount)+ " added to "
+								+ trans.to_acct + " on " + trans.date + " by " + trans.cust_id;
+			}
+			//Witdraw
+			else if(trans.to_acct.equals("") || trans.to_acct ==null){
+				transaction+= "$"+ Double.toString(trans.amount)+ " taken from "
+								+ trans.to_acct + " on " + trans.date + " by " + trans.cust_id;
+
+			}
+			else{
+				transaction+= "$" + Double.toString(trans.amount)+ ", " +trans.from_acct+ " -> " + trans.to_acct
+								+ " on " + trans.date + " by " + trans.cust_id;
+			}
+			transaction+="\n";						   
+		}
+		//A big ass string
+		return transaction;
 	}
 	
 }

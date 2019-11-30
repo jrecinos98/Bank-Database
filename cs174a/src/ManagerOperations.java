@@ -33,7 +33,7 @@ public class ManagerOperations {
 	}
 
 
-	public ArrayList<CustomerMonthlyStatement> generate_monthly_statement(OracleConnection connection){
+	public static ArrayList<CustomerMonthlyStatement> generate_monthly_statement(OracleConnection connection){
 		// Generate monthly statement
 		ArrayList<CustomerMonthlyStatement> monthly_statements = new ArrayList<CustomerMonthlyStatement>();
 		ArrayList<String> customers = Customer.get_all_customers(connection);

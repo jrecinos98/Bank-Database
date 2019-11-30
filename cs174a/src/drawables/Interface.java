@@ -60,15 +60,15 @@ public class Interface extends JFrame {
       this.addWindowListener(new WindowAdapter(){
         public void windowClosing(WindowEvent w){
           int i=JOptionPane.showConfirmDialog(null, "Exit program?");
-              if(i==0){
-                try{
-                  connection.close();
-                  System.err.println("Connection closed!");
-                }catch(SQLException e){
-                  e.printStackTrace();
-                }
-                System.exit(0);
-              }
+          if(i==0){
+            try{
+              connection.close();
+              System.err.println("Connection closed!");
+            }catch(SQLException e){
+              e.printStackTrace();
+            }
+            System.exit(0);
+          }
         }
       });
       main_frame= this;
