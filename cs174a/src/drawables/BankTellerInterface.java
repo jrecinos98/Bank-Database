@@ -354,7 +354,7 @@ public class BankTellerInterface extends JPanel{
 				s+= "			Transactions:\n"+Utilities.format_transactions(a_info.get(j).transactions);
 				s+= "			Initial Balance: "+ Double.toString(a_info.get(j).initial_balance) + "\n";
 				s+= "			Final Balance: " + Double.toString(a_info.get(j).final_balance) + "\n";
-				s+= "			Insurance Status "+ Boolean.toString(a_info.get(j).insurance_limit_reached)+ "\n";
+				s+= "			Insurance Limit Reached: "+ Boolean.toString(a_info.get(j).insurance_limit_reached)+ "\n";
 			}
 			System.out.println(s);
 			System.out.println("\n\n");
