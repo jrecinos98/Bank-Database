@@ -348,16 +348,16 @@ public class BankTellerInterface extends JPanel{
 			System.out.println("	Accounts: ");
 			ArrayList<AccountStatement> a_info= statement.get(i).statements;
 			for (int j=0; j< statement.get(i).statements.size(); j++){
-				s+= "		Account: " + a_info.get(j).a_id+ "\n";
+				s+= "		Account: " + a_info.get(j).a_id+ "\n\n";
 
 				s+= "			Owners: \n 				"+ Utilities.format_owners(a_info.get(j).owners) + "\n";
-				s+= "			Transactions:\n"+Utilities.format_transactions(a_info.get(j).transactions);
-				s+= "			Initial Balance: "+ Double.toString(a_info.get(j).initial_balance) + "\n";
-				s+= "			Final Balance: " + Double.toString(a_info.get(j).final_balance) + "\n";
-				s+= "			Insurance Limit Reached: "+ Boolean.toString(a_info.get(j).insurance_limit_reached)+ "\n";
+				s+= "			Transactions:\n"+Utilities.format_transactions(a_info.get(j).transactions)+"\n";
+				s+= "			Initial Balance: "+ Double.toString(a_info.get(j).initial_balance) + "\n\n";
+				s+= "			Final Balance: " + Double.toString(a_info.get(j).final_balance) + "\n\n";
+				s+= "			Insurance Limit Reached: "+ Boolean.toString(a_info.get(j).insurance_limit_reached)+ "\n\n";
 			}
 			System.out.println(s);
-			System.out.println("\n\n");
+			System.out.println("______________________________________________________________________________________________________________________________");
 
 		}
 		/*if(statement == null || statement.size() == 0){
