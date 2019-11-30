@@ -138,10 +138,10 @@ public class Customer {
 			initial_balance = final_balance;
 			// Unwind transactions to find the initial balance at the start of the month
 			for(int j = 0; j < transactions.size(); j++){
-				if(transactions.get(j).to_acct.equals(accounts.get(i))){
+				if(transactions.get(j).to_acct != null && transactions.get(j).to_acct.equals(accounts.get(i))){
 					// Subtract amount
 					initial_balance -= transactions.get(j).amount;
-				}else if(transactions.get(j).from_acct.equals(accounts.get(i))){
+				}else if(transactions.get(j).from_acct != null && transactions.get(j).from_acct.equals(accounts.get(i))){
 					// Add amount
 					initial_balance += transactions.get(j).amount;
 				}

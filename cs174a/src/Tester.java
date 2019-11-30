@@ -14,6 +14,7 @@ import java.util.ArrayList;
 public class Tester{
 	private OracleConnection connection;
 	private int id = 30;
+	private ManagerOperations mops = new ManagerOperations();
 
 	public String get_next_id(){
 		String next = "" + id;
@@ -401,6 +402,63 @@ public class Tester{
 		return error();
 	}
 
+	public int test_monthly_statement(){
+		try{
+			Account acct = Account.create_account(Testable.AccountType.SAVINGS, this.get_next_id(), 1000.00,
+										 "408466365", "Person", "Address", this.connection);
+			 ArrayList<CustomerMonthlyStatement> mstmt = mops.generate_monthly_statement(this.connection);
+			 for(int i = 0; i < mstmt.size(); i++){
+			 	CustomerMonthlyStatement m = mstmt.get(i);
+			 	System.out.println("Customer: " + m.c_id);
+			 	for(int j = 0; j < mstmt.get(i).statements.size(); j++){
+					AccountStatement a = mstmt.get(i).statements.get(j);
+					System.out.println("Account: " + a.a_id);
+					System.out.print("Owners: ");
+					for(int k = 0; k < a.owners.size(); k++){
+						System.out.print(a.owners.get(k) + " ");
+					}
+					System.out.println();
+					System.out.print("Transactions: ");
+					for(int k = 0; k < a.transactions.size(); k++){
+						System.out.print(a.transactions.get(k).t_id + " ");
+					}
+					System.out.println();
+					String final_balance = String.format("Final Balance: %.2f", a.final_balance);
+					String initial_balance = String.format("Initial Balance: %.2f", a.initial_balance);
+					System.out.println(initial_balance);
+					System.out.println(final_balance);
+					if(a.insurance_limit_reached){
+						System.out.println("Insurance limit has been reached!");
+					}
+					System.out.println();
+			 	}
+
+			 }
+			 return pass();
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return error();
+	}
+
+	public int test_testable_app(){
+		try{
+			return fail();
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return error();
+	}
+
+	public int test_sample_data(){
+		try{
+			return fail();
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return error();
+	}
+
 	public void run_tests(OracleConnection connection){
 		// TODO: CHECK THAT ALL TRANSACTIONS CANNOT BE DONE BY A NON-OWNER
 		// TODO: WRITE TESTS TO CHECK EVERY ACCOUNT GETS CLOSED ON 0 OR .01 BALANCE
@@ -419,7 +477,11 @@ public class Tester{
 		results.add(result("test_pocket_acct_pay_friend():", this.test_pocket_acct_pay_friend()));
 		results.add(result("test_acct_wire():", this.test_acct_wire()));
 		results.add(result("test_acct_write_check():", this.test_acct_write_check()));
+		results.add(result("test_monthly_statement():", this.test_monthly_statement()));
 		results.add(result("test_acct_accrue_interest():", this.test_acct_accrue_interest()));
+		results.add(result("test_testable_app():", this.test_testable_app()));
+		results.add(result("test_sample_data():", this.test_sample_data()));
+		results.add(result("test_monthly_statement():", this.test_monthly_statement()));
 
 
 		System.err.println("\n----- RESULTS -----");
