@@ -213,7 +213,7 @@ public class Account{
 				while(rs.next()){
 					String owner = "name: ";
 					owner += rs.getString("c_name");
-					owner += rs.getString(" | address: ");
+					owner += " | address: ";
 					owner += rs.getString("address");
 					owners.add(owner);
 				}
