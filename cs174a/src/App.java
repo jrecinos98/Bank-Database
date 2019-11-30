@@ -253,11 +253,11 @@ public class App implements Testable
 			}else if (resp.equals("2")){
 				Tester tester = new Tester();
 				tester.run_tests(connection);
+				this.close_connection();
 			}
 			else{
 				System.out.println("Did not recognize input -- should be 1 , 2, or 3");
 			}
-			this.close_connection();
 			
 		} catch( Exception e ) {
 			System.err.println( e.getMessage() );

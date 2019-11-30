@@ -338,10 +338,29 @@ public class BankTellerInterface extends JPanel{
 	}
 	public void monthly_statement(){
 		ListPage page = (ListPage) panels.get(BankTellerActions.MONTHLY_STATEMENT);
-		String cust_id= page.getInput();
+		//String cust_id= page.getInput();
 		String [] col={"Primary Owner", "Account", "Owners","Transactions", "Initial Balance", "Final Balance", "Insurance status"};
 		ArrayList<CustomerMonthlyStatement> statement= ManagerOperations.generate_monthly_statement(this.connection);
-		if(statement == null || statement.size() == 0){
+		System.out.println("Date: "+ Bank.get_date(this.connection)+"\n\n");
+		for (int i =0; i < statement.size(); i++){
+			String s="";
+			System.out.println("Primary Owner: "+ statement.get(i).c_id+ " ");
+			System.out.println("	Accounts: ");
+			ArrayList<AccountStatement> a_info= statement.get(i).statements;
+			for (int j=0; j< statement.get(i).statements.size(); j++){
+				s+= "		Account: " + a_info.get(j).a_id+ "\n";
+
+				s+= "			Owners: \n 				"+ Utilities.format_owners(a_info.get(j).owners) + "\n";
+				s+= "			Transactions:\n"+Utilities.format_transactions(a_info.get(j).transactions);
+				s+= "			Initial Balance: "+ Double.toString(a_info.get(j).initial_balance) + "\n";
+				s+= "			Final Balance: " + Double.toString(a_info.get(j).final_balance) + "\n";
+				s+= "			Insurance Status "+ Boolean.toString(a_info.get(j).insurance_limit_reached)+ "\n";
+			}
+			System.out.println(s);
+			System.out.println("\n\n");
+
+		}
+		/*if(statement == null || statement.size() == 0){
 			JOptionPane.showMessageDialog(parent_frame,"Error: No reports","Inane warning",JOptionPane.WARNING_MESSAGE);
 			//page.setLabel("No accounts associated with the given customer ID", Color.red);
 			return;
@@ -384,7 +403,7 @@ public class BankTellerInterface extends JPanel{
 		row_elements.add(insurance_limit);
 		System.out.println("Creating table");
 		page.createTable(col, row_elements);
-		update_page(BankTellerActions.MONTHLY_STATEMENT);
+		update_page(BankTellerActions.MONTHLY_STATEMENT);*/
 
 	}
 	public void add_interest(){
