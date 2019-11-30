@@ -32,10 +32,24 @@ public class ManagerOperations {
 		}
 	}
 
-	public static boolean generate_monthly_statement(){
+
+	public ArrayList<CustomerMonthlyStatement> generate_monthly_statement(OracleConnection connection){
 		// Generate monthly statement
+		ArrayList<CustomerMonthlyStatement> monthly_statements = new ArrayList<CustomerMonthlyStatement>();
+		ArrayList<String> customers = Customer.get_all_customers(connection);
+		try{
+			for(int i = 0; i < customers.size(); i++){
+				CustomerMonthlyStatement cms = new CustomerMonthlyStatement();
+				cms.c_id = customers.get(i);
+				cms.statements = Customer.generate_monthly_statement(customers.get(i), connection);
+				monthly_statements.add(cms);
+			}	
+		}catch(Exception e){
+			e.printStackTrace();
+			return null;
+		}
 		
-		return false;
+		return monthly_statements;
 	}
 
 	public static ArrayList<String> list_closed_accounts(OracleConnection connection){

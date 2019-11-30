@@ -202,6 +202,32 @@ public class Account{
 		return owners;
 	}
 
+	public static ArrayList<String> get_account_owners_name_address(String a_id, OracleConnection connection){
+		ArrayList<String> owners = new ArrayList<String>();
+		String query = String.format("SELECT C.c_name, C.address " +
+									 "FROM custaccounts A, Customers C " +
+									 "WHERE A.a_id = '%s' " +
+									 "AND A.c_id = C.c_id", a_id);
+		try( Statement statement = connection.createStatement() ) {
+			try( ResultSet rs = statement.executeQuery( query )){
+				while(rs.next()){
+					String owner = "name: ";
+					owner += rs.getString("c_name");
+					owner += rs.getString(" | address: ");
+					owner += rs.getString("address");
+					owners.add(owner);
+				}
+			}catch(SQLException e){
+				e.printStackTrace();
+				return null;
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+			return null;
+		}
+		return owners;
+	}
+
 	public static ArrayList<String> get_all_accounts(OracleConnection connection){
 		ArrayList<String> accounts = new ArrayList<String>();
 		String query = String.format("SELECT a_id FROM accounts");
@@ -241,6 +267,27 @@ public class Account{
 			return false;
 		}
 		return true;
+	}
+
+	public static ArrayList<String> get_cust_accounts(String c_id, OracleConnection connection){
+		ArrayList<String> accts = new ArrayList<String>();
+		String query = String.format("SELECT A.a_id " +
+									 "FROM Accounts A " +
+									 "WHERE A.owner_id = '%s'", c_id);
+		try( Statement statement = connection.createStatement() ) {
+			try( ResultSet rs = statement.executeQuery( query )){
+				while(rs.next()){
+					accts.add(rs.getString("a_id"));
+				}
+			}catch(SQLException e){
+				e.printStackTrace();
+				return null;
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+			return null;
+		}
+		return accts;
 	}
 
 	public static ArrayList<String> get_cust_accounts_and_status(String c_id, OracleConnection connection){
@@ -293,6 +340,25 @@ public class Account{
 		}
 		return true;
 	}
+
+	public static String get_linked(String pocket_id, OracleConnection connection){
+		String query = String.format("SELECT P.link_id FROM pocketlinks P WHERE P.pocket_id = '%s'",
+										pocket_id);
+		try( Statement statement = connection.createStatement() ) {
+			try( ResultSet rs = statement.executeQuery( query )){
+				if(rs.next()){
+					return rs.getString("link_id");
+				}
+			}catch(SQLException e){
+				e.printStackTrace();
+				return "";
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+			return "";
+		}
+		return "";
+	}	
 
 	public static boolean accounts_are_linked(String pocket_id, String linked_id, OracleConnection connection){
 		String query = String.format("SELECT * FROM pocketlinks P WHERE P.pocket_id = '%s' AND P.link_id = '%s'",
