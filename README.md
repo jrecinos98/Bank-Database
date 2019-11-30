@@ -20,7 +20,6 @@
 # 
 
 # Questions
-* Check if account exists before creation
 * Allow pocket and student accounts to change interest?
 
 # To-do
@@ -33,6 +32,9 @@
 * Pocket account accrue interest as a transaction as this could attempt to make negative on balance?
 * Add Leap year fucntionality
 * Add bank branch to account creation
-* Disallow transactions to same account
+* Disallow transactions to/from same account
 * Make sure everything compiles correctly
 * Prompt for account on transaction if own multiple
+* Make sure can only do monthly on last day of month
+* Make monthly statement show all accounts
+* Create customer error if cust exists or just add them to the account?

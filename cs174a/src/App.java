@@ -78,7 +78,64 @@ public class App implements Testable
 			System.err.println( e.getMessage() );
 			return "1";
 		}
+	}
 
+	public void run_demo(){
+		// Setup
+		this.initializeSystem();
+		this.dropTables();
+		this.createTables();
+
+		// Set date march 1, 2011
+		Bank.set_date(""+ 2011, "" + 3, ""+1, this.connection);
+
+		// Create accounts
+		this.createCheckingSavingsAccount(Testable.AccountType.STUDENT_CHECKING, "17431", 1200, 
+			"344151573", "Joe Pepsi", "3210 State St");
+		Customer.update_pin("344151573", "1717", "3692", this.connection);
+
+		this.createCheckingSavingsAccount(Testable.AccountType.STUDENT_CHECKING, "54321", 21000,
+		 "212431965" , "Hurryson Ford", "678 State St");
+		Customer.update_pin("212431965", "1717", "3532", this.connection);
+
+		this.createCheckingSavingsAccount(Testable.AccountType.STUDENT_CHECKING, "12121", 1200,
+		 "207843218" , "David Copperfill", "1357 State St");
+		Customer.update_pin("207843218", "1717", "8582", this.connection);
+
+		this.createCheckingSavingsAccount(Testable.AccountType.INTEREST_CHECKING, "41725", 15000,
+		 "201674933" , "George Brush", "5346 Foothill Av");
+		Customer.update_pin("201674933", "1717", "9824", this.connection);
+
+		this.createCheckingSavingsAccount(Testable.AccountType.INTEREST_CHECKING, "93156", 2000000,
+		 "209378521" , "Kelvin Costner", "Santa Cruz #3579");
+		Customer.update_pin("209378521", "1717", "4659", this.connection);
+
+		this.createPocketAccount("53027", "12121", 50, "207843218");
+
+		this.createCheckingSavingsAccount(Testable.AccountType.SAVINGS, "43942", 1289,
+		 "361721022" , "Alfred Hitchcock", "6667 El Colegio #40");
+		Customer.update_pin("361721022", "1717", "1234", this.connection);
+
+		this.createCustomer("43942", "400651982" , "Pit Wilson", "911 State St");
+		Customer.update_pin("400651982", "1717", "1821", this.connection);
+
+		this.createCheckingSavingsAccount(Testable.AccountType.SAVINGS, "29107", 34000,
+		 "209378521" , "Kelvin Costner", "Santa Cruz #3579");
+		
+		this.createCheckingSavingsAccount(Testable.AccountType.SAVINGS, "19023", 2300,
+		 "412231856" , "Cindy Laugher", "7000 Hollister");
+		Customer.update_pin("412231856", "1717", "3764", this.connection);
+
+		this.createPocketAccount("60413", "43942", 20, "400651982");
+
+		this.createCheckingSavingsAccount(Testable.AccountType.SAVINGS, "32156", 1000,
+		 "188212217" , "Magic Jordon", "3852 Court Rd");
+		Customer.update_pin("188212217", "1717", "7351", this.connection);
+
+		this.createCheckingSavingsAccount(Testable.AccountType.INTEREST_CHECKING, "76543", 8456,
+		 "212116070" , "Li Kung", "2 People's Rd Beijing");
+		Customer.update_pin("212116070", "1717", "9173", this.connection);
+		// Create non-primary owners
 
 	}
 
@@ -147,7 +204,7 @@ public class App implements Testable
 		if(balance == -1){
 			return "1";
 		}else{
-			String response = String.format("0 %.2f", balance);
+			String response = String.format("0 %.2f", math.abs(balance));
 			return response;
 		}
 	}

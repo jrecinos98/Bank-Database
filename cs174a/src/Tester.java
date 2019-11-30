@@ -452,6 +452,7 @@ public class Tester{
 
 	public int test_sample_data(){
 		try{
+			
 			return fail();
 		}catch(Exception e){
 			e.printStackTrace();

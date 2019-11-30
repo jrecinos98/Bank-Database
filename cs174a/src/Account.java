@@ -44,6 +44,12 @@ public class Account{
 
 		Account acct = null;
 
+		Account account_exists_check = Account.get_account_by_id(id, connection);
+		if(account_exists_check != null){
+			// Account already exists
+			return null;
+		}
+
 		// Determine if customer exists
 		Customer cust = Customer.get_cust_by_id(tin, connection);
 		
