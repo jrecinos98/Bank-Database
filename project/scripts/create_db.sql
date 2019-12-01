@@ -11,7 +11,7 @@ CREATE TABLE accounts (
 	owner_id VARCHAR(9) NOT NULL,
 	account_type VARCHAR(32) NOT NULL,
 	bank_branch VARCHAR(32),
-	balance REAL NOT NULL CHECK (balance>=0),
+	balance FLOAT NOT NULL CHECK (balance>=0),
 	is_open NUMBER(1, 0) DEFAULT 0, 
     interest_date VARCHAR(10),
 	PRIMARY KEY (a_id),
@@ -33,7 +33,7 @@ CREATE TABLE transactions (
 	cust_id VARCHAR(9),
 	t_date VARCHAR(10),
 	t_type VARCHAR(16),
-	amount REAL,
+	amount FLOAT,
 	PRIMARY KEY(t_id),
 	FOREIGN KEY(to_acct) REFERENCES accounts(a_id),
 	FOREIGN KEY(from_acct) REFERENCES accounts(a_id),
@@ -46,7 +46,7 @@ CREATE TABLE custaccounts (
 	c_id VARCHAR(9) NOT NULL,
 	a_id VARCHAR(32) NOT NULL,
 	PRIMARY KEY(c_id, a_id),
-	FOREIGN KEY(c_id) REFERENCES customers(c_id),
+	FOREIGN KEY(c_id) REFERENCES customers(c_id) ON DELETE CASCADE,
 	FOREIGN KEY(a_id) REFERENCES accounts(a_id) ON DELETE CASCADE
 )
 #NEW#
@@ -55,8 +55,8 @@ CREATE TABLE bank (
 	day VARCHAR(2),
 	month VARCHAR(2),
 	year VARCHAR(4),
-	chk_int_intrst REAL,
-	sav_intrst REAL,
+	chk_int_intrst FLOAT,
+	sav_intrst FLOAT,
 	last_intrst_date VARCHAR(10),
 	PRIMARY KEY(b_id)
 )
