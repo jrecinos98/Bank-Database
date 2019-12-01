@@ -495,6 +495,10 @@ public class Tester{
 
 	public void test_app(App app){
 		System.out.println("START");
+
+
+
+		app.close_connection();
 	}
 
 }
