@@ -144,7 +144,7 @@ public class Account{
 			}
 		}
 		if(!owns_account){
-			System.err.println("Customer must own linked account to create a pocket account");
+			System.err.println("Customer must own linked account to create a pocket account: " + linkedId);
 			return null;
 		}
 		// Create pocket account

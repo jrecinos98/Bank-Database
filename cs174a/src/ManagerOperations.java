@@ -88,6 +88,14 @@ public class ManagerOperations {
 
 	public static boolean add_interest(OracleConnection connection){
 		// Get all accounts and then run the accrue interest function on each
+		String last_interest = Bank.get_last_interest_date(connection);
+		if(last_interest.split("-")[0].equals(Bank.get_date(connection).split("-")[0]) &&
+		   last_interest.split("-")[1].equals(Bank.get_date(connection).split("-")[1])){
+		   	System.err.println("Interest already accrued this month");
+		   	return false;
+		}
+
+		Bank.set_last_interest_date(Bank.get_date(connection), connection);
 		ArrayList<String> accounts = Account.get_all_accounts(connection);
 		for(int i = 0; i < accounts.size(); i++){
 			boolean success = Transaction.accrue_interest(accounts.get(i), connection);

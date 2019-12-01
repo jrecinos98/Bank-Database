@@ -364,7 +364,7 @@ public class BankTellerInterface extends JPanel{
 			String c_id = monthly_statement.c_id;
 			for(int j=0; j < monthly_statement.statements.size(); j++){
 				customers.add(monthly_statement.c_id);
-				AccountStatement a_statement= monthly_statement.statements.get(i);
+				AccountStatement a_statement= monthly_statement.statements.get(j);
 				accounts.add(a_statement.a_id);
 				owners.add(Utilities.format_owners(a_statement.owners));
 				trans.add(Utilities.format_transactions(a_statement.transactions));
