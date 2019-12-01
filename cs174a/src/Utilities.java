@@ -98,14 +98,50 @@ public class Utilities{
 		}
 		return true;
 	}
+	public static String format_owners_cli(ArrayList<String> o){
+		String owners="";
+		for (int i=0; i< o.size(); i++){
+			owners+=o.get(i)+"\n 				";
+		}
+		return owners;
+	}
+	public static String format_transactions_cli(ArrayList<Transaction> transactions){
+		String transaction="";
+		for(int i=0; i < transactions.size(); i++){
+			Transaction trans = transactions.get(i);
+
+			transaction+= "				[T_ID: "+Integer.toString(trans.t_id)+"] ";
+			transaction+= trans.transaction_type + ": ";
+			//From account empty means deposit1
+			if(trans.from_acct == null || trans.from_acct.equals("") ){
+				transaction+= "$"+ Double.toString(trans.amount)+ " added to account "
+								+ trans.to_acct + " on " + trans.date + " by customer: " + trans.cust_id;
+			}
+			//Witdraw
+			else if(trans.to_acct != null && trans.to_acct.equals("") || trans.to_acct ==null){
+				transaction+= "$"+ Double.toString(trans.amount)+ " taken from "
+								+ trans.to_acct + " on " + trans.date + " by " + trans.cust_id;
+
+			}
+			else{
+				transaction+= "$" + Double.toString(trans.amount)+ ", account " +trans.from_acct+ " -> account " + trans.to_acct
+								+ " on " + trans.date + " by customer: " + trans.cust_id;
+			}
+			transaction+="\n";						   
+		}
+		//A big ass string
+		return transaction;
+	}
 	public static String format_owners(ArrayList<String> o){
 		String owners="";
 		for (int i=0; i< o.size(); i++){
-			String t= o.get(i);
-			//String [] n_a= t.split("|");
-
-			owners+=o.get(i);
-			//owners+= n_a[0] + n_a[1]+ "\n";
+			//owners+=o.get(i)+"\n";
+			String[] n_a= o.get(i).split(",");
+			String n= (n_a[0].split(":"))[1];
+			owners+=n;
+			if(i != o.size()-1){
+				owners+=", ";
+			}
 		}
 		return owners;
 	}
@@ -113,18 +149,26 @@ public class Utilities{
 		String transaction="";
 		for(int i=0; i < transactions.size(); i++){
 			Transaction trans = transactions.get(i);
-			transaction+= "				"+Integer.toString(i+1)+". ";
-			transaction+= trans.transaction_type + " Transaction: ";
-			//From account empty means deposit
+			transaction+= "[T_ID: "+Integer.toString(trans.t_id)+"] ";
+			transaction+= trans.transaction_type + ": ";
+			if(trans.transaction_type.equals("FTM_FEE") || trans.transaction_type.equals("PCT_FEE")){
+				transaction+= "$"+ Double.toString(trans.amount)+ " taken from account "
+								+ trans.from_acct + " on " + trans.date;
 
-			if(trans.from_acct != null && trans.from_acct.equals("") || trans.from_acct == null){
-				transaction+= "$"+ Double.toString(trans.amount)+ " added to "
-								+ trans.to_acct + " on " + trans.date + " by " + trans.cust_id;
+			}
+			else if(trans.transaction_type.equals("ACCRUE_INTEREST")){
+				transaction+= "$"+ Double.toString(trans.amount)+ " added to account "
+								+ trans.to_acct + " on " + trans.date;
+			}
+			//From account empty means deposit1
+			else if(trans.from_acct == null || trans.from_acct.equals("") ){
+				transaction+= "$"+ Double.toString(trans.amount)+ " added to account "
+								+ trans.to_acct + " on " + trans.date + " by customer: " + trans.cust_id;
 			}
 			//Witdraw
-			else if(trans.to_acct != null && trans.to_acct.equals("") || trans.to_acct ==null){
-				transaction+= "$"+ Double.toString(trans.amount)+ " taken from "
-								+ trans.to_acct + " on " + trans.date + " by " + trans.cust_id;
+			else if(trans.to_acct ==null || trans.to_acct.equals("")){
+				transaction+= "$"+ Double.toString(trans.amount)+ " taken from account "
+								+ trans.from_acct + " on " + trans.date + " by customer: " + trans.cust_id;
 
 			}
 			else{
