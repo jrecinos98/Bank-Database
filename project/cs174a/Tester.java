@@ -406,7 +406,7 @@ public class Tester{
 		try{
 			Account acct = Account.create_account(Testable.AccountType.SAVINGS, this.get_next_id(), 1000.00,
 										 "408466365", "Person", "Address", this.connection);
-			 ArrayList<CustomerMonthlyStatement> mstmt = mops.generate_monthly_statement(this.connection);
+			 ArrayList<CustomerMonthlyStatement> mstmt = ManagerOperations.generate_monthly_statement(this.connection);
 			 for(int i = 0; i < mstmt.size(); i++){
 			 	CustomerMonthlyStatement m = mstmt.get(i);
 			 	System.out.println("Customer: " + m.c_id);

@@ -12,60 +12,11 @@ public class ListPage extends JPanel{
 	private JTextField input;
 	private JScrollPane scroll;
 	private JTable table;
-	private JList list;
 	private JLabel label;
 	private ArrayList <ArrayList<String>> row_elements;
 	private String previous_search;
 	private JPanel button_text_holder;
 
-	public ListPage(JButton b, String l, String[] col_names, ArrayList <ArrayList<String>> disp_list){
-		//add Layout manager if need
-		super();
-
-		//Create search bar/action field
-		JPanel holder = new JPanel(new GridLayout(1, 1));
-		input = new JTextField();
-		input.setHorizontalAlignment(JTextField.CENTER);	
-		holder.add(new JLabel(l));
-		holder.add(input);
-
-		//Button and label
-		JPanel b_label= new JPanel(new GridLayout(1,1));
-		label= new JLabel();
-		b_label.add(label);
-		b_label.add(b);
-
-		button_text_holder= new JPanel(new GridLayout(2, 1));
-		button_text_holder.add(holder);
-		button_text_holder.add(b_label);
-		add(button_text_holder);
-		
-		createTable(col_names, disp_list);	
-		row_elements = new ArrayList<ArrayList<String>>(disp_list.size());
-		//Copy info to make less queries
-		for(ArrayList<String> p : disp_list) {
-			row_elements.add((ArrayList<String>)disp_list.clone());
-		}
-
-
-		/*
-	    DefaultListModel listModel;
-	    listModel = new DefaultListModel();
-	    for(int i =0; i < disp_list.size(); i++){
-	    	listModel.addElement(disp_list.get(i));
-	    }
-	    //Create the list and put it in a scroll pane.
-	    list = new JList(listModel);
-	    list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-	    list.setSelectedIndex(0);
-	    //list.addListSelectionListener(this);
-	    list.setVisibleRowCount(5);
-	    JPanel list_holder= new JPanel();
-	    list_holder.setLayout(new BorderLayout());
-	    scroll = new JScrollPane(list);*/
-
-
-	}
 	public ListPage(JButton b, String l){
 		//add Layout manager if need
 		super();
@@ -145,9 +96,12 @@ public class ListPage extends JPanel{
             table.getColumnModel().getColumn(columnIndex).setCellRenderer(rightRenderer);
         }
     }
-    public void maximizeTable(JFrame window){
+    public void removeSearch(){
     	remove(button_text_holder);
-    	scroll.setPreferredSize( new Dimension(1800, 800));
+    }
+    public void maximizeTable(JFrame window){
+    	removeSearch();
+    	scroll.setPreferredSize( new Dimension(1800, 1000));
     	table.setPreferredScrollableViewportSize(table.getPreferredSize());
 		table.setFillsViewportHeight(true);
 		table.getColumnModel().getColumn(0).setPreferredWidth(35);
