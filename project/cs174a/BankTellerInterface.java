@@ -342,34 +342,7 @@ public class BankTellerInterface extends JPanel{
 	}
 	public void monthly_statement(){
 		ListPage page = (ListPage) panels.get(BankTellerActions.MONTHLY_STATEMENT);
-		//String cust_id= page.getInput();
-		/*
-		ArrayList<CustomerMonthlyStatement> statement= ManagerOperations.generate_monthly_statement(this.connection);
-		System.out.println("Date: "+ Bank.get_date(this.connection)+"\n\n");
-		DecimalFormat df = new DecimalFormat("#.###");
-		for (int i =0; i < statement.size(); i++){
-			String s="";
-			System.out.println("Primary Owner: "+ statement.get(i).c_id+ " ");
-			System.out.println("	Accounts: ");
-			ArrayList<AccountStatement> a_info= statement.get(i).statements;
-			for (int j=0; j< statement.get(i).statements.size(); j++){
-				s+= "		Account: " + a_info.get(j).a_id+ "\n\n";
 
-				s+= "			Owners: \n 				"+ Utilities.format_owners(a_info.get(j).owners) + "\n";
-				s+= "			Transactions:\n"+Utilities.format_transactions(a_info.get(j).transactions)+"\n";
-				s+= "			Initial Balance: "+ df.format(a_info.get(j).initial_balance) + "\n\n";
-				s+= "			Final Balance: " + df.format(a_info.get(j).final_balance) + "\n\n";
-				s+= "			Insurance Limit Reached: "+ Boolean.toString(a_info.get(j).insurance_limit_reached)+ "\n\n";
-			}
-			System.out.println(s);
-			System.out.println("______________________________________________________________________________________________________________________________");
-
-		}
-		if(statement == null || statement.size() == 0){
-			JOptionPane.showMessageDialog(parent_frame,"Error: No reports","Inane warning",JOptionPane.WARNING_MESSAGE);
-			//page.setLabel("No accounts associated with the given customer ID", Color.red);
-			return;
-		}*/
 		//Multiple entries in table for a customer if they are the primary owner for multiple accounts
 		String [] col={"Owner", "Account", "Owners","Transactions", "Initial Balance", "Final Balance", "Insurance status"};
 		ArrayList<CustomerMonthlyStatement> statement= ManagerOperations.generate_monthly_statement(this.connection);
@@ -413,10 +386,8 @@ public class BankTellerInterface extends JPanel{
 		page.maximizeTable(this.parent_frame);
 		update_page(BankTellerActions.MONTHLY_STATEMENT);
 
-		//Do command line too
-		//ArrayList<CustomerMonthlyStatement> statement= ManagerOperations.generate_monthly_statement(this.connection);
+		//Do command line too for extra security.
 		System.out.println("\n\nDate: "+ Bank.get_date(this.connection)+"\n\n");
-		//DecimalFormat df = new DecimalFormat("#.###");
 		for (int i =0; i < statement.size(); i++){
 			String s="";
 			System.out.println("Primary Owner: "+ statement.get(i).c_id+ " ");

@@ -401,6 +401,84 @@ public class Tester{
 		}
 		return error();
 	}
+	public int test_overdrawn_transaction(){
+		System.out.println("Overdrawn\n");
+		try{
+			
+			Account acct_1= Account.create_account(Testable.AccountType.INTEREST_CHECKING, "696969696", 1510.00,
+										 this.get_next_id(), "Michael Jackson", "Wonderland", this.connection);
+			String m_id = acct_1.owner_id;
+			//Topup = $5 and initial fee $5 = so total in account after creation is $1,500
+			Account pocket_1= Account.create_pocket_account("707070707", acct_1.a_id, 5.00,
+												    m_id, this.connection);
+			
+			Account acct_2= Account.create_account(Testable.AccountType.SAVINGS,"969696969" , 2000.00,
+										 this.get_next_id(), "Bill Cosby", "Prison", this.connection);
+			String cosby_id = acct_2.owner_id;
+			Account pocket_2= Account.create_pocket_account("070707070", acct_2.a_id, 5.00,
+												    cosby_id, this.connection);
+			//Create a second account owned by Michael
+			Account acct_3= Account.create_account(Testable.AccountType.SAVINGS,"699669969" , 5000.00,
+										 m_id, "Michael Jackson", "Wonderland", this.connection);
+			//Withdraw more than the account balance should fail for all transactions
+			boolean withdraw= Transaction.withdraw(acct_1.a_id, m_id, Bank.get_date(this.connection), 
+						 Transaction.TransactionType.WITHDRAWAL, 1500.01, this.connection);
+			if(withdraw){
+				System.err.print("Withdraw not null. Balance: "+Double.toString(acct_1.balance)+"\n");
+				return fail();
+			}
+
+			Transaction transfer= Transaction.transfer(acct_3.a_id, acct_1.a_id, m_id,
+			 					  Bank.get_date(this.connection), Transaction.TransactionType.TRANSFER, 1500.01, this.connection);
+			if(transfer != null){
+				System.err.print("Transfer not null\n");
+				return fail();
+			}
+			Transaction wire = Transaction.wire(acct_2.a_id, acct_1.a_id, m_id,
+			 				   Bank.get_date(this.connection), Transaction.TransactionType.WIRE, 1500.01, this.connection);
+			if(wire != null){
+				System.err.print("Wire not null\n");
+				return fail();
+			}
+			Transaction check = Transaction.write_check(acct_1.a_id, m_id, Bank.get_date(this.connection), 
+						 Transaction.TransactionType.WRITE_CHECK, 1500.01, this.connection);
+			if(check != null){
+				System.err.print("Check not null\n");
+				return fail();
+			}
+			Transaction top_up= Transaction.top_up(pocket_1.a_id, acct_1.a_id, Bank.get_date(this.connection),
+								 1500.01, m_id, this.connection);
+			if(top_up != null){
+				System.err.print("Top up not null\n");
+				return fail();
+			}
+
+			//Check pocket account transactions are safe guarded
+			//Pocket account should still only have the initial $5 since previous transactions shoud fail
+			Transaction purchase = Transaction.purchase(pocket_1.a_id, Bank.get_date(this.connection), 5.01, 
+										m_id, this.connection);
+			if(purchase != null){
+				System.err.print("Purchase not null\n");
+				return fail();
+			}
+			Transaction collect = Transaction.collect(acct_1.a_id, pocket_1.a_id, m_id, Bank.get_date(this.connection), 
+						 Transaction.TransactionType.COLLECT, 5.01, this.connection);
+			if(collect != null){
+				System.err.print("Collect not null\n");
+				return fail();
+			}
+			Transaction pay_friend= Transaction.pay_friend(pocket_2.a_id, pocket_1.a_id, m_id, Bank.get_date(this.connection), 
+						 Transaction.TransactionType.PAY_FRIEND, 5.01, this.connection);
+			if(pay_friend != null){
+				System.err.print("Pay Friend not null\n");
+				return fail();
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+			return error();
+		}
+		return pass();
+	}
 
 	public int test_monthly_statement(){
 		try{
@@ -450,6 +528,7 @@ public class Tester{
 		return error();
 	}
 
+
 	public int test_sample_data(){
 		try{
 			
@@ -478,6 +557,7 @@ public class Tester{
 		results.add(result("test_pocket_acct_pay_friend():", this.test_pocket_acct_pay_friend()));
 		results.add(result("test_acct_wire():", this.test_acct_wire()));
 		results.add(result("test_acct_write_check():", this.test_acct_write_check()));
+		results.add(result("test_overdrawn_transaction():",this.test_overdrawn_transaction()));
 		results.add(result("test_monthly_statement():", this.test_monthly_statement()));
 		results.add(result("test_acct_accrue_interest():", this.test_acct_accrue_interest()));
 		results.add(result("test_testable_app():", this.test_testable_app()));

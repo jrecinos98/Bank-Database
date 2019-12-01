@@ -55,7 +55,7 @@ public class Utilities{
 			return false;
 		}
 		//Amount cant be negative
-		if(m < 0){
+		if(m < 0.01){
 			return false;
 		}
 		return true;
