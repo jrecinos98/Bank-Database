@@ -63,7 +63,7 @@ public class Account{
 		// Attempt to create the new account
 		String query = String.format("INSERT INTO accounts (a_id, owner_id, account_type, bank_branch, balance, is_open, interest_date) " +
 	    							 "VALUES ('%s', '%s', '%s', '%s', %f, %d, '%s')"
-	    							 , id, tin, "" + accountType, "", initialBalance, 1, "");
+	    							 , id, tin, "" + accountType, "DEFAULT", initialBalance, 1, "");
 		try( Statement statement = connection.createStatement() ) {
 			try{
 				int updates = statement.executeUpdate( query );
