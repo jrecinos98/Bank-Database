@@ -16,6 +16,7 @@ public class ListPage extends JPanel{
 	private JLabel label;
 	private ArrayList <ArrayList<String>> row_elements;
 	private String previous_search;
+	private JPanel button_text_holder;
 
 	public ListPage(JButton b, String l, String[] col_names, ArrayList <ArrayList<String>> disp_list){
 		//add Layout manager if need
@@ -34,7 +35,7 @@ public class ListPage extends JPanel{
 		b_label.add(label);
 		b_label.add(b);
 
-		JPanel button_text_holder= new JPanel(new GridLayout(2, 1));
+		button_text_holder= new JPanel(new GridLayout(2, 1));
 		button_text_holder.add(holder);
 		button_text_holder.add(b_label);
 		add(button_text_holder);
@@ -81,7 +82,7 @@ public class ListPage extends JPanel{
 		b_label.add(label);
 		b_label.add(b);
 
-		JPanel button_text_holder= new JPanel(new GridLayout(2, 1));
+		button_text_holder= new JPanel(new GridLayout(2, 1));
 		button_text_holder.add(holder);
 		button_text_holder.add(b_label);
 		add(button_text_holder);
@@ -110,14 +111,16 @@ public class ListPage extends JPanel{
 		    	}
 		    	tableModel.addRow(row_data);
 		    }
+		  
 		    scroll = new JScrollPane();
 		    scroll.setViewportView(table);
+		 
 		    //JPanel list_holder= new JPanel();
 		    //list_holder.add(scroll, BorderLayout.NORTH);
 
 		    //Make the strings in a cells be centered
 		    setCellsAlignment();
-		    table.setRowHeight(25); 
+		    table.setRowHeight(100); 
 		    //Select how many rows to display at a time
 		    //table.setPreferredScrollableViewportSize(table.getPreferredSize());
 		    //table.setBackground(Color.gray);
@@ -141,6 +144,20 @@ public class ListPage extends JPanel{
         {
             table.getColumnModel().getColumn(columnIndex).setCellRenderer(rightRenderer);
         }
+    }
+    public void maximizeTable(JFrame window){
+    	remove(button_text_holder);
+    	scroll.setPreferredSize( new Dimension(1800, 800));
+    	table.setPreferredScrollableViewportSize(table.getPreferredSize());
+		table.setFillsViewportHeight(true);
+		table.getColumnModel().getColumn(0).setPreferredWidth(35);
+		table.getColumnModel().getColumn(1).setPreferredWidth(20);
+		table.getColumnModel().getColumn(2).setPreferredWidth(400);
+		table.getColumnModel().getColumn(3).setPreferredWidth(950);
+		table.getColumnModel().getColumn(4).setPreferredWidth(40);
+		table.getColumnModel().getColumn(5).setPreferredWidth(40);
+		table.getColumnModel().getColumn(6).setPreferredWidth(20);
+		window.setExtendedState( window.getExtendedState()|JFrame.MAXIMIZED_BOTH );
     }
    
     public void setPrevious(String s){

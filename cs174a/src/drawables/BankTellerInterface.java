@@ -38,6 +38,8 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.*;
 
+import java.text.*;
+
 public class BankTellerInterface extends JPanel{
 	
 	public static String[] ACCT_TYPES= {"Student Checking", "Interest Checking", "Savings", "Pocket"};
@@ -339,9 +341,10 @@ public class BankTellerInterface extends JPanel{
 	public void monthly_statement(){
 		ListPage page = (ListPage) panels.get(BankTellerActions.MONTHLY_STATEMENT);
 		//String cust_id= page.getInput();
-		String [] col={"Primary Owner", "Account", "Owners","Transactions", "Initial Balance", "Final Balance", "Insurance status"};
+		/*
 		ArrayList<CustomerMonthlyStatement> statement= ManagerOperations.generate_monthly_statement(this.connection);
 		System.out.println("Date: "+ Bank.get_date(this.connection)+"\n\n");
+		DecimalFormat df = new DecimalFormat("#.###");
 		for (int i =0; i < statement.size(); i++){
 			String s="";
 			System.out.println("Primary Owner: "+ statement.get(i).c_id+ " ");
@@ -352,20 +355,23 @@ public class BankTellerInterface extends JPanel{
 
 				s+= "			Owners: \n 				"+ Utilities.format_owners(a_info.get(j).owners) + "\n";
 				s+= "			Transactions:\n"+Utilities.format_transactions(a_info.get(j).transactions)+"\n";
-				s+= "			Initial Balance: "+ Double.toString(a_info.get(j).initial_balance) + "\n\n";
-				s+= "			Final Balance: " + Double.toString(a_info.get(j).final_balance) + "\n\n";
+				s+= "			Initial Balance: "+ df.format(a_info.get(j).initial_balance) + "\n\n";
+				s+= "			Final Balance: " + df.format(a_info.get(j).final_balance) + "\n\n";
 				s+= "			Insurance Limit Reached: "+ Boolean.toString(a_info.get(j).insurance_limit_reached)+ "\n\n";
 			}
 			System.out.println(s);
 			System.out.println("______________________________________________________________________________________________________________________________");
 
 		}
-		/*if(statement == null || statement.size() == 0){
+		if(statement == null || statement.size() == 0){
 			JOptionPane.showMessageDialog(parent_frame,"Error: No reports","Inane warning",JOptionPane.WARNING_MESSAGE);
 			//page.setLabel("No accounts associated with the given customer ID", Color.red);
 			return;
-		}
+		}*/
 		//Multiple entries in table for a customer if they are the primary owner for multiple accounts
+		String [] col={"Owner", "Account", "Owners","Transactions", "Initial Balance", "Final Balance", "Insurance status"};
+		ArrayList<CustomerMonthlyStatement> statement= ManagerOperations.generate_monthly_statement(this.connection);
+		
 		ArrayList<String> customers = new ArrayList<String>(); 
 		ArrayList<String> accounts= new ArrayList<String>();
 
@@ -377,20 +383,20 @@ public class BankTellerInterface extends JPanel{
 		ArrayList<String> insurance_limit= new ArrayList<String>();
 
 		ArrayList<ArrayList<String>> row_elements= new ArrayList<ArrayList<String>>();
-		System.out.println("Creating rows");
+		DecimalFormat df = new DecimalFormat("#.###");
 		for(int i=0; i < statement.size(); i++){
-			CustomerMonthlyStatement monthly_statement= statement.get(i);
-			String c_id = monthly_statement.c_id;
-			for(int j=0; j < monthly_statement.statements.size(); j++){
-				customers.add(monthly_statement.c_id);
-				AccountStatement a_statement= monthly_statement.statements.get(i);
-				accounts.add(a_statement.a_id);
-				owners.add(Utilities.format_owners(a_statement.owners));
-				trans.add(Utilities.format_transactions(a_statement.transactions));
-				initial_balance.add(Double.toString(a_statement.initial_balance));
-				final_balance.add(Double.toString(a_statement.final_balance));
+			ArrayList<AccountStatement> a_info= statement.get(i).statements;
+			for(int j=0; j < statement.get(i).statements.size(); j++){
+				customers.add(statement.get(i).c_id);
+				//Add account id
+				accounts.add(a_info.get(j).a_id);
+
+				owners.add(Utilities.format_owners(a_info.get(j).owners));
+				trans.add(Utilities.format_transactions(a_info.get(j).transactions));
+				initial_balance.add(Double.toString(a_info.get(j).initial_balance));
+				final_balance.add(df.format(a_info.get(j).final_balance));
 				//Reverse so it makes more sense in table
-				insurance_limit.add(Boolean.toString(!a_statement.insurance_limit_reached));
+				insurance_limit.add(Boolean.toString(!a_info.get(j).insurance_limit_reached));
 			}
 
 		}
@@ -403,7 +409,36 @@ public class BankTellerInterface extends JPanel{
 		row_elements.add(insurance_limit);
 		System.out.println("Creating table");
 		page.createTable(col, row_elements);
-		update_page(BankTellerActions.MONTHLY_STATEMENT);*/
+		page.maximizeTable(this.parent_frame);
+		update_page(BankTellerActions.MONTHLY_STATEMENT);
+
+		//Do command line too
+		//ArrayList<CustomerMonthlyStatement> statement= ManagerOperations.generate_monthly_statement(this.connection);
+		System.out.println("Date: "+ Bank.get_date(this.connection)+"\n\n");
+		//DecimalFormat df = new DecimalFormat("#.###");
+		for (int i =0; i < statement.size(); i++){
+			String s="";
+			System.out.println("Primary Owner: "+ statement.get(i).c_id+ " ");
+			System.out.println("	Accounts: ");
+			ArrayList<AccountStatement> a_info= statement.get(i).statements;
+			for (int j=0; j< statement.get(i).statements.size(); j++){
+				s+= "		Account: " + a_info.get(j).a_id+ "\n\n";
+
+				s+= "			Owners:\n"+ Utilities.format_owners_cli(a_info.get(j).owners) + "\n";
+				s+= "			Transactions:\n"+Utilities.format_transactions_cli(a_info.get(j).transactions)+"\n";
+				s+= "			Initial Balance: "+ (a_info.get(j).initial_balance) + "\n\n";
+				s+= "			Final Balance: " + df.format(a_info.get(j).final_balance) + "\n\n";
+				s+= "			Insurance Limit Reached: "+ Boolean.toString(a_info.get(j).insurance_limit_reached)+ "\n\n";
+			}
+			System.out.println(s);
+			System.out.println("______________________________________________________________________________________________________________________________");
+
+		}
+		if(statement == null || statement.size() == 0){
+			JOptionPane.showMessageDialog(parent_frame,"Error: No reports","Inane warning",JOptionPane.WARNING_MESSAGE);
+			//page.setLabel("No accounts associated with the given customer ID", Color.red);
+			return;
+		}
 
 	}
 	public void add_interest(){
