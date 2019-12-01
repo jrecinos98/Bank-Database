@@ -395,8 +395,8 @@ public class BankTellerInterface extends JPanel{
 
 				owners.add(Utilities.format_owners(a_info.get(j).owners));
 				trans.add(Utilities.format_transactions(a_info.get(j).transactions));
-				initial_balance.add(Double.toString(a_info.get(j).initial_balance));
-				final_balance.add(df.format(a_info.get(j).final_balance));
+				initial_balance.add(String.format("%.2f",Math.abs(a_info.get(j).initial_balance)));
+				final_balance.add(String.format("%.2f", Math.abs(a_info.get(j).final_balance)));
 				//Reverse so it makes more sense in table
 				insurance_limit.add(Boolean.toString(!a_info.get(j).insurance_limit_reached));
 			}
@@ -427,8 +427,8 @@ public class BankTellerInterface extends JPanel{
 
 				s+= "			Owners:\n"+ Utilities.format_owners_cli(a_info.get(j).owners) + "\n";
 				s+= "			Transactions:\n"+Utilities.format_transactions_cli(a_info.get(j).transactions)+"\n";
-				s+= "			Initial Balance: "+ (a_info.get(j).initial_balance) + "\n\n";
-				s+= "			Final Balance: " + df.format(a_info.get(j).final_balance) + "\n\n";
+				s+= "			"+ String.format("Initial Balance: %.2f", Math.abs(a_info.get(j).initial_balance)) + "\n\n";
+				s+= "			"+ String.format("Final Balance: %.2f", Math.abs(a_info.get(j).final_balance)) + "\n\n";
 				s+= "			Insurance Limit Reached: "+ Boolean.toString(a_info.get(j).insurance_limit_reached)+ "\n\n";
 			}
 			System.out.println(s);

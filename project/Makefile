@@ -1,8 +1,8 @@
 
 build:
 	#find ./cs174a -type f -name "*.java" > ../cs174a/bin/sources.txt
-	#suppress -serial warning because our project is never serialize. 
-	javac -Xlint -Xlint:-serial -classpath ./lib/ojdbc8.jar:./cs174a ./cs174a/* -d ./out/
+	
+	javac -classpath ./lib/ojdbc8.jar:./cs174a ./cs174a/* -d ./out/
 
 clean:
 	rm ./out/cs174a/*

@@ -101,7 +101,7 @@ public class Utilities{
 	public static String format_owners_cli(ArrayList<String> o){
 		String owners="";
 		for (int i=0; i< o.size(); i++){
-			owners+=o.get(i)+"\n 				";
+			owners+=" 				"+ o.get(i)+"\n";
 		}
 		return owners;
 	}
@@ -149,7 +149,7 @@ public class Utilities{
 		String transaction="";
 		for(int i=0; i < transactions.size(); i++){
 			Transaction trans = transactions.get(i);
-			transaction+= "[T_ID: "+Integer.toString(trans.t_id)+"] ";
+			transaction+= "\n[T_ID: "+Integer.toString(trans.t_id)+"] ";
 			transaction+= trans.transaction_type + ": ";
 			if(trans.transaction_type.equals("FTM_FEE") || trans.transaction_type.equals("PCT_FEE")){
 				transaction+= "$"+ Double.toString(trans.amount)+ " taken from account "
