@@ -1,4 +1,4 @@
 sources.txt
 .idea
 *bin/*
-./out/cs174a/*
+out/*
