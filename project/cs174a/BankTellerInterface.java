@@ -267,6 +267,7 @@ public class BankTellerInterface extends JPanel{
 		System.out.println("Successfully got closed accounts!");
 		a_list.add(accounts);
 		p.createTable(col, a_list);
+		//p.removeSearch();
 		update_page(BankTellerActions.LIST_CLOSED);
 
 
@@ -291,6 +292,7 @@ public class BankTellerInterface extends JPanel{
 		System.out.println("Successfully got closed accounts!");
 		c_list.add(customers);
 		p.createTable(col, c_list);
+		//p.removeSearch();
 		update_page(BankTellerActions.DTER);
 
 	}
@@ -340,34 +342,7 @@ public class BankTellerInterface extends JPanel{
 	}
 	public void monthly_statement(){
 		ListPage page = (ListPage) panels.get(BankTellerActions.MONTHLY_STATEMENT);
-		//String cust_id= page.getInput();
-		/*
-		ArrayList<CustomerMonthlyStatement> statement= ManagerOperations.generate_monthly_statement(this.connection);
-		System.out.println("Date: "+ Bank.get_date(this.connection)+"\n\n");
-		DecimalFormat df = new DecimalFormat("#.###");
-		for (int i =0; i < statement.size(); i++){
-			String s="";
-			System.out.println("Primary Owner: "+ statement.get(i).c_id+ " ");
-			System.out.println("	Accounts: ");
-			ArrayList<AccountStatement> a_info= statement.get(i).statements;
-			for (int j=0; j< statement.get(i).statements.size(); j++){
-				s+= "		Account: " + a_info.get(j).a_id+ "\n\n";
 
-				s+= "			Owners: \n 				"+ Utilities.format_owners(a_info.get(j).owners) + "\n";
-				s+= "			Transactions:\n"+Utilities.format_transactions(a_info.get(j).transactions)+"\n";
-				s+= "			Initial Balance: "+ df.format(a_info.get(j).initial_balance) + "\n\n";
-				s+= "			Final Balance: " + df.format(a_info.get(j).final_balance) + "\n\n";
-				s+= "			Insurance Limit Reached: "+ Boolean.toString(a_info.get(j).insurance_limit_reached)+ "\n\n";
-			}
-			System.out.println(s);
-			System.out.println("______________________________________________________________________________________________________________________________");
-
-		}
-		if(statement == null || statement.size() == 0){
-			JOptionPane.showMessageDialog(parent_frame,"Error: No reports","Inane warning",JOptionPane.WARNING_MESSAGE);
-			//page.setLabel("No accounts associated with the given customer ID", Color.red);
-			return;
-		}*/
 		//Multiple entries in table for a customer if they are the primary owner for multiple accounts
 		String [] col={"Owner", "Account", "Owners","Transactions", "Initial Balance", "Final Balance", "Insurance status"};
 		ArrayList<CustomerMonthlyStatement> statement= ManagerOperations.generate_monthly_statement(this.connection);
@@ -393,8 +368,8 @@ public class BankTellerInterface extends JPanel{
 
 				owners.add(Utilities.format_owners(a_info.get(j).owners));
 				trans.add(Utilities.format_transactions(a_info.get(j).transactions));
-				initial_balance.add(Double.toString(a_info.get(j).initial_balance));
-				final_balance.add(df.format(a_info.get(j).final_balance));
+				initial_balance.add(String.format("%.2f",Math.abs(a_info.get(j).initial_balance)));
+				final_balance.add(String.format("%.2f", Math.abs(a_info.get(j).final_balance)));
 				//Reverse so it makes more sense in table
 				insurance_limit.add(Boolean.toString(!a_info.get(j).insurance_limit_reached));
 			}
@@ -407,15 +382,12 @@ public class BankTellerInterface extends JPanel{
 		row_elements.add(initial_balance);
 		row_elements.add(final_balance);
 		row_elements.add(insurance_limit);
-		System.out.println("Creating table");
 		page.createTable(col, row_elements);
 		page.maximizeTable(this.parent_frame);
 		update_page(BankTellerActions.MONTHLY_STATEMENT);
 
-		//Do command line too
-		//ArrayList<CustomerMonthlyStatement> statement= ManagerOperations.generate_monthly_statement(this.connection);
-		System.out.println("Date: "+ Bank.get_date(this.connection)+"\n\n");
-		//DecimalFormat df = new DecimalFormat("#.###");
+		//Do command line too for extra security.
+		System.out.println("\n\nDate: "+ Bank.get_date(this.connection)+"\n\n");
 		for (int i =0; i < statement.size(); i++){
 			String s="";
 			System.out.println("Primary Owner: "+ statement.get(i).c_id+ " ");
@@ -426,8 +398,8 @@ public class BankTellerInterface extends JPanel{
 
 				s+= "			Owners:\n"+ Utilities.format_owners_cli(a_info.get(j).owners) + "\n";
 				s+= "			Transactions:\n"+Utilities.format_transactions_cli(a_info.get(j).transactions)+"\n";
-				s+= "			Initial Balance: "+ (a_info.get(j).initial_balance) + "\n\n";
-				s+= "			Final Balance: " + df.format(a_info.get(j).final_balance) + "\n\n";
+				s+= "			"+ String.format("Initial Balance: %.2f", Math.abs(a_info.get(j).initial_balance)) + "\n\n";
+				s+= "			"+ String.format("Final Balance: %.2f", Math.abs(a_info.get(j).final_balance)) + "\n\n";
 				s+= "			Insurance Limit Reached: "+ Boolean.toString(a_info.get(j).insurance_limit_reached)+ "\n\n";
 			}
 			System.out.println(s);
@@ -547,7 +519,7 @@ public class BankTellerInterface extends JPanel{
 	private JPanel create_actions_page(){
 		JPanel holder= new JPanel(new GridLayout(2, 1));
 		create_render_buttons();
-		List keys = new ArrayList(action_buttons.keySet());
+		ArrayList<BankTellerActions> keys = new ArrayList<BankTellerActions>(action_buttons.keySet());
 		Collections.sort(keys);
 		for(int i=0; i< keys.size();i++){
 			holder.add(action_buttons.get(keys.get(i)));
@@ -590,15 +562,6 @@ public class BankTellerInterface extends JPanel{
 		JButton button= new JButton("Search");
 		button.addMouseListener( new ListButtonListener(BankTellerActions.SEARCH_MONTHLY_STATEMENT));
 		return (new ListPage(button, "Customer ID: "));
-	}
-
-	private JPanel create_custom_list_page(JButton b, String label, String[] col_names, ArrayList<ArrayList<String>> row_elements){
-		if(col_names.length != row_elements.size()){
-			System.err.println("Missing colums on list");
-			return (new JPanel());
-		}
-		ListPage temp = new ListPage(b,label, col_names, row_elements);
-		return temp;
 	}
 
 	//These buttons are used to render new pages from the ACTIONS_PAGE.

@@ -4,11 +4,12 @@ build:
 
 
 clean:
-	rm ./bin/cs174a/*
+	rm ./out/cs174a/*
 
 run:
 	java -cp ./lib/ojdbc8.jar:out:. cs174a.Main
+
 #Need to re build to see changes
 gui:
 	make build
-	java -classpath ./bin:./lib/* cs174a.Main
+	java -classpath ./out:./lib/* cs174a.Main
