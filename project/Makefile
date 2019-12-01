@@ -1,14 +1,14 @@
 
 build:
-	find ./src -type f -name "*.java" > sources.txt
-	javac -classpath ./lib/ojdbc8.jar:./src @sources.txt -d ./bin
+	#find ./cs174a -type f -name "*.java" > ../cs174a/bin/sources.txt
+	javac -Xlint -classpath ./lib/ojdbc8.jar:./cs174a ./cs174a/* -d ./out/
 
 clean:
-	rm ./bin/cs174a/*
+	rm ./out/cs174a/*
 
 run:
-	java -classpath ./bin:./lib/* cs174a.Main
+	java -classpath ./out:./lib/* cs174a.Main
 #Need to re build to see changes
 gui:
 	make build
-	java -classpath ./bin:./lib/* cs174a.Main
+	java -classpath ./out:./lib/* cs174a.Main
