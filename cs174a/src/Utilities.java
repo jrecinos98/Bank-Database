@@ -116,14 +116,15 @@ public class Utilities{
 			transaction+= "				"+Integer.toString(i+1)+". ";
 			transaction+= trans.transaction_type + " Transaction: ";
 			//From account empty means deposit
-			if(trans.from_acct == null || trans.from_acct.equals("") ){
-				transaction+= "$"+ Double.toString(trans.amount)+ " added to account "
-								+ trans.to_acct + " on " + trans.date + " by customer: " + trans.cust_id;
+
+			if(trans.from_acct != null && trans.from_acct.equals("") || trans.from_acct == null){
+				transaction+= "$"+ Double.toString(trans.amount)+ " added to "
+								+ trans.to_acct + " on " + trans.date + " by " + trans.cust_id;
 			}
 			//Witdraw
-			else if(trans.to_acct ==null || trans.to_acct.equals("")){
-				transaction+= "$"+ Double.toString(trans.amount)+ " taken from account"
-								+ trans.from_acct + " on " + trans.date + " by customer: " + trans.cust_id;
+			else if(trans.to_acct != null && trans.to_acct.equals("") || trans.to_acct ==null){
+				transaction+= "$"+ Double.toString(trans.amount)+ " taken from "
+								+ trans.to_acct + " on " + trans.date + " by " + trans.cust_id;
 
 			}
 			else{

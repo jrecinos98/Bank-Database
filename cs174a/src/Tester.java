@@ -452,6 +452,7 @@ public class Tester{
 
 	public int test_sample_data(){
 		try{
+			
 			return fail();
 		}catch(Exception e){
 			e.printStackTrace();
@@ -492,5 +493,8 @@ public class Tester{
 		this.teardown();
 	}
 
+	public void test_app(App app){
+		System.out.println("START");
+	}
 
 }

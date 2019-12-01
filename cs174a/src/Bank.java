@@ -79,6 +79,46 @@ public class Bank{
 		return true;
 	}
 
+	public static String get_last_interest_date(OracleConnection connection){
+		String date = "";
+		String query = String.format("SELECT last_intrst_date FROM bank");
+		try( Statement statement = connection.createStatement() ) {
+			try( ResultSet rs = statement.executeQuery( query )){
+				if(rs.next()){
+					date = String.format("%s",rs.getString("last_intrst_date"));
+				}else{
+					return "";
+				}
+			}catch(SQLException e){
+				e.printStackTrace();
+				return "";
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+			return "";
+		}
+		return date;
+	}
+
+	public static boolean set_last_interest_date(String date, OracleConnection connection){
+		String query = String.format("UPDATE bank SET last_intrst_date = '%s'", date);
+		try( Statement statement = connection.createStatement() ) {
+			try{
+				int updates = statement.executeUpdate( query );
+				if(updates == 0){
+					return false;
+				}
+			}catch(SQLException e){
+				e.printStackTrace();
+				return false;
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+			return false;
+		}
+		return true;
+	}
+
 	public static String get_month(OracleConnection connection){
 		String date = Bank.get_date(connection);
 		if(date.equals("")){

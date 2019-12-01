@@ -291,7 +291,7 @@ public class Transaction {
 		// Make sure account is NOT a pocket account
 		Account account = Account.get_account_by_id(from_acct, connection);
 		if(account != null && account.account_type.equals("" + Testable.AccountType.POCKET)){
-			System.err.println("Withdraw failed -- cannot deposit to pocket account");
+			System.err.println("Withdraw failed -- cannot withdraw to pocket account");
 			return false;
 		}
 

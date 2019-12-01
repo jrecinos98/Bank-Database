@@ -179,6 +179,17 @@ public class Customer {
 	public static Customer create_customer(String tin, String name, String address, OracleConnection connection){
 		Customer cust = null;
 		String new_encrypted_pin = "0000";
+		Customer check_cust = Customer.get_cust_by_id(tin, connection);
+		if(check_cust != null){
+			// Customer already exists
+			return null;
+		}
+
+		// Fix strings if have '
+		name = name.replace("'", "''");
+		address = address.replace("'", "''");
+
+
 		try{
 			new_encrypted_pin = Customer.encrypt_pin("1717");
 		}catch(Exception e){ return null; }
