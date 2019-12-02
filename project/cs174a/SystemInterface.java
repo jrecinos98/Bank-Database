@@ -129,6 +129,12 @@ public class SystemInterface extends JPanel{
 		}else{
 			System.out.println("Error creating tables");
 		}
+		if(Bank.bank_set_up(this.connection)){
+			System.out.println("Initialized Bank");
+		}
+		else{
+			System.out.println("Initialization failed");
+		}
 	}
 
 	public void destroy_tables(){
