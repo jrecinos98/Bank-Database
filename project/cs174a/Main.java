@@ -34,8 +34,8 @@ public class Main
 				// Another example test.
 				// r = app.createCheckingSavingsAccount( AccountType.INTEREST_CHECKING, "account1", 1234.56, "theTaxID", "Im YoungMing", "Known" );
 				// System.out.println( r );
-				app.run_cli();
-				 //app.run_gui();
+				//app.run_cli();
+				app.run_gui();
 				//app.run_demo();
 				// Tester tester = new Tester();
 				// tester.test_app(app);

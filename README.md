@@ -19,12 +19,8 @@
 
 # To-do
 * Make strings for the database creation instead of reading from file
-* Make unit tests that test deposit and other transactions with nonexistant accounts, customers, etc.
-* Test payfriend where it's FTM for both pocket accounts
-* Try every transaction with a nonexistant account
+* Test GUI monthly things
 * Add Leap year fucntionality
-* Disallow transactions to/from same account
 * Make sure can only do monthly on last day of month
 * Make monthly statement show all accounts
-* Test account closing
-* Create check number?
+* Slideshow?

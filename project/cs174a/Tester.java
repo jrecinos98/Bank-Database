@@ -576,9 +576,182 @@ public class Tester{
 	public void test_app(App app){
 		System.out.println("START");
 
+		// WRITE TESTS HERE
+		String result; 
+		result = app.initializeSystem();
+		if(result.equals("1")){
+			System.err.println("ERROR INIT");
+		}
+		result = app.dropTables();
+		if(result.equals("1")){
+			System.err.println("ERROR DROP");
+		}
+	
+		result = app.createTables();
+		if(result.equals("1")){
+			System.err.println("ERROR CREATE");
+		}
 
+		result = app.setDate(2011, 3, 1);
+		if(result.equals("1")){
+			System.err.println("ERROR SETDATE");
+		}
+
+		result = app. createCheckingSavingsAccount( Testable.AccountType.SAVINGS, "12241",
+		 			1250, "111000111", "George Washington", "White House");
+		if(!result.equals("0 12241 SAVINGS 1250 111000111")){
+			System.err.println("ERROR ACCOUNT CREATE 1");
+		}
+
+		result = app. createCheckingSavingsAccount( Testable.AccountType.INTEREST_CHECKING, "22241",
+		 			5000, "222111222", "Abraham Lincoln", "White House");
+		if(!result.equals(result.equals("0 22241 INTEREST_CHECKING 5000 222111222"))){
+			System.err.println("ERROR ACCOUNT CREATE 2");
+		}
+
+		result = app. createCheckingSavingsAccount( Testable.AccountType.STUDENT_CHECKING, "33341",
+		 			1010, "333222333", "Thomas Jefferson", "White House");
+		if(!result.equals("0 33341 STUDENT_CHECKING 1010 333222333")){
+			System.err.println("ERROR ACCOUNT CREATE 3");
+		}
+
+		result = app. createCheckingSavingsAccount( Testable.AccountType.INTEREST_CHECKING, "55541",
+		 			200, "444333444", "Benjamin Franklin", "Paris");
+		if(!result.equals("1")){
+			System.err.println("ERROR ACCOUNT CREATE 4");
+		}
+
+		// Too much money
+		result = app.createPocketAccount("66651", "12241", 1249, "111000111");
+		if(!result.equals("1")){
+			System.err.println("ERROR P_ACCOUNT CREATE 1");
+		}
+
+		// Cust doesn't exist
+		result = app.createPocketAccount("66651", "12241", 50, "111010111");
+		if(!result.equals("1")){
+			System.err.println("ERROR P_ACCOUNT CREATE 2");
+		}
+
+		// Linked doesn't exist
+		result = app.createPocketAccount("66651", "12243", 50, "111000111");
+		if(!result.equals("1")){
+			System.err.println("ERROR P_ACCOUNT CREATE 3");
+		}
+
+		// Should be ok
+		result = app.createPocketAccount("66651", "12241", 50, "111000111");
+		if(!result.equals("0 66651 POCKET 50.00 111000111")){
+			System.err.println("ERROR P_ACCOUNT CREATE 4");
+		}
+
+		// Can't recreate same account
+		result = app.createPocketAccount("66651", "12241", 50, "111000111");
+		if(!result.equals("1")){
+			System.err.println("ERROR P_ACCOUNT CREATE 5");
+		}
+
+		// Should be ok
+		result = app.createPocketAccount("77751", "22241", 100, "222111222");
+		if(!result.equals("0 77751 POCKET 100.00 222111222")){
+			System.err.println("ERROR P_ACCOUNT CREATE 6");
+		}
+
+
+
+		// Should succeed
+		result = app.createCustomer("33341", "121212121", "James Madison", "Pennsylvania");
+		if(!result.equals("0")){
+			System.err.println("ERROR CREATECUSTOMER 1");
+		}
+
+		// Should fail account doesnt exist
+		result = app.createCustomer("33345", "121212121", "James Madison", "Pennsylvania");
+		if(!result.equals("1")){
+			System.err.println("ERROR CREATECUSTOMER 2");
+		}
+
+		// Should fail, customer already exists
+		result = app.createCustomer("33341", "121212121", "James Madison", "Pennsylvania");
+		if(!result.equals("1")){
+			System.err.println("ERROR CREATECUSTOMER 3");
+		}		
+
+		result = app.setDate(2011, 3, 5);
+		if(!result.equals("0 2011-03-05")){
+			System.err.println("ERROR SETDATE 2");
+		}
+
+		result = app.deposit("12241", 5);
+		if(!result.equals("0 1195.00 1200.00")){
+			System.err.println("ERROR DEPOSIT 1");
+		}
+
+		// Should fail as deposit not work on pocket acct
+		result = app.deposit("66651", 2);
+		if(!result.equals("1")){
+			System.err.println("ERROR DEPOSIT 2");
+		}
+
+		// Should fail as nonexistant account
+		result = app.showBalance("66661");
+		if(!result.equals("1")){
+			System.err.println("ERROR SHOWBALANCE 1");
+		}
+
+		// Should succeed
+		result = app.showBalance("22241");
+		if(!result.equals("0 4895.00")){
+			System.err.println("ERROR SHOWBALANCE 2");
+		}
+
+		result = app.topUp("66651", 50);
+		if(!result.equals("0 1150.00 100.00")){
+			System.err.println("ERROR TOPUP 1");
+		}
+
+		// Should fail, not enough money
+		result = app.topUp("66651", 520000);
+		if(!result.equals("0 1150.00 100.00")){
+			System.err.println("ERROR TOPUP 1");
+		}
+
+		// Nonexistant account, should fail
+		result = app.topUp("66661", 50);
+		if(!result.equals("1")){
+			System.err.println("ERROR TOPUP 2");
+		}
+
+		// Should fail, more money than in account
+		result = app.payFriend("77751", "66651", 50000);
+		if(!result.equals("1")){
+			System.err.println("ERROR PAYFRIEND 3");
+		}		
+
+		result = app.payFriend("77751", "66651", 100);
+		if(!result.equals("0 0.00 200.00")){
+			System.err.println("ERROR PAYFRIEND 1");
+		}
+
+		// Should fail, pocket is closed
+		result = app.payFriend("66651", "77752", 20);
+		if(!result.equals("1")){
+			System.err.println("ERROR PAYFRIEND 2");
+		}
+
+		result = app.topUp("66651", 1150);
+		if(!result.equals("0 0.00 1350.00")){
+			System.err.println("ERROR TOPUP 3");
+		}
+
+		result = app.listClosedAccounts();
+		if(!result.equals("1")){
+			System.err.println("Should be closed: 66651 77751 12241");
+			System.err.println("Closed accounts:" + result);
+		}else{
+			System.err.println("ERROR LISTCLOSEDACCT");
+		}
 
 		app.close_connection();
 	}
-
 }
