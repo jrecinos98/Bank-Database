@@ -131,7 +131,14 @@ public class Utilities{
 			Transaction trans = transactions.get(i);
 
 			transaction+= "				[T_ID: "+Integer.toString(trans.t_id)+"] ";
-			transaction+= trans.transaction_type+ ": "  ;
+			if(trans.transaction_type.equals("WRITE_CHECK")){
+				String[] s= trans.date.split("-");
+				transaction+= "["+trans.transaction_type+ ", Check No: "+s[0]+s[1]+s[2]+trans.t_id+"]  ";
+			}
+			else{
+
+				transaction+= trans.transaction_type+ ": "  ;
+			}
 			if(trans.transaction_type.equals("FTM_FEE") || trans.transaction_type.equals("PCT_FEE")){
 				transaction+= "$"+ Double.toString(trans.amount)+ " taken from account "
 								+ trans.from_acct + " on " + trans.date;
