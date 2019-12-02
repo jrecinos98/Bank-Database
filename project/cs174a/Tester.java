@@ -599,19 +599,19 @@ public class Tester{
 
 		result = app. createCheckingSavingsAccount( Testable.AccountType.SAVINGS, "12241",
 		 			1250, "111000111", "George Washington", "White House");
-		if(!result.equals("0 12241 SAVINGS 1250 111000111")){
+		if(!result.equals("0 12241 SAVINGS 1250.00 111000111")){
 			System.err.println("ERROR ACCOUNT CREATE 1");
 		}
 
 		result = app. createCheckingSavingsAccount( Testable.AccountType.INTEREST_CHECKING, "22241",
 		 			5000, "222111222", "Abraham Lincoln", "White House");
-		if(!result.equals(result.equals("0 22241 INTEREST_CHECKING 5000 222111222"))){
+		if(!result.equals("0 22241 INTEREST_CHECKING 5000.00 222111222")){
 			System.err.println("ERROR ACCOUNT CREATE 2");
 		}
 
 		result = app. createCheckingSavingsAccount( Testable.AccountType.STUDENT_CHECKING, "33341",
 		 			1010, "333222333", "Thomas Jefferson", "White House");
-		if(!result.equals("0 33341 STUDENT_CHECKING 1010 333222333")){
+		if(!result.equals("0 33341 STUDENT_CHECKING 1010.00 333222333")){
 			System.err.println("ERROR ACCOUNT CREATE 3");
 		}
 
@@ -656,7 +656,6 @@ public class Tester{
 		if(!result.equals("0 77751 POCKET 100.00 222111222")){
 			System.err.println("ERROR P_ACCOUNT CREATE 6");
 		}
-
 
 
 		// Should succeed
@@ -712,8 +711,8 @@ public class Tester{
 
 		// Should fail, not enough money
 		result = app.topUp("66651", 520000);
-		if(!result.equals("0 1150.00 100.00")){
-			System.err.println("ERROR TOPUP 1");
+		if(!result.equals("1")){
+			System.err.println("ERROR TOPUP 3");
 		}
 
 		// Nonexistant account, should fail
