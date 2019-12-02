@@ -21,6 +21,6 @@
 
 ### Anything important that might prevent running: No
 * Provided the two commands supplied are executed in the `project` directory, it should run correctly
+* And the build directory should have the out folder as mentioned in the specs
 
 ### App should run with just the two given commands: Yes
-* If for whatever reason, it doesn't run, it can be executed with make && make run
