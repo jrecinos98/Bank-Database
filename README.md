@@ -1,5 +1,5 @@
 #Team members: 
-* Jose Recinos Cuellar ()
+* Jose Recinos Cuellar (8907826)
 * Nicholas Duncan (3937679)
 
 ### We completed all basic requirements from the project specs as well as the discussions/changes on piazza
