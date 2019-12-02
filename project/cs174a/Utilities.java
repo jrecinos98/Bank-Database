@@ -131,8 +131,16 @@ public class Utilities{
 			Transaction trans = transactions.get(i);
 
 			transaction+= "				[T_ID: "+Integer.toString(trans.t_id)+"] ";
-			transaction+= trans.transaction_type + ": ";
+			if(trans.transaction_type.equals("FTM_FEE") || trans.transaction_type.equals("PCT_FEE")){
+				transaction+= "$"+ Double.toString(trans.amount)+ " taken from account "
+								+ trans.from_acct + " on " + trans.date;
+			}
+			else if(trans.transaction_type.equals("ACCRUE_INTEREST")){
+				transaction+= "$"+ Double.toString(trans.amount)+ " added to account "
+								+ trans.to_acct + " on " + trans.date;
+			}
 			//From account empty means deposit1
+			if(trans.transaction_type.equals())
 			if(trans.from_acct == null || trans.from_acct.equals("") ){
 				transaction+= "$"+ Double.toString(trans.amount)+ " added to account "
 								+ trans.to_acct + " on " + trans.date + " by customer: " + trans.cust_id;
