@@ -127,7 +127,7 @@ public class BankTellerInterface extends JPanel{
 		String c_id= form.getInput(2);
 		String name= form.getInput(3);
 		String address= form.getInput(4);
-		String initial_balance= form.getInput(4);
+		String initial_balance= form.getInput(5);
 
 		if(!Utilities.valid_id(a_id)){
 			form.setLabel("Enter a valid account ID", Color.red);
