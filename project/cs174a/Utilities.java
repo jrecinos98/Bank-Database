@@ -139,8 +139,6 @@ public class Utilities{
 				transaction+= "$"+ Double.toString(trans.amount)+ " added to account "
 								+ trans.to_acct + " on " + trans.date;
 			}
-			//From account empty means deposit1
-			if(trans.transaction_type.equals())
 			if(trans.from_acct == null || trans.from_acct.equals("") ){
 				transaction+= "$"+ Double.toString(trans.amount)+ " added to account "
 								+ trans.to_acct + " on " + trans.date + " by customer: " + trans.cust_id;

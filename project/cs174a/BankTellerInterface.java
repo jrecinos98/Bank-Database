@@ -399,7 +399,9 @@ public class BankTellerInterface extends JPanel{
 		row_elements.add(final_balance);
 		row_elements.add(insurance_limit);
 		page.createTable(col, row_elements);
+		
 		page.maximizeTable(this.parent_frame);
+		page.minimize(this.parent_frame);
 		update_page(BankTellerActions.MONTHLY_STATEMENT);
 
 		//Do command line too for extra security.
