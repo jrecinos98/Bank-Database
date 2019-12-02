@@ -113,6 +113,10 @@ public class ListPage extends JPanel{
 		table.getColumnModel().getColumn(6).setPreferredWidth(20);
 		window.setExtendedState( window.getExtendedState()|JFrame.MAXIMIZED_BOTH );
     }
+    public void minimize(JFrame window){
+    	window.setState(JFrame.ICONIFIED);
+    	//window.setExtendedState(JFrame.ICONIFIED );
+    }
    
     public void setPrevious(String s){
     	this.previous_search= s;

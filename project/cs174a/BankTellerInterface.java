@@ -124,9 +124,9 @@ public class BankTellerInterface extends JPanel{
 
 		Testable.AccountType type = Testable.AccountType.values()[a_type];
 		String a_id= form.getInput(0);
-		String c_id= form.getInput(1);
-		String name= form.getInput(2);
-		String address= form.getInput(3);
+		String c_id= form.getInput(2);
+		String name= form.getInput(3);
+		String address= form.getInput(4);
 		String initial_balance= form.getInput(4);
 
 		if(!Utilities.valid_id(a_id)){
@@ -183,9 +183,9 @@ public class BankTellerInterface extends JPanel{
 
 		Testable.AccountType type = Testable.AccountType.values()[a_type];
 		String id= form.getInput(0);
-		String linkedId= form.getInput(1);
-		String tin= form.getInput(2);
-		String initialTopUp= form.getInput(3);
+		String linkedId= form.getInput(2);
+		String tin= form.getInput(3);
+		String initialTopUp= form.getInput(4);
 
 		if(!Utilities.valid_id(id)){
 			form.setLabel("Enter a valid account ID", Color.red);
@@ -399,7 +399,9 @@ public class BankTellerInterface extends JPanel{
 		row_elements.add(final_balance);
 		row_elements.add(insurance_limit);
 		page.createTable(col, row_elements);
+		
 		page.maximizeTable(this.parent_frame);
+		page.minimize(this.parent_frame);
 		update_page(BankTellerActions.MONTHLY_STATEMENT);
 
 		//Do command line too for extra security.
@@ -577,13 +579,13 @@ public class BankTellerInterface extends JPanel{
 		if(regular_acct){
 			JComboBox<String> acctList = new JComboBox<>(BankTellerInterface.ACCT_TYPES);
 			acctList.addItemListener(item);
-			return create_custom_page(new ArrayList<String> (Arrays.asList("Account ID: ", " Customer ID: ", "Customer Name: ", "Customer Address: ", "Initial Balance: $")), "Create Account", acctList,"Account Type",BankTellerActions.CREATE_ACCOUNT );
+			return create_custom_page(new ArrayList<String> (Arrays.asList(" Account ID: ", "Bank Branch: ", " Customer ID: ", "Customer Name: ", " Customer Address: ", "Initial Balance: $")), "Create Account", acctList,"Account Type",BankTellerActions.CREATE_ACCOUNT );
 	
 		}
 		else{
 			JComboBox<String> acctList = new JComboBox<>(BankTellerInterface.ACCT_TYPES);
 			acctList.addItemListener(item);
-			return create_custom_page(new ArrayList<String> (Arrays.asList("Account ID: ", " Linked Account ID: ", "Customer ID: ", "Initial Top Up: $")), "Create Pocket Account", acctList,"Account Type",BankTellerActions.POCKET_ACCOUNT );
+			return create_custom_page(new ArrayList<String> (Arrays.asList(" Account ID: ", "Bank Branch: ", " Linked Account ID: ", "Customer ID: ", " Initial Top Up: $")), "Create Pocket Account", acctList,"Account Type",BankTellerActions.POCKET_ACCOUNT );
 		}
 	}
 	private JPanel create_closed_page(){

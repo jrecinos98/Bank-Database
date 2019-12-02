@@ -44,6 +44,26 @@ public class Utilities{
 		}
 		return true;
 	}
+	public static boolean valid_rate(String rate){
+		if(rate.equals("")){
+			return false;
+		}
+		Double r;
+		try{
+			r=Double.parseDouble(rate);
+		}
+		catch(Exception e){
+			return false;
+		}
+		if(r < 0){
+			return false;
+		}
+		if (r > 100){
+			return false;
+		}
+		return true;
+
+	}
 	public static boolean valid_money_input(String amount){
 		double m;
 		//Trim spaces and try to parse
@@ -111,8 +131,14 @@ public class Utilities{
 			Transaction trans = transactions.get(i);
 
 			transaction+= "				[T_ID: "+Integer.toString(trans.t_id)+"] ";
-			transaction+= trans.transaction_type + ": ";
-			//From account empty means deposit1
+			if(trans.transaction_type.equals("FTM_FEE") || trans.transaction_type.equals("PCT_FEE")){
+				transaction+= "$"+ Double.toString(trans.amount)+ " taken from account "
+								+ trans.from_acct + " on " + trans.date;
+			}
+			else if(trans.transaction_type.equals("ACCRUE_INTEREST")){
+				transaction+= "$"+ Double.toString(trans.amount)+ " added to account "
+								+ trans.to_acct + " on " + trans.date;
+			}
 			if(trans.from_acct == null || trans.from_acct.equals("") ){
 				transaction+= "$"+ Double.toString(trans.amount)+ " added to account "
 								+ trans.to_acct + " on " + trans.date + " by customer: " + trans.cust_id;
