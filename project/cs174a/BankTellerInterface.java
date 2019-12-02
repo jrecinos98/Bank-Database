@@ -244,7 +244,7 @@ public class BankTellerInterface extends JPanel{
 		}
 		else{
 			//May have to do something with check num.
-			form.setLabel("Check transaction success", Color.green);
+			form.setLabel(String.format("	Check ID: %s 	",checkID), Color.green);
 			System.out.println("Check transaction success");
 			return;
 		}
@@ -280,6 +280,14 @@ public class BankTellerInterface extends JPanel{
 		String[] col= {"Customer ID"};
 		ArrayList< ArrayList<String> > c_list= new ArrayList<ArrayList<String>>();
 		ArrayList<String> customers = ManagerOperations.generate_dter(this.connection);
+		String date= Bank.get_date(this.connection);
+		String[] s= date.split("-");
+		if(Integer.parseInt(s[2]) != (Bank.get_days_in_month(s[1]))){
+			//have a dialog saying that no closed accounts were found
+			JOptionPane.showMessageDialog(parent_frame,"Action can only be performed at the end of the month","Inane warning",JOptionPane.WARNING_MESSAGE);
+			return;
+		}
+
 		if(customers == null || customers.size() == 0){
 			//have a dialog saying that no closed accounts were found
 			JOptionPane.showMessageDialog(parent_frame,"No customers were found");
@@ -342,6 +350,14 @@ public class BankTellerInterface extends JPanel{
 	}
 	public void monthly_statement(){
 		ListPage page = (ListPage) panels.get(BankTellerActions.MONTHLY_STATEMENT);
+
+		String date= Bank.get_date(this.connection);
+		String[] d= date.split("-");
+		if(Integer.parseInt(d[2]) != (Bank.get_days_in_month(d[1]))){
+			//have a dialog saying that no closed accounts were found
+			JOptionPane.showMessageDialog(parent_frame,"Action can only be performed at the end of the month","Inane warning",JOptionPane.WARNING_MESSAGE);
+			return;
+		}
 
 		//Multiple entries in table for a customer if they are the primary owner for multiple accounts
 		String [] col={"Owner", "Account", "Owners","Transactions", "Initial Balance", "Final Balance", "Insurance status"};
@@ -414,7 +430,18 @@ public class BankTellerInterface extends JPanel{
 
 	}
 	public void add_interest(){
+		String date= Bank.get_date(this.connection);
+		String[] s= date.split("-");
+		//If the day isn't the last day in the month
+		if(Integer.parseInt(s[2]) != (Bank.get_days_in_month(s[1]))){
+			//have a dialog saying that no closed accounts were found
+			JOptionPane.showMessageDialog(parent_frame,"Action can only be performed at the end of the month","Inane warning",JOptionPane.WARNING_MESSAGE);
+			return;
+		}
 		int i=JOptionPane.showConfirmDialog(parent_frame, "Sure you want to add interest?");
+		
+		
+
         if(i==0){
         	if(ManagerOperations.add_interest(this.connection)){
         		//Show dialog confirming
@@ -430,8 +457,17 @@ public class BankTellerInterface extends JPanel{
         }
 	}
 	public void delete_closed(){
+		String date= Bank.get_date(this.connection);
+		String[] s= date.split("-");
+		if(Integer.parseInt(s[2]) != (Bank.get_days_in_month(s[1]))){
+			//have a dialog saying that no closed accounts were found
+			JOptionPane.showMessageDialog(parent_frame,"Action can only be performed at the end of the month","Inane warning",JOptionPane.WARNING_MESSAGE);
+			return;
+		}
+
 		//Show a dalog to make user confirm action (Make them type it)
 		int i=JOptionPane.showConfirmDialog(parent_frame, "Sure you want to delete all closed accounts?");
+        
         if(i==0){
         	if(ManagerOperations.delete_closed_acc_and_cust(this.connection)){
         		//Show dialog confirming
@@ -447,6 +483,15 @@ public class BankTellerInterface extends JPanel{
         }
 	}
 	public void delete_transactions(){
+		String date= Bank.get_date(this.connection);
+		String[] s= date.split("-");
+		if(Integer.parseInt(s[2]) != (Bank.get_days_in_month(s[1]))){
+			//have a dialog saying that no closed accounts were found
+			JOptionPane.showMessageDialog(parent_frame,"Action can only be performed at the end of the month","Inane warning",JOptionPane.WARNING_MESSAGE);
+			return;
+		}
+
+
 		//Show a dalog to make user confirm action (Make them type it)
 		int i=JOptionPane.showConfirmDialog(parent_frame, "Sure you want to delete all transactions?");
         if(i==0){

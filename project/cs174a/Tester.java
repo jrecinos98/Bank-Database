@@ -405,15 +405,15 @@ public class Tester{
 		System.out.println("Overdrawn\n");
 		try{
 			
-			Account acct_1= Account.create_account(Testable.AccountType.INTEREST_CHECKING, "696969696", 1510.00,
-										 this.get_next_id(), "Michael Jackson", "Wonderland", this.connection);
+			Account acct_1= Account.create_account(Testable.AccountType.INTEREST_CHECKING, this.get_next_id(), 1510.00,
+										 "696969696", "Michael Jackson", "Wonderland", this.connection);
 			String m_id = acct_1.owner_id;
 			//Topup = $5 and initial fee $5 = so total in account after creation is $1,500
 			Account pocket_1= Account.create_pocket_account("707070707", acct_1.a_id, 5.00,
 												    m_id, this.connection);
 			
-			Account acct_2= Account.create_account(Testable.AccountType.SAVINGS,"969696969" , 2000.00,
-										 this.get_next_id(), "Bill Cosby", "Prison", this.connection);
+			Account acct_2= Account.create_account(Testable.AccountType.SAVINGS,this.get_next_id(), 2000.00,
+										 "969696969" , "Bill Cosby", "Prison", this.connection);
 			String cosby_id = acct_2.owner_id;
 			Account pocket_2= Account.create_pocket_account("070707070", acct_2.a_id, 5.00,
 												    cosby_id, this.connection);

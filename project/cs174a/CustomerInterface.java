@@ -326,66 +326,77 @@ public class CustomerInterface extends JPanel{
 
 	}
 	public void collect(){
-		String from_pocket= form.getInput(0);
-		String amount= form.getInput(1);
-		String to_link= form.getInput(2);
-		if(!Utilities.valid_id(from_pocket)){
-			form.setLabel("Invalid sending pocket account", Color.red);
-			return;
-		}
-		if(!Utilities.valid_money_input(amount)){
-			form.setLabel("Enter a valid amount", Color.red);
-			return;
-		}
-		if(!Utilities.valid_id(to_link)){
-			form.setLabel("Invalid receiving pocket account", Color.red);
-			return;
-		}
+		//Show a dalog to make user confirm action (Make them type it)
+		int i=JOptionPane.showConfirmDialog(parent_frame, "There is a 3% fee associated with this transaction. Want to proceed?");
+        
+        if(i==0){
+			String from_pocket= form.getInput(0);
+			String amount= form.getInput(1);
+			String to_link= form.getInput(2);
+			if(!Utilities.valid_id(from_pocket)){
+				form.setLabel("Invalid sending pocket account", Color.red);
+				return;
+			}
+			if(!Utilities.valid_money_input(amount)){
+				form.setLabel("Enter a valid amount", Color.red);
+				return;
+			}
+			if(!Utilities.valid_id(to_link)){
+				form.setLabel("Invalid receiving pocket account", Color.red);
+				return;
+			}
 		
-		
-		String date = Bank.get_date(connection);
-		Transaction.TransactionType type = Transaction.TransactionType.PURCHASE;
-		Transaction trans= Transaction.collect(to_link, from_pocket, this.user_id, date, 
-						 						type, Double.parseDouble(amount),this.connection);
-		if(trans == null){
-			form.setLabel("Transfer Failed", Color.red);
-			System.err.println("Transfer failed");
-		}else{
-			form.setLabel("Transfer Successful", Color.green);
-			System.out.println("Transfer success!");
-			update_page(CustomerActions.ACTIONS_PAGE);
+			
+			String date = Bank.get_date(connection);
+			Transaction.TransactionType type = Transaction.TransactionType.PURCHASE;
+			Transaction trans= Transaction.collect(to_link, from_pocket, this.user_id, date, 
+							 						type, Double.parseDouble(amount),this.connection);
+			if(trans == null){
+				form.setLabel("Transfer Failed", Color.red);
+				System.err.println("Transfer failed");
+			}else{
+				form.setLabel("Transfer Successful", Color.green);
+				System.out.println("Transfer success!");
+				update_page(CustomerActions.ACTIONS_PAGE);
+			}
 		}
+
 
 	}
 	public void wire(){
-		String from_acct= form.getInput(0);
-		String amount= form.getInput(1);
-		String to_acct= form.getInput(2);
+		//Show a dalog to make user confirm action (Make them type it)
+		int i=JOptionPane.showConfirmDialog(parent_frame, "There is a 2% fee associated with this transaction. Want to proceed?");
+        
+        if(i==0){
+			String from_acct= form.getInput(0);
+			String amount= form.getInput(1);
+			String to_acct= form.getInput(2);
 
-		if(!Utilities.valid_id(from_acct)){
-			form.setLabel("Enter a valid sending account", Color.red);
-			return;
-		}
-		if(!Utilities.valid_id(to_acct)){
-			form.setLabel("Enter a valid receiving account", Color.red);
-			return;
-		}
-		if(!Utilities.valid_money_input(amount)){
-			form.setLabel("Enter a valid amount", Color.red);
-			return;
-		}
-		
-		String date = Bank.get_date(connection);
-		Transaction.TransactionType type = Transaction.TransactionType.PURCHASE;
-		Transaction trans= Transaction.wire(to_acct, from_acct, this.user_id, date, 
-						 					type, Double.parseDouble(amount), this.connection);
-		if(trans == null){
-			form.setLabel("Wire Transaction Failed", Color.red);
-			System.err.println("Wire failed");
-		}else{
-			form.setLabel("Wire Transaction Successful", Color.green);
-			System.out.println("Wire success!");
-			update_page(CustomerActions.ACTIONS_PAGE);
+			if(!Utilities.valid_id(from_acct)){
+				form.setLabel("Enter a valid sending account", Color.red);
+				return;
+			}
+			if(!Utilities.valid_id(to_acct)){
+				form.setLabel("Enter a valid receiving account", Color.red);
+				return;
+			}
+			if(!Utilities.valid_money_input(amount)){
+				form.setLabel("Enter a valid amount", Color.red);
+				return;
+			}
+			
+			String date = Bank.get_date(connection);
+			Transaction.TransactionType type = Transaction.TransactionType.PURCHASE;
+			Transaction trans= Transaction.wire(to_acct, from_acct, this.user_id, date, 
+							 					type, Double.parseDouble(amount), this.connection);
+			if(trans == null){
+				form.setLabel("Wire Transaction Failed", Color.red);
+				System.err.println("Wire failed");
+			}else{
+				form.setLabel("Wire Transaction Successful", Color.green);
+				System.out.println("Wire success!");
+				update_page(CustomerActions.ACTIONS_PAGE);
+			}
 		}
 
 	}
