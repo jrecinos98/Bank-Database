@@ -282,7 +282,7 @@ public class BankTellerInterface extends JPanel{
 		ArrayList<String> customers = ManagerOperations.generate_dter(this.connection);
 		String date= Bank.get_date(this.connection);
 		String[] s= date.split("-");
-		if(Integer.parseInt(s[2]) != (Bank.get_days_in_month(s[1]))){
+		if(Integer.parseInt(s[2]) != (Bank.get_days_in_month(s[1], this.connection))){
 			//have a dialog saying that no closed accounts were found
 			JOptionPane.showMessageDialog(parent_frame,"Action can only be performed at the end of the month","Inane warning",JOptionPane.WARNING_MESSAGE);
 			return;
@@ -353,7 +353,7 @@ public class BankTellerInterface extends JPanel{
 
 		String date= Bank.get_date(this.connection);
 		String[] d= date.split("-");
-		if(Integer.parseInt(d[2]) != (Bank.get_days_in_month(d[1]))){
+		if(Integer.parseInt(d[2]) != (Bank.get_days_in_month(d[1], this.connection))){
 			//have a dialog saying that no closed accounts were found
 			JOptionPane.showMessageDialog(parent_frame,"Action can only be performed at the end of the month","Inane warning",JOptionPane.WARNING_MESSAGE);
 			return;
@@ -433,7 +433,7 @@ public class BankTellerInterface extends JPanel{
 		String date= Bank.get_date(this.connection);
 		String[] s= date.split("-");
 		//If the day isn't the last day in the month
-		if(Integer.parseInt(s[2]) != (Bank.get_days_in_month(s[1]))){
+		if(Integer.parseInt(s[2]) != (Bank.get_days_in_month(s[1], this.connection))){
 			//have a dialog saying that no closed accounts were found
 			JOptionPane.showMessageDialog(parent_frame,"Action can only be performed at the end of the month","Inane warning",JOptionPane.WARNING_MESSAGE);
 			return;
@@ -459,7 +459,7 @@ public class BankTellerInterface extends JPanel{
 	public void delete_closed(){
 		String date= Bank.get_date(this.connection);
 		String[] s= date.split("-");
-		if(Integer.parseInt(s[2]) != (Bank.get_days_in_month(s[1]))){
+		if(Integer.parseInt(s[2]) != (Bank.get_days_in_month(s[1], this.connection))){
 			//have a dialog saying that no closed accounts were found
 			JOptionPane.showMessageDialog(parent_frame,"Action can only be performed at the end of the month","Inane warning",JOptionPane.WARNING_MESSAGE);
 			return;
@@ -485,7 +485,7 @@ public class BankTellerInterface extends JPanel{
 	public void delete_transactions(){
 		String date= Bank.get_date(this.connection);
 		String[] s= date.split("-");
-		if(Integer.parseInt(s[2]) != (Bank.get_days_in_month(s[1]))){
+		if(Integer.parseInt(s[2]) != (Bank.get_days_in_month(s[1], this.connection))){
 			//have a dialog saying that no closed accounts were found
 			JOptionPane.showMessageDialog(parent_frame,"Action can only be performed at the end of the month","Inane warning",JOptionPane.WARNING_MESSAGE);
 			return;

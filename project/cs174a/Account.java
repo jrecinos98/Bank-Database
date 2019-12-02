@@ -82,6 +82,7 @@ public class Account{
 		boolean owner_create_success = Account.create_acct_ownership(id, tin, connection);
 		if(!owner_create_success){
 			System.out.println("Error creating cust-acct link");
+			return null;
 		}
 
 		// Create Transaction of initial deposit
@@ -92,6 +93,7 @@ public class Account{
 
 			if(transaction == null){
 				System.out.println("Error creating initial deposit transaction");
+				return null;
 			}
 		}
 
