@@ -49,11 +49,11 @@ public class Interface extends JFrame {
 
   
     public Interface(OracleConnection connection) {
-      /*try {
+      try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
             ex.printStackTrace();
-        }*/
+        }
       setTitle("Bank");
 
       Utilities.setWindow(this);

@@ -429,7 +429,7 @@ public class BankTellerInterface extends JPanel{
 				s+= "			Insurance Limit Reached: "+ Boolean.toString(a_info.get(j).insurance_limit_reached)+ "\n\n";
 			}
 			System.out.println(s);
-			System.out.println("______________________________________________________________________________________________________________________________");
+			System.out.println("__________________________________________________________________________________________________________________________________________________________");
 
 		}
 		if(statement == null || statement.size() == 0){

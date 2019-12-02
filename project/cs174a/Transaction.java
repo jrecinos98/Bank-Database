@@ -807,9 +807,10 @@ public class Transaction {
 		}
 
 		double interest_amount = 0;
-		for(int i = Bank.get_days_in_current_month(connection); i > 0; i--){
+		int days_in_month= Bank.get_days_in_current_month(connection);
+		for(int i = days_in_month ; i > 0; i--){
 			// Compute weighted avg with the day's daily balance
-			interest_amount += (daily_balance / Bank.get_days_in_current_month(connection));
+			interest_amount += (daily_balance / days_in_month);
 
 			// Adjust previous days balance by undoing transactions on current day
 			for(int j = 0; j < transactions.size(); j++){
