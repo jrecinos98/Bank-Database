@@ -161,12 +161,13 @@ public class BankTellerInterface extends JPanel{
 		}else{
 			form.setLabel("Account created successfully", Color.green);
 			System.out.println("Account: " + acct.a_id + " created!");
-			update_page(BankTellerActions.ACTIONS_PAGE);
+			//update_page(BankTellerActions.ACTIONS_PAGE);
 		}
 	}
 
 
 	public void create_pocket_acct(){
+
 		//Get JComboBox and find selected Index
 		int a_type=3;
 		try{
@@ -211,11 +212,12 @@ public class BankTellerInterface extends JPanel{
 
 		//Create the pocket account
 		if(ManagerOperations.create_pocket_account(id, linkedId,Double.parseDouble(initialTopUp), tin, this.connection)){
-			form.setLabel("Account creation failed", Color.red);
-			System.err.println("Error: could not create pocket acct");
-		}else{
 			form.setLabel("Account created successfully", Color.green);
 			System.out.println("Successfully created pocket acct!");
+		}else{
+			form.setLabel("Account creation failed", Color.red);
+			System.err.println("Error: could not create pocket acct");
+			
 		}
 	}
 	public void check_transaction(){
@@ -399,8 +401,14 @@ public class BankTellerInterface extends JPanel{
 		row_elements.add(final_balance);
 		row_elements.add(insurance_limit);
 		page.createTable(col, row_elements);
+		JButton back =new JButton("Back");
+		back.addMouseListener(new MouseAdapter() { 
+			public void mouseClicked(MouseEvent e) {
+                update_page(BankTellerActions.ACTIONS_PAGE);
+            }
+		});
 		
-		page.maximizeTable(this.parent_frame);
+		page.maximizeTable(this.parent_frame, back);
 		page.minimize(this.parent_frame);
 		update_page(BankTellerActions.MONTHLY_STATEMENT);
 
@@ -453,7 +461,7 @@ public class BankTellerInterface extends JPanel{
 
 				//Show dialog stating failure
 				JOptionPane.showMessageDialog(parent_frame,"An error occured","Inane warning",JOptionPane.WARNING_MESSAGE);
-				System.out.println("Check transaction success");
+				System.out.println("Error occured accruing interest");
 				return;
 			}
         }
@@ -762,6 +770,19 @@ public class BankTellerInterface extends JPanel{
 			}
 			else if(SwingUtilities.isRightMouseButton(e)){
 				//Essentially a back key
+				if(form != null){
+					System.out.println("Form not null");
+
+					if(form.getCustomComponent() != null){
+						//Reset comboBox
+						System.out.println("Reset comboBox");
+						((JComboBox)form.getCustomComponent()).setSelectedIndex(0);
+					}
+					else{
+
+						System.out.println("No comboBox");
+					}
+				}
 				update_page(BankTellerActions.ACTIONS_PAGE);
 			}
 		}
@@ -780,7 +801,7 @@ public class BankTellerInterface extends JPanel{
 	          }
 	          if(i==3 && index != i){
 	          	update_page(BankTellerActions.POCKET_ACCOUNT);
-	          	((JComboBox)form.getCustomComponent()).setSelectedIndex(3);
+	          	((JComboBox)form.getCustomComponent()).setSelectedIndex(i);
 	          }
 	          //Condition wrong
 	          else if (index == 3 && i!= 3){

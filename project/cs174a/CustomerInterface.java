@@ -157,9 +157,9 @@ public class CustomerInterface extends JPanel{
 			Customer cust = Customer.get_cust_by_id(this.user_id, this.connection);
 			if(cust != null){
 				//Pop up saying that operation was a success.
-				form.setLabel("Successfully updated PIN", Color.red);	
+				form.setLabel("Successfully updated PIN", Color.green);	
 				System.out.println("Successfully set pin to " + cust.encrypted_pin);
-				update_page(CustomerActions.ACTIONS_PAGE);
+				//update_page(CustomerActions.ACTIONS_PAGE);
 				return;
 			}
 		}
@@ -196,7 +196,7 @@ public class CustomerInterface extends JPanel{
 		}else{
 			form.setLabel("Deposit successful", Color.green);
 			System.out.println("Deposit success!");
-			update_page(CustomerActions.ACTIONS_PAGE);
+			//update_page(CustomerActions.ACTIONS_PAGE);
 
 		}
 	}
@@ -232,7 +232,7 @@ public class CustomerInterface extends JPanel{
 		}else{
 			form.setLabel("Transaction Successful", Color.green);
 			System.out.println("Top-Up success!");
-			update_page(CustomerActions.ACTIONS_PAGE);
+			//update_page(CustomerActions.ACTIONS_PAGE);
 		}
 	}
 
@@ -262,7 +262,7 @@ public class CustomerInterface extends JPanel{
 		}else{
 			form.setLabel("Transaction Successful", Color.green);
 			System.out.println("Withdrawal success!");
-			update_page(CustomerActions.ACTIONS_PAGE);
+			//update_page(CustomerActions.ACTIONS_PAGE);
 		}
 	}
 	public void purchase(){
@@ -288,7 +288,7 @@ public class CustomerInterface extends JPanel{
 		}else{
 			form.setLabel("Purchase Successful", Color.green);
 			System.out.println("Purchase success!");
-			update_page(CustomerActions.ACTIONS_PAGE);
+			//update_page(CustomerActions.ACTIONS_PAGE);
 		}
 		
 
@@ -321,7 +321,7 @@ public class CustomerInterface extends JPanel{
 		}else{
 			form.setLabel("Transfer Successful", Color.green);
 			System.out.println("Transfer success!");
-			update_page(CustomerActions.ACTIONS_PAGE);
+			//update_page(CustomerActions.ACTIONS_PAGE);
 		}
 
 	}
@@ -357,7 +357,7 @@ public class CustomerInterface extends JPanel{
 			}else{
 				form.setLabel("Transfer Successful", Color.green);
 				System.out.println("Transfer success!");
-				update_page(CustomerActions.ACTIONS_PAGE);
+				//update_page(CustomerActions.ACTIONS_PAGE);
 			}
 		}
 
@@ -395,7 +395,7 @@ public class CustomerInterface extends JPanel{
 			}else{
 				form.setLabel("Wire Transaction Successful", Color.green);
 				System.out.println("Wire success!");
-				update_page(CustomerActions.ACTIONS_PAGE);
+				//update_page(CustomerActions.ACTIONS_PAGE);
 			}
 		}
 
@@ -428,7 +428,7 @@ public class CustomerInterface extends JPanel{
 		}else{
 			form.setLabel("Transaction Successful", Color.green);
 			System.out.println("Pay Friend success!");
-			update_page(CustomerActions.ACTIONS_PAGE);
+			//update_page(CustomerActions.ACTIONS_PAGE);
 		}
 
 

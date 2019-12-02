@@ -57,6 +57,7 @@ public class Interface extends JFrame {
       setTitle("Bank");
 
       Utilities.setWindow(this);
+      setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
       this.addWindowListener(new WindowAdapter(){
         public void windowClosing(WindowEvent w){
           int i=JOptionPane.showConfirmDialog(null, "Exit program?");
@@ -68,6 +69,9 @@ public class Interface extends JFrame {
               e.printStackTrace();
             }
             System.exit(0);
+          }
+          else{
+            return;
           }
         }
       });
