@@ -131,6 +131,7 @@ public class Utilities{
 			Transaction trans = transactions.get(i);
 
 			transaction+= "				[T_ID: "+Integer.toString(trans.t_id)+"] ";
+			transaction+= trans.transaction_type+ ": "  ;
 			if(trans.transaction_type.equals("FTM_FEE") || trans.transaction_type.equals("PCT_FEE")){
 				transaction+= "$"+ Double.toString(trans.amount)+ " taken from account "
 								+ trans.from_acct + " on " + trans.date;
@@ -139,14 +140,14 @@ public class Utilities{
 				transaction+= "$"+ Double.toString(trans.amount)+ " added to account "
 								+ trans.to_acct + " on " + trans.date;
 			}
-			if(trans.from_acct == null || trans.from_acct.equals("") ){
+			else if(trans.from_acct == null || trans.from_acct.equals("") ){
 				transaction+= "$"+ Double.toString(trans.amount)+ " added to account "
 								+ trans.to_acct + " on " + trans.date + " by customer: " + trans.cust_id;
 			}
 			//Witdraw
 			else if(trans.to_acct != null && trans.to_acct.equals("") || trans.to_acct ==null){
-				transaction+= "$"+ Double.toString(trans.amount)+ " taken from "
-								+ trans.to_acct + " on " + trans.date + " by " + trans.cust_id;
+				transaction+= "$"+ Double.toString(trans.amount)+ " taken from account "
+								+ trans.from_acct + " on " + trans.date + " by customer: " + trans.cust_id;
 
 			}
 			else{

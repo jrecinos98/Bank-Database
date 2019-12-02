@@ -118,10 +118,14 @@ public class ManagerOperations {
 
 	public static boolean create_pocket_account(String id, String linkedId, double initialTopUp,
 											    String tin, OracleConnection connection){
+		System.out.println(id);
+		System.out.println(linkedId);
+		System.out.println(initialTopUp);
+		System.out.println(tin);
 		// Creates a new pocket account and retuns true if successful
-		boolean created = create_pocket_account(id, linkedId, initialTopUp,
+		Account created = Account.create_pocket_account(id, linkedId, initialTopUp,
 											    tin, connection);
-		return created;
+		return (created != null);
 	}
 
 	public static boolean add_owner_to_account(String new_owner_id, String a_id, OracleConnection connection){

@@ -99,9 +99,9 @@ public class ListPage extends JPanel{
     public void removeSearch(){
     	remove(button_text_holder);
     }
-    public void maximizeTable(JFrame window){
+    public void maximizeTable(JFrame window, JButton b){
     	removeSearch();
-    	scroll.setPreferredSize( new Dimension(1800, 1000));
+    	scroll.setPreferredSize( new Dimension(1800, 800));
     	table.setPreferredScrollableViewportSize(table.getPreferredSize());
 		table.setFillsViewportHeight(true);
 		table.getColumnModel().getColumn(0).setPreferredWidth(35);
@@ -111,6 +111,7 @@ public class ListPage extends JPanel{
 		table.getColumnModel().getColumn(4).setPreferredWidth(40);
 		table.getColumnModel().getColumn(5).setPreferredWidth(40);
 		table.getColumnModel().getColumn(6).setPreferredWidth(20);
+		add(b);
 		window.setExtendedState( window.getExtendedState()|JFrame.MAXIMIZED_BOTH );
     }
     public void minimize(JFrame window){
