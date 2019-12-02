@@ -2,7 +2,6 @@
 build:
 	javac -d out/ -cp ./lib/ojdbc8.jar cs174a/*.java
 
-
 clean:
 	rm ./out/cs174a/*
 

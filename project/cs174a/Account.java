@@ -335,7 +335,26 @@ public class Account{
 		return acct_statuses;
 	}
 
-
+	public static ArrayList<String> get_all_cust_accounts(String c_id, OracleConnection connection){
+		ArrayList<String> accts = new ArrayList<String>();
+		String query = String.format("SELECT C.a_id " +
+									 "FROM custaccounts C " +
+									 "WHERE C.c_id = '%s'", c_id);
+		try( Statement statement = connection.createStatement() ) {
+			try( ResultSet rs = statement.executeQuery( query )){
+				while(rs.next()){
+					accts.add(rs.getString("a_id"));
+				}
+			}catch(SQLException e){
+				e.printStackTrace();
+				return null;
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+			return null;
+		}
+		return accts;
+	}
 
 	public static boolean create_pock_link(String a_id, String link_id, OracleConnection connection){
 		String query = String.format("INSERT INTO pocketlinks (pocket_id, link_id) " +

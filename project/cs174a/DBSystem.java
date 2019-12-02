@@ -40,7 +40,6 @@ public class DBSystem{
 					e.printStackTrace();
 					all_succeeded = false;
 				}
-
       		}
 		}catch(Exception e){
 			e.printStackTrace();

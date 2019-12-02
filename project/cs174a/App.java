@@ -321,6 +321,9 @@ public class App implements Testable
 			if(from.equals(to)){
 				return "1";
 			}
+			if(amount <= 0){
+				return "1";
+			}
 			Transaction transact = Transaction.pay_friend_no_owner_check(to, from, Bank.get_date(this.connection), 
 							 Transaction.TransactionType.PAY_FRIEND, amount, connection);
 			if(transact == null){
@@ -340,6 +343,9 @@ public class App implements Testable
 	@Override
 	public String topUp( String accountId, double amount ){
 		try{
+			if(amount <= 0){
+				return "1";
+			}
 			Account account = Account.get_account_by_id(accountId, this.connection);
 			String linked_id = Account.get_linked(accountId, this.connection);
 			if(linked_id != ""){

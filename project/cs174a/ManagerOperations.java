@@ -65,7 +65,7 @@ public class ManagerOperations {
 									 "FROM custaccounts C, transactions T " +
 									 "WHERE C.a_id = T.to_acct AND (T.t_type = 'WIRE' OR T.t_type = 'TRANSFER' OR T.t_type = 'DEPOSIT') " +
 									 "GROUP BY C.c_id " +
-									 "HAVING SUM(T.amount) >= 10000");
+									 "HAVING SUM(T.amount) > 10000");
 		try( Statement statement = connection.createStatement() ) {
 			try( ResultSet rs = statement.executeQuery( query )){
 				while(rs.next()){
