@@ -530,11 +530,11 @@ public class Tester{
 		results.add(result("test_acct_wire():", this.test_acct_wire()));
 		//results.add(result("test_acct_write_check():", this.test_acct_write_check()));
 		results.add(result("test_overdrawn_transaction():",this.test_overdrawn_transaction()));
-		//results.add(result("test_monthly_statement():", this.test_monthly_statement()));
+		results.add(result("test_monthly_statement():", this.test_monthly_statement()));
 		results.add(result("test_acct_accrue_interest():", this.test_acct_accrue_interest()));
 		//results.add(result("test_testable_app():", this.test_testable_app()));
 		//results.add(result("test_sample_data():", this.test_sample_data()));
-		//results.add(result("test_monthly_statement():", this.test_monthly_statement()));
+		results.add(result("test_monthly_statement():", this.test_monthly_statement()));
 
 
 		System.err.println("\n----- RESULTS -----");

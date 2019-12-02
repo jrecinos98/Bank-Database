@@ -61,7 +61,10 @@ public class Bank{
 	}
 
 	public static boolean set_date(String year, String month, String day, OracleConnection connection){
-		String query = String.format("UPDATE bank SET day = '%s', month = '%s', year = '%s'", day, month, year);
+		int iyear = Integer.parseInt(year);
+		int imonth = Integer.parseInt(month);
+		int iday = Integer.parseInt(day);
+		String query = String.format("UPDATE bank SET day = '%d', month = '%d', year = '%d'", iday, imonth, iyear);
 		try( Statement statement = connection.createStatement() ) {
 			try{
 				int updates = statement.executeUpdate( query );

@@ -122,7 +122,10 @@ public class Customer {
 	public static ArrayList<AccountStatement> generate_monthly_statement(String c_id, OracleConnection connection){
 		ArrayList<AccountStatement> statements = new ArrayList<AccountStatement>(); // Return statements
 		ArrayList<String> accounts = Account.get_cust_accounts(c_id, connection);
-
+		if(accounts.size() < 1){
+			return statements;
+		}
+		accounts = Account.get_all_cust_accounts(c_id, connection);
 
 		// Loop over all the accounts they are primary owner of
 		for(int i = 0; i < accounts.size(); i++){
