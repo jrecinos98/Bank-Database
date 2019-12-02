@@ -82,6 +82,7 @@ public class Account{
 		boolean owner_create_success = Account.create_acct_ownership(id, tin, connection);
 		if(!owner_create_success){
 			System.out.println("Error creating cust-acct link");
+			return null;
 		}
 
 		// Create Transaction of initial deposit
@@ -92,6 +93,7 @@ public class Account{
 
 			if(transaction == null){
 				System.out.println("Error creating initial deposit transaction");
+				return null;
 			}
 		}
 
@@ -134,9 +136,14 @@ public class Account{
 		// Check customer exists
 		if(cust == null){
 			System.err.println("Need an existing customer for a pocket account");
+			return null;
 		}
 		// Check customer owns account 
 		ArrayList<String> owners = get_account_owners(linkedId, connection);
+		if(owners == null){
+			System.err.println("Error retrieving owners");
+			return null;
+		}
 		boolean owns_account = false;
 		for(int i = 0; i < owners.size(); i++){
 			if(cust.c_id.equals(owners.get(i))){
@@ -150,6 +157,10 @@ public class Account{
 		// Create pocket account
 		Account pock_account = Account.create_account(Testable.AccountType.POCKET, id, 0.0,
 										 tin,"", "", connection);
+		if(pock_account == null){
+			System.err.println("Could not create account for pocket account");
+			return null;
+		}
 
 		// Transfer initial topup from linked account
 		if(initialTopUp != 0 && !Transaction.transfer_money(id, linkedId, initialTopUp, connection)){

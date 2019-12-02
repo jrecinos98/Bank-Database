@@ -279,148 +279,209 @@ public class App implements Testable
 	@Override
 	public String listClosedAccounts()
 	{
-		ArrayList<String> closed_accts = Account.get_closed_accounts(this.connection);
-		String closed = "0";
-		if(closed_accts == null){
-			return "1";
-		}else{
-			for(int i = 0; i < closed_accts.size(); i++){
-				closed += " " + closed_accts.get(i);
+		try {
+			ArrayList<String> closed_accts = Account.get_closed_accounts(this.connection);
+			String closed = "0";
+			if(closed_accts == null){
+				return "1";
+			}else{
+				for(int i = 0; i < closed_accts.size(); i++){
+					closed += " " + closed_accts.get(i);
+				}
+				return closed;
 			}
-			return closed;
+		}catch(Exception e){
+			e.printStackTrace();
+			return "1";
 		}
 	}
 
 	@Override
 	public String createCheckingSavingsAccount( AccountType accountType, String id, double initialBalance, String tin, String name, String address)
 	{
-		Account new_acct =  Account.create_account(accountType, id, initialBalance,
-										 tin, name, address, this.connection);
-		if(new_acct == null){
+		try{
+			Account new_acct =  Account.create_account(accountType, id, initialBalance,
+											 tin, name, address, this.connection);
+			if(new_acct == null){
+				return "1";
+			}else{
+				String response = String.format("0 %s %s %.2f %s", id, "" + accountType, initialBalance, tin);
+				return response;
+			}
+		}catch(Exception e){
+			e.printStackTrace();
 			return "1";
-		}else{
-			String response = String.format("0 %s %s %.2f %s", id, "" + accountType, initialBalance, tin);
-			return response;
 		}
 	}
 
 	@Override
 	public String payFriend(String from, String to, double amount ){
-		Transaction transact = Transaction.pay_friend_no_owner_check(to, from, Bank.get_date(this.connection), 
-						 Transaction.TransactionType.PAY_FRIEND, amount, connection);
-		if(transact == null){
+		try{
+			// Can't pay same account
+			if(from.equals(to)){
+				return "1";
+			}
+			Transaction transact = Transaction.pay_friend_no_owner_check(to, from, Bank.get_date(this.connection), 
+							 Transaction.TransactionType.PAY_FRIEND, amount, connection);
+			if(transact == null){
+				return "1";
+			}else{
+				double fromNewBalance = Account.get_account_balance(from, this.connection);
+				double toNewBalance = Account.get_account_balance(to, this.connection);
+				String response = String.format("0 %.2f %.2f", Math.abs(fromNewBalance), Math.abs(toNewBalance));
+				return response;
+			}
+		}catch(Exception e){
+			e.printStackTrace();
 			return "1";
-		}else{
-			double fromNewBalance = Account.get_account_balance(from, this.connection);
-			double toNewBalance = Account.get_account_balance(to, this.connection);
-			String response = String.format("0 %.2f %.2f", fromNewBalance, toNewBalance);
-			return response;
 		}
 	}
 
 	@Override
 	public String topUp( String accountId, double amount ){
-		Account account = Account.get_account_by_id(accountId, this.connection);
-		String linked_id = Account.get_linked(accountId, this.connection);
-		if(linked_id != ""){
-			Transaction transact = Transaction.top_up_no_owner_check(accountId, linked_id, Bank.get_date(this.connection),
-						 amount, connection);
-			if(transact != null){
-				double pocket_balance = Account.get_account_balance(accountId, this.connection);
-				double linked_balance = Account.get_account_balance(linked_id, this.connection);
-				String resp = String.format("0 %.2f %.2f", linked_balance, pocket_balance);
-				return resp;
-			}			
+		try{
+			Account account = Account.get_account_by_id(accountId, this.connection);
+			String linked_id = Account.get_linked(accountId, this.connection);
+			if(linked_id != ""){
+				Transaction transact = Transaction.top_up_no_owner_check(accountId, linked_id, Bank.get_date(this.connection),
+							 amount, connection);
+				if(transact != null){
+					double pocket_balance = Account.get_account_balance(accountId, this.connection);
+					double linked_balance = Account.get_account_balance(linked_id, this.connection);
+					String resp = String.format("0 %.2f %.2f", Math.abs(linked_balance), Math.abs(pocket_balance));
+					return resp;
+				}			
+			}
+			return "1";
+		}catch(Exception e){
+			e.printStackTrace();
+			return "1";
 		}
-		return "1";
 	}
 
 	@Override
 	public String showBalance( String accountId ){
-		double balance = Account.get_account_balance(accountId, this.connection);
-		if(balance == -1){
+		try{
+			double balance = Account.get_account_balance(accountId, this.connection);
+			if(balance == -1){
+				return "1";
+			}else{
+				String response = String.format("0 %.2f", Math.abs(balance));
+				return response;
+			}
+		}catch(Exception e){
+			e.printStackTrace();
 			return "1";
-		}else{
-			String response = String.format("0 %.2f", Math.abs(balance));
-			return response;
 		}
 	}
 
 	@Override
 	public String deposit( String accountId, double amount ){
-		double old = Account.get_account_balance(accountId, this.connection);
-		boolean transact = Transaction.deposit_no_owner_check(accountId, Bank.get_date(this.connection), 
-						 Transaction.TransactionType.DEPOSIT, amount, this.connection);
-		double new_b = Account.get_account_balance(accountId, this.connection);
-		if(transact == false || old == -1 || new_b == -1){
+		try{
+			if(amount <= 0){
+				return "1";
+			}
+			double old = Account.get_account_balance(accountId, this.connection);
+			boolean transact = Transaction.deposit_no_owner_check(accountId, Bank.get_date(this.connection), 
+							 Transaction.TransactionType.DEPOSIT, amount, this.connection);
+			double new_b = Account.get_account_balance(accountId, this.connection);
+			if(transact == false || old == -1 || new_b == -1){
+				return "1";
+			}else{
+				String response = String.format("0 %.2f %.2f", Math.abs(old), Math.abs(new_b));
+				return response;
+			}
+		}catch(Exception e){
+			e.printStackTrace();
 			return "1";
-		}else{
-			String response = String.format("0 %.2f %.2f", old, new_b);
-			return response;
 		}
 	}
 
 	@Override
 	public String createCustomer( String accountId, String tin, String name, String address ){
-		Account account = Account.get_account_by_id(accountId, this.connection);
-		if(account == null){
-			return "1";
-		}else{
-			if(!account.is_open){
-				// Customer cannot link to a closed account
-				return "1";
-			}
-			Customer cust = Customer.create_customer(tin, name, address,this.connection);
-			if(cust == null){
+		try{
+			Account account = Account.get_account_by_id(accountId, this.connection);
+			if(account == null){
 				return "1";
 			}else{
-				if(Account.create_acct_ownership(accountId, tin, this.connection)){
-					return "0";
-				}else{
+				if(!account.is_open){
+					// Customer cannot link to a closed account
 					return "1";
 				}
+				Customer cust = Customer.create_customer(tin, name, address,this.connection);
+				if(cust == null){
+					return "1";
+				}else{
+					if(Account.create_acct_ownership(accountId, tin, this.connection)){
+						return "0";
+					}else{
+						return "1";
+					}
+				}
 			}
+		}catch(Exception e){
+			e.printStackTrace();
+			return "1";
 		}
-
 	}
 
 	@Override
 	public String createPocketAccount( String id, String linkedId, double initialTopUp, String tin ){
-		Account account = Account.create_pocket_account(id, linkedId, initialTopUp,
-											    tin, this.connection);
-		if(account == null){
+		try{
+			Account account = Account.create_pocket_account(id, linkedId, initialTopUp,
+												    tin, this.connection);
+			if(account == null){
+				return "1";
+			}else{
+				String resp = String.format("0 %s %s %.2f %s", id, "" + Testable.AccountType.POCKET, initialTopUp, tin);
+				return resp;
+			}
+		}catch(Exception e){
+			e.printStackTrace();
 			return "1";
-		}else{
-			String resp = String.format("0 %s %s %.2f %s", id, "" + Testable.AccountType.POCKET, initialTopUp, tin);
-			return resp;
 		}
 	}
 
 	@Override
 	public String setDate( int year, int month, int day ){
-		boolean success = Bank.set_date( "" + year, "" + month, "" + day, this.connection);
-		if(success){
-			return "0 " + year + "-" + Bank.pretty_month("" + month) + "-" + Bank.pretty_day("" + day);
-		}else{
+		try{
+			boolean success = Bank.set_date( "" + year, "" + month, "" + day, this.connection);
+			if(success){
+				return "0 " + year + "-" + Bank.pretty_month("" + month) + "-" + Bank.pretty_day("" + day);
+			}else{
+				return "1";
+			}
+		}catch(Exception e){
+			e.printStackTrace();
 			return "1";
 		}
 	}
 
 	@Override
 	public String dropTables(){
-		if(DBSystem.execute_queries_from_file("./scripts/destroy_db.sql", this.connection)){
-			return "0";
-		}else{
+		try{
+			if(DBSystem.execute_queries_from_file("./scripts/destroy_db.sql", this.connection)){
+				return "0";
+			}else{
+				return "1";
+			}
+		}catch(Exception e){
+			e.printStackTrace();
 			return "1";
 		}
 	}
 
 	@Override
 	public String createTables(){
-		if(DBSystem.execute_queries_from_file("./scripts/create_db.sql", this.connection)){
-			Bank.bank_set_up(this.connection);
-			return "0";
-		}else{
+		try{
+			if(DBSystem.execute_queries_from_file("./scripts/create_db.sql", this.connection)){
+				Bank.bank_set_up(this.connection);
+				return "0";
+			}else{
+				return "1";
+			}
+		}catch(Exception e){
+			e.printStackTrace();
 			return "1";
 		}
 	}

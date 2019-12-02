@@ -208,11 +208,28 @@ public class Bank{
 		}
 	}
 
-	public static int get_days_in_month(String month){
+	public static int get_days_in_month(String month, OracleConnection connection){
+		int year = Integer.parseInt(Bank.get_year(connection));
+		boolean leap_year = false;
+		if (year % 4 != 0) {
+		    leap_year = false;
+		} else if (year % 400 == 0) {
+		    leap_year = true;
+		} else if (year % 100 == 0) {
+		    leap_year = false;
+		} else {
+		    leap_year = true;
+		}
+
+
 		if(month.equals("1") || month.equals("01")){
 			return 31;
 		}else if(month.equals("2") || month.equals("02")){
-			return 28;
+			if(leap_year == true){
+				return 29;
+			}else{
+				return 28;
+			}
 		}else if(month.equals("3") || month.equals("03")){
 			return 31;
 		}else if(month.equals("4") || month.equals("04")){
@@ -238,7 +255,7 @@ public class Bank{
 	}
 
 	public static int get_days_in_current_month(OracleConnection connection){
-		return Bank.get_days_in_month(Bank.get_month(connection));
+		return Bank.get_days_in_month(Bank.get_month(connection), connection);
 	}
 
 	public static String pretty_month(String month){
