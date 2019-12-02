@@ -35,9 +35,6 @@ public class DBSystem{
 	  		try( Statement statement = connection.createStatement() ) {
 				try{
 					int updates = statement.executeUpdate( query );
-					if(updates == 0){
-						all_succeeded = false;
-					}
 				}catch(SQLException e){
 					e.printStackTrace();
 					all_succeeded = false;
@@ -61,9 +58,7 @@ public class DBSystem{
 			try( Statement statement = connection.createStatement() ) {
 				try{
 					int updates = statement.executeUpdate( query );
-					if(updates == 0){
-						all_succeeded = false;
-					}
+
 				}catch(SQLException e){
 					e.printStackTrace();
 					all_succeeded = false;
@@ -82,9 +77,7 @@ public class DBSystem{
 			try( Statement statement = connection.createStatement() ) {
 				try{
 					int updates = statement.executeUpdate( query );
-					if(updates == 0){
-						all_succeeded = false;
-					}
+
 				}catch(SQLException e){
 					e.printStackTrace();
 					all_succeeded = false;
@@ -112,9 +105,7 @@ public class DBSystem{
 			try( Statement statement = connection.createStatement() ) {
 				try{
 					int updates = statement.executeUpdate( query );
-					if(updates == 0){
-						all_succeeded = false;
-					}
+
 				}catch(SQLException e){
 					e.printStackTrace();
 					all_succeeded = false;
@@ -134,9 +125,7 @@ public class DBSystem{
 			try( Statement statement = connection.createStatement() ) {
 				try{
 					int updates = statement.executeUpdate( query );
-					if(updates == 0){
-						all_succeeded = false;
-					}
+
 				}catch(SQLException e){
 					e.printStackTrace();
 					all_succeeded = false;
@@ -159,9 +148,7 @@ public class DBSystem{
 			try( Statement statement = connection.createStatement() ) {
 				try{
 					int updates = statement.executeUpdate( query );
-					if(updates == 0){
-						all_succeeded = false;
-					}
+
 				}catch(SQLException e){
 					e.printStackTrace();
 					all_succeeded = false;
@@ -178,9 +165,7 @@ public class DBSystem{
 	  		try( Statement statement = connection.createStatement() ) {
 				try{
 					int updates = statement.executeUpdate( query );
-					if(updates == 0){
-						all_succeeded = false;
-					}
+
 				}catch(SQLException e){
 					e.printStackTrace();
 					all_succeeded = false;
@@ -194,9 +179,7 @@ public class DBSystem{
 	  		try( Statement statement = connection.createStatement() ) {
 				try{
 					int updates = statement.executeUpdate( query );
-					if(updates == 0){
-						all_succeeded = false;
-					}				
+			
 				}catch(SQLException e){
 					e.printStackTrace();
 					all_succeeded = false;
@@ -210,9 +193,7 @@ public class DBSystem{
 			try( Statement statement = connection.createStatement() ) {
 				try{
 					int updates = statement.executeUpdate( query );
-					if(updates == 0){
-						all_succeeded = false;
-					}				
+			
 				}catch(SQLException e){
 					e.printStackTrace();
 					all_succeeded = false;
@@ -226,9 +207,7 @@ public class DBSystem{
 			try( Statement statement = connection.createStatement() ) {
 				try{
 					int updates = statement.executeUpdate( query );
-					if(updates == 0){
-						all_succeeded = false;
-					}				
+				
 				}catch(SQLException e){
 					e.printStackTrace();
 					all_succeeded = false;
@@ -242,9 +221,7 @@ public class DBSystem{
 			try( Statement statement = connection.createStatement() ) {
 				try{
 					int updates = statement.executeUpdate( query );
-					if(updates == 0){
-						all_succeeded = false;
-					}				
+				
 				}catch(SQLException e){
 					e.printStackTrace();
 					all_succeeded = false;
@@ -258,9 +235,7 @@ public class DBSystem{
 			try( Statement statement = connection.createStatement() ) {
 				try{
 					int updates = statement.executeUpdate( query );
-					if(updates == 0){
-						all_succeeded = false;
-					}				
+		
 				}catch(SQLException e){
 					e.printStackTrace();
 					all_succeeded = false;
