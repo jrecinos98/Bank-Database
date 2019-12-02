@@ -59,7 +59,7 @@ public class InputForm extends JPanel{
 
 			//Odd number of texboxes looks fucky. Gotta do this nasty shit
 			//Add one for the extra component
-			if((l.size()%2 + 1) != 0){
+			if((l.size() + 2)%2 != 0){
 				add(new JLabel());
 				add(new JLabel());
 			}

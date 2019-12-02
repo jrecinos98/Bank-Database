@@ -30,17 +30,20 @@ import java.sql.DatabaseMetaData;
 import java.util.Scanner;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Hashtable;
 
 public class SystemInterface extends JPanel{
-
+	public static String[] ACCT_TYPES= {"Student Checking", "Interest Checking", "Savings", "Pocket"};
+	
 	public enum SystemActions{
 		ACTIONS_PAGE,
 		CREATE_CUSTOMER,
 		DELETE_CUSTOMER,
 		CREATE_TABLES,
 		DESTROY_TABLES,
-		SET_DATE
+		SET_DATE,
+		ADJUST_INTEREST
 	}
 
 	private OracleConnection connection;
@@ -69,7 +72,7 @@ public class SystemInterface extends JPanel{
 		panels.put(SystemActions.CREATE_CUSTOMER, create_page(new ArrayList<String> (Arrays.asList("Customer ID: ", "Customer Name: ", "Customer Address: ")), "Create Customer", SystemActions.CREATE_CUSTOMER));
 		panels.put(SystemActions.DELETE_CUSTOMER, create_page(new ArrayList<String> (Arrays.asList("Customer ID: ")), "Delete Customer", SystemActions.DELETE_CUSTOMER));
 		panels.put(SystemActions.SET_DATE, create_page(new ArrayList<String> (Arrays.asList("Date (MM-DD-YYYY): ")), "Set Date", SystemActions.SET_DATE ));
-		
+		panels.put(SystemActions.ADJUST_INTEREST, create_interest_page());
 		
 	}
 	
@@ -153,6 +156,46 @@ public class SystemInterface extends JPanel{
 		update_page(SystemActions.ACTIONS_PAGE);
 
 	}
+	public void adjust_interest(){
+		//Get JComboBox and find selected Index
+		int a_type=0;
+		try{
+			a_type= ((JComboBox)form.getCustomComponent()).getSelectedIndex();
+			//If none selected or error
+			if(a_type < 0){
+				//Set to default value (Student Checkings)
+				a_type= 0;
+			}
+		}
+		catch(Exception e){
+			System.err.println(e);
+		}
+		if (a_type == 0){
+			form.setLabel("Cannot add interest to Student Account", Color.red);
+			return;
+		}
+		else if(a_type == 3){
+			form.setLabel("Cannot add interest to Pocket Account", Color.red);
+			return;
+		}
+
+		Testable.AccountType type = Testable.AccountType.values()[a_type];
+		String new_rate= form.getInput(0);
+		if(!Utilities.valid_rate(new_rate)){
+			form.setLabel("Invalid rate", Color.red);
+			return;
+		}
+		boolean success= Bank.set_interest_rate(type, Double.parseDouble(new_rate), this.connection);
+		if(success){
+			form.setLabel("Rate adjusted successfully", Color.green);
+			return;
+		}
+		else{
+			form.setLabel("An error occured", Color.red);
+			return;
+		}
+
+	}
 	/* Changes from one page to another*/
 	private void update_page(SystemActions page){
 		this.remove(current_page);
@@ -187,6 +230,15 @@ public class SystemInterface extends JPanel{
 		//holder.add(form);
 		return form;
 	}
+	/*Creates a page with labels and textfields (depends on size of ArrayList)*/
+	private JPanel create_custom_page(ArrayList<String> labels, String b_label, JComponent component, String c_label, SystemActions action){
+		
+		JButton button= new JButton(b_label);
+		button.addMouseListener(new ButtonListener(action));
+		InputForm form = new InputForm(labels, button,component,c_label);
+		return form;
+	}
+
 
 	/* Creates the page with user actions*/
 	private JPanel create_actions_page(){
@@ -205,6 +257,14 @@ public class SystemInterface extends JPanel{
 		t.addMouseListener(new MouseAdapter() { 
 			public void mouseClicked(MouseEvent e) {
                 update_page(SystemActions.SET_DATE);
+            }
+		});		
+		this.action_buttons.add(t);
+
+		t= new JButton("Adjust Interest Rate");
+		t.addMouseListener(new MouseAdapter() { 
+			public void mouseClicked(MouseEvent e) {
+                update_page(SystemActions.ADJUST_INTEREST);
             }
 		});		
 		this.action_buttons.add(t);
@@ -242,8 +302,10 @@ public class SystemInterface extends JPanel{
             }
 		});
 		this.action_buttons.add(t);
-
-
+	}
+	private JPanel create_interest_page(){
+		JComboBox<String> acctList = new JComboBox<>(SystemInterface.ACCT_TYPES);
+		return create_custom_page(new ArrayList<String> (Arrays.asList("New interest rate: ")), "Adjust interest rate", acctList,"Account Type", SystemActions.ADJUST_INTEREST);
 	}
 	class ButtonListener extends MouseAdapter{
 		private SystemInterface.SystemActions action;
@@ -265,6 +327,9 @@ public class SystemInterface extends JPanel{
 						break;
 					case SET_DATE:
 						set_date();
+						break;
+					case ADJUST_INTEREST:
+						adjust_interest();
 						break;
 				}
 

@@ -44,6 +44,26 @@ public class Utilities{
 		}
 		return true;
 	}
+	public static boolean valid_rate(String rate){
+		if(rate.equals("")){
+			return false;
+		}
+		Double r;
+		try{
+			r=Double.parseDouble(rate);
+		}
+		catch(Exception e){
+			return false;
+		}
+		if(r < 0){
+			return false;
+		}
+		if (r > 100){
+			return false;
+		}
+		return true;
+
+	}
 	public static boolean valid_money_input(String amount){
 		double m;
 		//Trim spaces and try to parse
