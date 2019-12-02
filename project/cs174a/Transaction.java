@@ -127,12 +127,14 @@ public class Transaction {
 
 		// Check that owner account has enough money
 		Account link_acc = Account.get_account_by_id(from_link, connection);
-
+		boolean is_first = false;
 		// Check if it's the first transaction of the month
 		if(Transaction.is_ftm(to_pocket, connection)){
 			if(link_acc == null || link_acc.balance - amount - 5.00 < 0){
 				System.err.println("Top up failed -- not enough money");
 				return null;
+			}else{
+				is_first = true;
 			}
 		}else{
 			if(link_acc == null || link_acc.balance - amount < 0){
@@ -153,7 +155,7 @@ public class Transaction {
 		}
 
 		// Charge $5 fee
-		if(Transaction.is_ftm(to_pocket, connection)){
+		if(is_first){
 			Transaction fee = Transaction.create_transaction("", from_link, cust_id,
 									 date, "" + Transaction.TransactionType.FTM_FEE, 5, connection);
 			if(!Transaction.transfer_money("", from_link, 5, connection)){
@@ -181,11 +183,15 @@ public class Transaction {
 		// Check that owner account has enough money
 		Account link_acc = Account.get_account_by_id(from_link, connection);
 
+		boolean is_ftm = false;
+
 		// Check if it's the first transaction of the month
 		if(Transaction.is_ftm(to_pocket, connection)){
 			if(link_acc == null || link_acc.balance - amount - 5.00 < 0){
 				System.err.println("Top up failed -- not enough money");
 				return null;
+			}else{
+				is_ftm = true;
 			}
 		}else{
 			if(link_acc == null || link_acc.balance - amount < 0){
@@ -206,7 +212,7 @@ public class Transaction {
 		}
 
 		// Charge $5 fee
-		if(Transaction.is_ftm(to_pocket, connection)){
+		if(is_ftm){
 			Transaction fee = Transaction.create_transaction("", from_link, "",
 									 date, "" + Transaction.TransactionType.FTM_FEE, 5, connection);
 			if(!Transaction.transfer_money("", from_link, 5, connection)){
@@ -223,11 +229,13 @@ public class Transaction {
 										String cust_id, OracleConnection connection){
 		Transaction transact = null;
 		Account pock_acc = Account.get_account_by_id(from_pocket, connection);
-
+		boolean is_ftm = false;
 		if(pock_acc == null || Transaction.is_ftm(from_pocket, connection)){
 			if(pock_acc.balance - amount - 5 < 0){
 				System.err.println("Purchase failed -- not enough money for pruchase + fee");
 				return null;
+			}else{
+				is_ftm = true;
 			}
 		}
 
@@ -256,7 +264,7 @@ public class Transaction {
 									 date, "" + Transaction.TransactionType.PURCHASE, amount, connection);
 
 		// Charge $5 fee
-		if(Transaction.is_ftm(from_pocket, connection)){
+		if(is_ftm){
 			if(!Transaction.transfer_money("", from_pocket, 5, connection)){
 				System.err.println("Purchase failed -- Could not transfer fee");
 				return null;
@@ -470,12 +478,14 @@ public class Transaction {
 
 		// Check that pocket account has enough money
 		Account link_acc = Account.get_account_by_id(to_link, connection);
-
+		boolean is_ftm = false;
 		// Check if it's the first transaction of the month
 		if(Transaction.is_ftm(from_pocket, connection)){
 			if(pock_acc.balance - amount - 5.00 - (0.03 * amount) < 0){
 				System.err.println("Collect failed -- not enough money");
 				return null;
+			}else{
+				is_ftm = true;
 			}
 		}else{
 			if(pock_acc.balance - amount - (0.03 * amount) < 0){
@@ -496,7 +506,7 @@ public class Transaction {
 		}
 
 		// Charge $5 fee
-		if(Transaction.is_ftm(from_pocket, connection)){
+		if(is_ftm){
 			if(!Transaction.transfer_money("", from_pocket, 5, connection)){
 				System.err.println("Collect failed -- Could not transfer money from the pocket account");
 				return null;
@@ -546,20 +556,26 @@ public class Transaction {
 			return null;
 		}
 		
+		boolean is_ftm_1 = false;
 		// Check if it's first transaction of the month for either account
 		if(Transaction.is_ftm(to_acct, connection)){
 			double balance = Account.get_account_balance(to_acct, connection);
 			if(balance < 5){
 				System.err.println("Pay_Friend failed -- to acct can't pay FTM");
 				return null;
+			}else{
+				is_ftm_1 = true;
 			}
 		}
 
+		boolean is_ftm_2 = false;
 		if(Transaction.is_ftm(from_acct, connection)){
 			double balance = Account.get_account_balance(from_acct, connection);
 			if(balance < amount + 5){
 				System.err.println("Pay_Friend failed -- from acct can't pay FTM");
 				return null;
+			}else{
+				is_ftm_2 = true;
 			}
 		}
 
@@ -578,7 +594,7 @@ public class Transaction {
 		}
 
 		// Do FTM transfer / transaction for to_acct
-		if(Transaction.is_ftm(to_acct, connection)){
+		if(is_ftm_1){
 			if(!Transaction.transfer_money("", to_acct, 5, connection)){
 				System.err.println("Pay_Friend failed -- Could not transfer money from the pocket account");
 				return null;
@@ -592,7 +608,7 @@ public class Transaction {
 		}
 
 		// Do FTM transfer / transaction for from_acct
-		if(Transaction.is_ftm(from_acct, connection)){
+		if(is_ftm_2){
 			Transaction pay_friend_ftm_2 = Transaction.create_transaction_and_transfer("", from_acct, cust_id,
 										date, "" + Transaction.TransactionType.FTM_FEE, 5, connection);
 			if(pay_friend_ftm_2 == null){
@@ -629,19 +645,27 @@ public class Transaction {
 		// }
 		
 		// Check if it's first transaction of the month for either account
+		
+		boolean is_ftm_1 = false;
 		if(Transaction.is_ftm(to_acct, connection)){
 			double balance = Account.get_account_balance(to_acct, connection);
 			if(balance < 5){
 				System.err.println("Pay_Friend failed -- to acct can't pay FTM");
 				return null;
+			}else{
+				is_ftm_1 = true;
 			}
 		}
+
+		boolean is_ftm_2 =false;
 
 		if(Transaction.is_ftm(from_acct, connection)){
 			double balance = Account.get_account_balance(from_acct, connection);
 			if(balance < amount + 5){
 				System.err.println("Pay_Friend failed -- from acct can't pay FTM");
 				return null;
+			}else{
+				is_ftm_2 = true;
 			}
 		}
 
@@ -660,7 +684,7 @@ public class Transaction {
 		}
 
 		// Do FTM transfer / transaction for to_acct
-		if(Transaction.is_ftm(to_acct, connection)){
+		if(is_ftm_1){
 			if(!Transaction.transfer_money("", to_acct, 5, connection)){
 				System.err.println("Pay_Friend failed -- Could not transfer money from the pocket account");
 				return null;
@@ -674,7 +698,7 @@ public class Transaction {
 		}
 
 		// Do FTM transfer / transaction for from_acct
-		if(Transaction.is_ftm(from_acct, connection)){
+		if(is_ftm_2){
 			Transaction pay_friend_ftm_2 = Transaction.create_transaction_and_transfer("", from_acct, "",
 										date, "" + Transaction.TransactionType.FTM_FEE, 5, connection);
 			if(pay_friend_ftm_2 == null){
@@ -844,6 +868,8 @@ public class Transaction {
 	public static boolean is_ftm(String a_id, OracleConnection connection){
 		if(Transaction.get_acct_transactions_this_month(a_id, connection) != null){
 			return Transaction.get_acct_transactions_this_month(a_id, connection).size() == 0;
+		}else{
+			System.out.println("ERROR");
 		}
 		return true;
 	}
@@ -945,7 +971,7 @@ public class Transaction {
 				while(rs.next()){
 					String t_date = rs.getString("t_date");
 					if(!t_date.equals("xxxx-xx-xx")){
-						if(t_date.split("-")[1].equals(month)){
+						if(Integer.parseInt(t_date.split("-")[1]) == Integer.parseInt(month)){
 							transactions.add(
 								new Transaction(
 									rs.getInt("t_id"), rs.getString("to_acct"),
