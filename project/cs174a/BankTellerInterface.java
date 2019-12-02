@@ -244,7 +244,7 @@ public class BankTellerInterface extends JPanel{
 		}
 		else{
 			//May have to do something with check num.
-			form.setLabel("Check transaction success", Color.green);
+			form.setLabel(String.format("	Check ID: %s 	",checkID), Color.green);
 			System.out.println("Check transaction success");
 			return;
 		}
