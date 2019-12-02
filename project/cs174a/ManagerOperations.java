@@ -148,7 +148,7 @@ public class ManagerOperations {
 		query = String.format(
 				"DELETE FROM customers C1 " +
 				"WHERE C1.c_id NOT IN ( " +
-	    			"SELECT C.c_id " +
+	    			"SELECT CA.c_id " +
     				"FROM custaccounts CA " +
 				")");
 		try( Statement statement = connection.createStatement() ) {
