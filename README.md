@@ -23,7 +23,7 @@ There is a Bank Teller Interface for Bank Operators to be able to perform higher
 
 Lastly there is an Administrator Interface which allows for system maintanence operations such as adjusting date, dropping and creating tables:
 
-![Screenshot](bank-administrator.png)
+![Screenshot](bank-adminstrator.png)
 ___
 - **Relevant Area** : Databases, Graphical Interfaces.
 ___
